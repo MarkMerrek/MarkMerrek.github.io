@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Швидкість руху</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: level menu → one level per screen; stage (SVG track) on top, question and answer under it; sized for iPad touch */
+:root{
+  --bg:#F2F5F8; --surface:#FFFFFF; --surface-2:#E8EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --accent-ink:#2E4A7D; --accent-soft:#E2E9F5; --on-accent:#FFFFFF;
+  --track:#E6EBF1; --mark:#8A570F; --mark-soft:#F5E9D7;
+  --good:#1E6B3A; --good-soft:#E1F1E6; --bad:#8C2F2F; --bad-soft:#F6E3E3;
+  --teal:#146B66;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637; --on-accent:#10131A;
+    --track:#232A38; --mark:#DCA76A; --mark-soft:#2C2318;
+    --good:#7FD39A; --good-soft:#18291F; --bad:#E89494; --bad-soft:#2E1C1C;
+    --teal:#6ACFC5;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+  --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+  --line:#2A3140; --line-strong:#3A4354;
+  --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637; --on-accent:#10131A;
+  --track:#232A38; --mark:#DCA76A; --mark-soft:#2C2318;
+  --good:#7FD39A; --good-soft:#18291F; --bad:#E89494; --bad-soft:#2E1C1C;
+  --teal:#6ACFC5;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:"Literata",Georgia,serif;font-size:17.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:0 18px 70px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 20px;padding:28px 0 16px;border-bottom:1px solid var(--line)}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"Archivo",Arial,sans-serif;font-weight:800;font-size:clamp(30px,5vw,44px);line-height:1;margin:4px 0 0;letter-spacing:-.02em}
+h1 .u{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:.5em;color:var(--mark);letter-spacing:0;margin-left:10px;vertical-align:middle}
+.total{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-2);text-align:right}
+.total b{font-family:"Archivo",Arial,sans-serif;font-size:28px;color:var(--ink);font-weight:700}
+.name-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 6px}
+.name-row label{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:15px;color:var(--ink-2)}
+.name-row input{flex:1 1 220px;max-width:360px}
+.menu{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:16px}
+.lvl{appearance:none;text-align:left;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 16px 14px;display:grid;gap:6px;color:var(--ink);font:inherit}
+.lvl:hover{border-color:var(--accent)}
+.lvl:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lvl .no{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.lvl .t{font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:21px;line-height:1.15}
+.lvl .d{font-size:15px;color:var(--ink-2)}
+.lvl .sc{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--muted);display:flex;gap:10px;align-items:center}
+.pips{display:flex;gap:3px;flex-wrap:wrap}
+.pip{width:10px;height:10px;border-radius:2px;background:var(--surface-2);border:1px solid var(--line-strong)}
+.pip.on{background:var(--good);border-color:var(--good)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:18px 0 12px}
+.back{appearance:none;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:15px;padding:9px 14px;border-radius:6px;cursor:pointer}
+.bar h2{font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:24px;margin:0;flex:1 1 auto}
+.prog{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--muted)}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stage svg{display:block;width:100%;height:auto}
+.stage text{font-family:"IBM Plex Mono",monospace;fill:var(--ink-2)}
+.task{margin-top:16px;display:grid;gap:12px}
+.ask{font-size:19px;max-width:62ch;margin:0}
+.ask b{font-family:"Archivo",Arial,sans-serif}
+.answer{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.answer .u{font-family:"IBM Plex Mono",monospace;font-size:18px;color:var(--ink-2)}
+input[type=text]{font-family:"IBM Plex Mono",monospace;font-size:22px;padding:11px 12px;width:170px;border:1px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink)}
+input.wide{width:auto;font-family:"Literata",Georgia,serif;font-size:18px}
+input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:18px;padding:13px 22px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line-strong)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.choice{appearance:none;cursor:pointer;text-align:left;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:17px;padding:14px 16px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink)}
+.choice:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.choice.ok{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.choice.no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.fb{font-size:17px;border-radius:0 6px 6px 0;padding:11px 14px;max-width:66ch}
+.fb.ok{border-left:4px solid var(--good);background:var(--good-soft)}
+.fb.no{border-left:4px solid var(--bad);background:var(--bad-soft)}
+.fb b{font-family:"Archivo",Arial,sans-serif}
+.end{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:22px;display:grid;gap:12px;margin-top:6px}
+.end .big{font-family:"Archivo",Arial,sans-serif;font-weight:800;font-size:44px;line-height:1}
+.hintline{font-size:14.5px;color:var(--muted)}
+.result-card{margin-top:22px;background:var(--accent-soft);border:2px solid var(--accent);border-radius:8px;padding:18px 20px;display:grid;gap:6px}
+.result-card .nm{font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:22px}
+.result-card .rows{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-2);display:grid;gap:2px}
+.confirm{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="kicker">Фізика · 7 клас · рівномірний рух</div>
+      <h1>Швидкість руху <span class="u">v = l / t</span></h1>
+    </div>
+    <div class="total">рахунок<br><b id="total">0</b> / <span id="max">33</span></div>
+  </div>
+
+  <div id="menu-view">
+    <div class="name-row"><label for="who">Твоє ім'я</label><input type="text" class="wide" id="who" autocomplete="off"></div>
+    <div class="menu" id="menu"></div>
+    <div class="result-card" id="card"></div>
+    <p class="hintline" style="margin-top:14px">Бали нараховуються лише за правильну відповідь з першої спроби. Рівень можна повторити: зарахується кращий результат. Усе зберігається на цьому айпаді.</p>
+    <div style="margin-top:22px" class="confirm">
+      <button class="btn ghost" id="reset" type="button">Почати з нуля</button>
+      <span id="reset-ask" hidden>Стерти всі бали? <button class="btn" id="reset-yes" type="button">Так</button> <button class="btn ghost" id="reset-no" type="button">Ні</button></span>
+    </div>
+  </div>
+
+  <div id="level-view" hidden>
+    <div class="bar">
+      <button class="back" id="back" type="button">← Рівні</button>
+      <h2 id="ltitle"></h2>
+      <span class="prog" id="lprog"></span>
+    </div>
+    <div class="stage"><svg id="stage" viewBox="0 0 700 260" role="img" aria-label="Анімація руху"></svg></div>
+    <div class="task" id="task"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var KEY='speed7-v1';
+  var LEVELS=[
+    {id:'strobe', t:'Стробоскоп', d:'Тіло залишає мітку через рівні проміжки часу. Визнач вид руху.', max:8},
+    {id:'speedo', t:'Спідометр', d:'Подивися на рух, зчитай шлях і час, обчисли швидкість.', max:5},
+    {id:'units', t:'Одиниці', d:'Переведи км/год у м/с і навпаки. Секундомір іде!', max:10},
+    {id:'catch', t:'Встигни!', d:'Обчисли шлях, час або швидкість і подивися, чи встигнеш.', max:4},
+    {id:'meet', t:'Зустріч', d:'Два тіла рухаються назустріч одне одному або одне наздоганяє інше. Остання задача складніша.', max:6}
+  ];
+  var store={name:'',best:{}};
+  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.best) store=o; } }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(store)); }catch(e){} }
+
+  function $(id){ return document.getElementById(id); }
+  function num(v){ v=String(v||'').trim().replace(/\s/g,'').replace(',', '.'); if(v==='') return NaN; return Number(v); }
+  function fmt(x){ if(!isFinite(x)) return '—'; var r=Math.round(x*1000)/1000; return String(r).replace('.', ','); }
+  function near(x,t,rel){ return isFinite(x) && Math.abs(x-t) <= Math.max(Math.abs(t)*(rel||0.01), 1e-9); }
+  function shuffle(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
+  function el(tag, attrs, txt){ var e=document.createElementNS(NS,tag); for(var k in attrs) e.setAttribute(k, attrs[k]); if(txt!=null) e.textContent=txt; return e; }
+  function h(tag, attrs, html){ var e=document.createElement(tag); for(var k in (attrs||{})) e.setAttribute(k, attrs[k]); if(html!=null) e.innerHTML=html; return e; }
+  function css(v){ return 'var('+v+')'; }
+
+  /* ---------- animation ---------- */
+  var animId=0;
+  function animate(ms, frame, done){
+    var my=++animId, t0=null;
+    function step(ts){ if(my!==animId) return; if(t0===null) t0=ts; var p=Math.min(1,(ts-t0)/ms); frame(p); if(p<1) requestAnimationFrame(step); else if(done) done(); }
+    requestAnimationFrame(step);
+  }
+  function stopAnim(){ animId++; }
+
+  /* ---------- menu ---------- */
+  function total(){ var s=0; LEVELS.forEach(function(L){ s+=(store.best[L.id]||0); }); return s; }
+  function renderMenu(){
+    $('total').textContent=total();
+    $('max').textContent=LEVELS.reduce(function(a,L){ return a+L.max; },0);
+    var m=$('menu'); m.innerHTML='';
+    LEVELS.forEach(function(L,i){
+      var b=h('button',{'class':'lvl',type:'button'});
+      var got=store.best[L.id]; var pips='';
+      for(var k=0;k<L.max;k++) pips+='<span class="pip'+(got!=null&&k<got?' on':'')+'"></span>';
+      b.innerHTML='<span class="no">Рівень '+(i+1)+'</span><span class="t">'+L.t+'</span><span class="d">'+L.d+'</span><span class="sc"><span class="pips">'+pips+'</span>'+(got!=null?got+' / '+L.max:'не пройдено')+'</span>';
+      b.addEventListener('click', function(){ openLevel(L); });
+      m.appendChild(b);
+    });
+    var card=$('card');
+    var nm=(store.name||'').trim()||'Без імені';
+    var rows=LEVELS.map(function(L,i){ var g=store.best[L.id]; return (i+1)+'. '+L.t+': '+(g!=null?g+' / '+L.max:'—'); }).join('<br>');
+    card.innerHTML='<div class="kicker">Покажи вчителю</div><div class="nm"></div><div class="rows">'+rows+'</div><div style="font-family:Archivo,Arial,sans-serif;font-weight:700;font-size:20px">Разом: '+total()+' / '+$('max').textContent+'</div>';
+    card.querySelector('.nm').textContent=nm;
+  }
+  $('who').value=store.name||'';
+  $('who').addEventListener('input', function(){ store.name=$('who').value; save(); renderMenu(); });
+  $('reset').addEventListener('click', function(){ $('reset-ask').hidden=false; });
+  $('reset-no').addEventListener('click', function(){ $('reset-ask').hidden=true; });
+  $('reset-yes').addEventListener('click', function(){ store.best={}; save(); $('reset-ask').hidden=true; renderMenu(); });
+
+  var cur=null;
+  function openLevel(L){
+    cur={L:L, i:0, score:0, items:BUILD[L.id]()};
+    $('menu-view').hidden=true; $('level-view').hidden=false;
+    $('ltitle').textContent=L.t;
+    window.scrollTo(0,0);
+    showItem();
+  }
+  function closeLevel(){ stopAnim(); $('level-view').hidden=true; $('menu-view').hidden=false; renderMenu(); window.scrollTo(0,0); }
+  $('back').addEventListener('click', closeLevel);
+
+  function clearStage(vb){ var s=$('stage'); while(s.firstChild) s.removeChild(s.firstChild); s.setAttribute('viewBox', vb||'0 0 700 260'); return s; }
+  function showItem(){
+    stopAnim();
+    var n=cur.items.length;
+    if(cur.i>=n){ return finish(); }
+    $('lprog').textContent='Завдання '+(cur.i+1)+' з '+n+' · рахунок: '+cur.score;
+    var task=$('task'); task.innerHTML='';
+    RUN[cur.L.id](cur.items[cur.i], task);
+  }
+  function next(){ cur.i++; showItem(); }
+  function finish(){
+    stopAnim();
+    var L=cur.L, prev=store.best[L.id];
+    if(prev==null || cur.score>prev){ store.best[L.id]=cur.score; save(); }
+    clearStage();
+    var s=$('stage');
+    s.appendChild(el('text',{x:350,y:120,'text-anchor':'middle','font-size':'54',style:'fill:'+css('--ink')+';font-family:Archivo,Arial,sans-serif;font-weight:800'}, cur.score+' / '+L.max));
+    s.appendChild(el('text',{x:350,y:170,'text-anchor':'middle','font-size':'18'}, 'рівень «'+L.t+'» пройдено'));
+    $('lprog').textContent='';
+    var task=$('task'); task.innerHTML='';
+    var best=store.best[L.id];
+    task.appendChild(h('p',{'class':'ask'}, cur.score===L.max?'<b>Без жодної помилки.</b>':'Найкращий результат на цьому рівні: <b>'+best+' / '+L.max+'</b>.'));
+    var row=h('div',{'class':'answer'});
+    var b1=h('button',{'class':'btn',type:'button'},'До рівнів'); b1.addEventListener('click', closeLevel);
+    var b2=h('button',{'class':'btn ghost',type:'button'},'Ще раз'); b2.addEventListener('click', function(){ openLevel(L); });
+    row.appendChild(b1); row.appendChild(b2); task.appendChild(row);
+  }
+  function feedback(task, ok, html){ var old=task.querySelector('.fb'); if(old) old.remove(); var f=h('div',{'class':'fb '+(ok?'ok':'no')}, html); task.appendChild(f); return f; }
+  function nextBtn(task, label){ var row=h('div',{'class':'answer'}); var b=h('button',{'class':'btn',type:'button'}, label||'Далі →'); b.addEventListener('click', next); row.appendChild(b); task.appendChild(row); setTimeout(function(){ b.focus({preventScroll:true}); },50); }
+
+  /* numeric answer widget: calls check(value) -> {ok, msg}; first attempt counts for score */
+  function numAnswer(task, unit, check, after){
+    var row=h('div',{'class':'answer'});
+    var inp=h('input',{type:'text',inputmode:'decimal',id:'ans-'+cur.L.id+'-'+cur.i,'aria-label':'Відповідь'});
+    var u=h('span',{'class':'u'}, unit);
+    var b=h('button',{'class':'btn',type:'button'},'Перевірити');
+    row.appendChild(inp); row.appendChild(u); row.appendChild(b); task.appendChild(row);
+    var tries=0, solved=false;
+    function go(){
+      if(solved) return; var v=num(inp.value); if(!isFinite(v)){ feedback(task,false,'Введи число. Десятковий дріб можна писати через кому.'); return; }
+      tries++; var r=check(v);
+      if(r.ok){ solved=true; if(tries===1) cur.score++; inp.disabled=true; b.disabled=true; feedback(task,true,r.msg); if(after) after(v, true); else nextBtn(task); }
+      else { feedback(task,false,r.msg + (tries>=2 && r.show ? ' '+r.show : '')); if(tries>=3 && r.reveal){ solved=true; inp.disabled=true; b.disabled=true; feedback(task,false,r.reveal); if(after) after(v,false); else nextBtn(task); } }
+    }
+    b.addEventListener('click', go);
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+    setTimeout(function(){ inp.focus({preventScroll:true}); },60);
+    return inp;
+  }
+
+  /* ---------- sprites ---------- */
+  function sprite(s, label, color, below){
+    var g=el('g',{});
+    g.appendChild(el('circle',{cx:0,cy:0,r:11,style:'fill:'+css(color||'--accent')+';stroke:'+css('--surface')+';stroke-width:3'}));
+    if(label){ var t=el('text',{x:0,y:below?34:-20,'text-anchor':'middle','font-size':'15',style:'fill:'+css('--ink')+';font-family:Archivo,Arial,sans-serif;font-weight:600'}, label); g.appendChild(t); }
+    s.appendChild(g); return g;
+  }
+  function place(g,x,y){ g.setAttribute('transform','translate('+x+' '+y+')'); }
+
+  /* ================= LEVEL 1: STROBE ================= */
+  var STROBE_TYPES={
+    ur:{label:'Рівномірний прямолінійний', names:['Ескалатор у метро','Потяг на прямій ділянці'], why:'Траєкторія пряма, і відстані між мітками однакові.'},
+    uc:{label:'Рівномірний криволінійний', names:['Кабінка оглядового колеса','Кінчик секундної стрілки'], why:'Траєкторія крива, але відстані між мітками однакові.'},
+    nr:{label:'Нерівномірний прямолінійний', names:['Санки, які розганяються з гірки','Автобус, який гальмує перед зупинкою'], why:'Траєкторія пряма, а відстані між мітками різні.'},
+    nc:{label:'Нерівномірний криволінійний', names:['Велосипедист, який розганяється на повороті','Автомобіль, який гальмує на повороті'], why:'Траєкторія крива, і відстані між мітками різні.'}
+  };
+  var BUILD={}, RUN={};
+  BUILD.strobe=function(){
+    var list=[]; ['ur','uc','nr','nc'].forEach(function(t){ list.push({type:t, v:0}); list.push({type:t, v:1}); });
+    return shuffle(list);
+  };
+  function strobePath(it){
+    /* returns f(u) for u in [0,5] (mark index), plus straight flag */
+    var t=it.type, v=it.v;
+    if(t==='ur'){ if(v===0) return function(u){ return [70+112*u, 150]; }; return function(u){ return [80+108*u, 210-30*u]; }; }
+    if(t==='nr'){ if(v===0) return function(u){ var k=u/5; return [70+560*k*k, 150]; }; return function(u){ var k=u/5; var e=1-(1-k)*(1-k); return [80+540*e, 210-150*e]; }; }
+    var cx=350, cy=250, r=190;
+    function arc(theta){ var a=theta*Math.PI/180; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; }
+    if(t==='uc'){ return function(u){ return arc(200+28*u); }; }
+    if(v===0) return function(u){ var k=u/5; return arc(200+140*k*k); };
+    return function(u){ var k=u/5; return arc(200+140*(1-(1-k)*(1-k))); };
+  }
+  RUN.strobe=function(it, task){
+    var s=clearStage('0 0 700 260');
+    var P=strobePath(it);
+    var d=''; for(var u=0;u<=5.0001;u+=0.05){ var p=P(u); d+=(u===0?'M':'L')+p[0].toFixed(1)+' '+p[1].toFixed(1)+' '; }
+    s.appendChild(el('path',{d:d,fill:'none',style:'stroke:'+css('--line-strong'),'stroke-width':2,'stroke-dasharray':'4 6'}));
+    var marks=el('g',{}); s.appendChild(marks);
+    var dot=sprite(s, '', '--accent');
+    s.appendChild(el('text',{x:16,y:26,'font-size':'14'}, 'Тіло №'+(cur.i+1)+' · мітка кожні 0,5 с'));
+    function drop(k){ var p=P(k); marks.appendChild(el('circle',{cx:p[0],cy:p[1],r:6,style:'fill:'+css('--mark')})); marks.appendChild(el('text',{x:p[0],y:p[1]+26,'text-anchor':'middle','font-size':'15',style:'fill:'+css('--ink')+';font-weight:600'}, String(k+1))); }
+    function play(){
+      while(marks.firstChild) marks.removeChild(marks.firstChild);
+      drop(0); place(dot, P(0)[0], P(0)[1]);
+      var last=0;
+      animate(3600, function(p){ var u=p*5; var q=P(u); place(dot,q[0],q[1]); var k=Math.floor(u+1e-6); while(last<k){ last++; drop(last); } });
+    }
+    play();
+    task.appendChild(h('p',{'class':'ask'},'Який це рух?'));
+    var ch=h('div',{'class':'choices'});
+    var tries=0, done=false;
+    ['ur','uc','nr','nc'].forEach(function(key){
+      var b=h('button',{'class':'choice',type:'button'}, STROBE_TYPES[key].label);
+      b.addEventListener('click', function(){
+        if(done) return; tries++;
+        if(key===it.type){ done=true; b.classList.add('ok'); if(tries===1) cur.score++; feedback(task,true,'<b>Так.</b> '+STROBE_TYPES[key].why+' Насправді це '+STROBE_TYPES[key].names[it.v].toLowerCase()+'.'); nextBtn(task); }
+        else { b.classList.add('no'); feedback(task,false,'<b>Ні.</b> Подивися уважно: траєкторія пряма чи крива? Відстані між сусідніми мітками однакові чи ні?'); }
+      });
+      ch.appendChild(b);
+    });
+    task.appendChild(ch);
+    var rb=h('button',{'class':'btn ghost',type:'button'},'Показати ще раз'); rb.addEventListener('click', play);
+    var row=h('div',{'class':'answer'}); row.appendChild(rb); task.appendChild(row);
+  };
+
+  /* ================= LEVEL 2: SPEEDOMETER ================= */
+  BUILD.speedo=function(){
+    var pool=[
+      {who:'велосипедист', v:5, t:40},
+      {who:'автобус', v:12, t:25},
+      {who:'потяг', v:25, t:40},
+      {who:'бігун', v:8, t:50},
+      {who:'дрон', v:15, t:20},
+      {who:'автомобіль', v:20, t:30}
+    ];
+    var list=shuffle(pool).slice(0,4);
+    list.push({who:'равлик', v:0.002, t:300});
+    return list;
+  };
+  RUN.speedo=function(it, task){
+    var s=clearStage('0 0 700 220');
+    var l=it.v*it.t;
+    var X0=50, X1=650; var span=X1-X0;
+    var ticks=5; var step=l/4; var scaleMax=step*ticks; /* finish lands on the 4th labelled tick */
+    var unit='м';
+    s.appendChild(el('rect',{x:X0-10,y:118,width:span+20,height:26,rx:4,style:'fill:'+css('--track')}));
+    for(var k=0;k<=ticks;k++){
+      var x=X0+span*k/ticks;
+      s.appendChild(el('line',{x1:x,x2:x,y1:112,y2:150,style:'stroke:'+css('--line-strong'),'stroke-width':2}));
+      s.appendChild(el('text',{x:x,y:174,'text-anchor':'middle','font-size':'16'}, fmt(step*k)+' '+unit));
+    }
+    var clock=el('text',{x:650,y:40,'text-anchor':'end','font-size':'22',style:'fill:'+css('--ink')+';font-weight:600'}, 't = 0 с'); s.appendChild(clock);
+    s.appendChild(el('text',{x:50,y:40,'font-size':'14'}, 'рух рівномірний · відео прискорене'));
+    var g=sprite(s, it.who, '--accent');
+    var finishX=X0+span*(l/scaleMax);
+    function play(){
+      place(g,X0,131);
+      animate(3800, function(p){ place(g, X0+(finishX-X0)*p, 131); var tt=it.t*p; clock.textContent='t = '+(p<1?fmt(Math.floor(tt*10)/10):fmt(it.t))+' с'; });
+    }
+    play();
+    task.appendChild(h('p',{'class':'ask'},'Рух '+(it.who==='равлик'?'равлика':it.who==='велосипедист'?'велосипедиста':it.who==='автобус'?'автобуса':it.who==='потяг'?'потяга':it.who==='бігун'?'бігуна':it.who==='дрон'?'дрона':'автомобіля')+' рівномірний. Зчитай зі шкали шлях, з годинника час і обчисли швидкість.'));
+    var v=it.v;
+    numAnswer(task, 'м/с', function(x){
+      if(near(x,v,0.01)) return {ok:true, msg:'<b>Так: v = '+fmt(l)+' м / '+fmt(it.t)+' с = '+fmt(v)+' м/с</b>'+(v>=1?' = '+fmt(v*3.6)+' км/год.':'. Це 2 мм за секунду.')};
+      if(near(x,v*3.6,0.01)) return {ok:false, msg:'Це відповідь у км/год, а потрібна в м/с.'};
+      if(near(x,it.t/l,0.02)) return {ok:false, msg:'Тут час поділено на шлях, а треба навпаки: швидкість — це шлях, поділений на час.'};
+      return {ok:false, msg:'Не так. Шлях — це позначка на шкалі, де зупинилося тіло, а час — те, що показав годинник.', show:'Підказка: v = l / t.', reveal:'Відповідь: v = '+fmt(l)+' / '+fmt(it.t)+' = '+fmt(v)+' м/с.'};
+    });
+    var rb=h('button',{'class':'btn ghost',type:'button'},'Показати ще раз'); rb.addEventListener('click', play);
+    var row=h('div',{'class':'answer'}); row.appendChild(rb); task.appendChild(row);
+  };
+
+  /* ================= LEVEL 3: UNITS ================= */
+  BUILD.units=function(){
+    var a=shuffle([[18,5],[36,10],[54,15],[72,20],[90,25],[108,30],[7.2,2],[144,40]]).slice(0,4).map(function(p){ return {q:fmt(p[0])+' км/год', u:'м/с', a:p[1], hint:'Ділимо на 3,6.'}; });
+    var b=shuffle([[5,18],[10,36],[20,72],[30,108],[2,7.2],[340,1224]]).slice(0,3).map(function(p){ return {q:fmt(p[0])+' м/с', u:'км/год', a:p[1], hint:'Множимо на 3,6.'}; });
+    var c=shuffle([[0.9,15],[1.2,20],[0.6,10]]).slice(0,2).map(function(p){ return {q:fmt(p[0])+' км/хв', u:'м/с', a:p[1], hint:'1 км = 1000 м, 1 хв = 60 с.'}; });
+    var d=shuffle([[30000,5],[6000,1],[12000,2]]).slice(0,1).map(function(p){ return {q:fmt(p[0])+' см/хв', u:'м/с', a:p[1], hint:'1 см = 0,01 м, 1 хв = 60 с.'}; });
+    return shuffle(a.concat(b,c,d));
+  };
+  var unitsT0=0;
+  RUN.units=function(it, task){
+    if(cur.i===0) unitsT0=Date.now();
+    var s=clearStage('0 0 700 160');
+    s.appendChild(el('text',{x:350,y:92,'text-anchor':'middle','font-size':'46',style:'fill:'+css('--ink')+';font-family:Archivo,Arial,sans-serif;font-weight:800'}, it.q+' = ?'));
+    var clock=el('text',{x:680,y:30,'text-anchor':'end','font-size':'16'},''); s.appendChild(clock);
+    (function tick(){ if(!cur||cur.L.id!=='units'||$('level-view').hidden) return; clock.textContent=Math.floor((Date.now()-unitsT0)/1000)+' с'; if(cur.i<cur.items.length) setTimeout(tick,500); })();
+    task.appendChild(h('p',{'class':'ask'},'Переведи <b>'+it.q+'</b> у '+it.u+'.'));
+    numAnswer(task, it.u, function(x){
+      if(near(x,it.a,0.005)) return {ok:true, msg:'<b>'+it.q+' = '+fmt(it.a)+' '+it.u+'.</b>'};
+      return {ok:false, msg:'Не так. '+it.hint, reveal:'Відповідь: '+it.q+' = '+fmt(it.a)+' '+it.u+'.'};
+    });
+  };
+
+  /* ================= LEVEL 4: CATCH ================= */
+  BUILD.catch=function(){
+    var A=shuffle([{L:300,T:200},{L:450,T:180},{L:240,T:120},{L:600,T:300}]);
+    var B=pick([{v:1.5,L:900},{v:2,L:1200},{v:1.25,L:1000}]);
+    var C=pick([{v:15,t:40,who:'Дрон'},{v:12,t:50,who:'Велосипедист'},{v:25,t:60,who:'Потяг'}]);
+    return [{kind:'A',L:A[0].L,T:A[0].T},{kind:'B',v:B.v,L:B.L},{kind:'C',v:C.v,t:C.t,who:C.who},{kind:'A',L:A[1].L,T:A[1].T}];
+  };
+  function trackScene(Lm, labelEnd){
+    var s=clearStage('0 0 700 220');
+    var X0=60, X1=620;
+    s.appendChild(el('rect',{x:X0-10,y:128,width:X1-X0+20,height:22,rx:4,style:'fill:'+css('--track')}));
+    s.appendChild(el('text',{x:X0,y:180,'text-anchor':'middle','font-size':'15'},'0'));
+    s.appendChild(el('text',{x:X1,y:180,'text-anchor':'middle','font-size':'15'}, fmt(Lm)+' м'));
+    s.appendChild(el('line',{x1:X1,x2:X1,y1:96,y2:160,style:'stroke:'+css('--mark'),'stroke-width':3}));
+    if(labelEnd) s.appendChild(el('text',{x:X1,y:86,'text-anchor':'middle','font-size':'15',style:'fill:'+css('--mark')+';font-weight:600'}, labelEnd));
+    var clock=el('text',{x:680,y:36,'text-anchor':'end','font-size':'20',style:'fill:'+css('--ink')+';font-weight:600'},'t = 0 с'); s.appendChild(clock);
+    return {s:s,X0:X0,X1:X1,clock:clock};
+  }
+  RUN.catch=function(it, task){
+    if(it.kind==='A'){
+      var sc=trackScene(it.L,'зупинка');
+      var me=sprite(sc.s,'ти','--accent'); place(me,sc.X0,139);
+      var bus=el('rect',{x:sc.X1+8,y:116,width:46,height:24,rx:5,style:'fill:'+css('--teal')}); sc.s.appendChild(bus);
+      var busL=el('text',{x:sc.X1+31,y:204,'text-anchor':'middle','font-size':'14'},'автобус'); sc.s.appendChild(busL);
+      var need=it.L/it.T;
+      task.appendChild(h('p',{'class':'ask'},'До зупинки <b>'+it.L+' м</b>. Автобус рушить через <b>'+it.T+' с</b>. З якою найменшою швидкістю треба йти, щоб встигнути?'));
+      numAnswer(task,'м/с',function(x){
+        if(x>12) return {ok:false, msg:'Так швидко люди не бігають: навіть Усейн Болт розвивав лише близько 12 м/с. Порахуй найменшу швидкість.'};
+        if(near(x,need,0.01)) return {ok:true, msg:'<b>Так: v = '+it.L+' / '+it.T+' = '+fmt(need)+' м/с.</b> Дивись, встигаєш впритул.'};
+        if(x>need) return {ok:false, msg:'З такою швидкістю встигнеш, але питання про <b>найменшу</b>.'};
+        return {ok:false, msg:'Не встигнеш. Подумай: шлях і час відомі, а швидкість = ?', reveal:'Відповідь: '+fmt(need)+' м/с.'};
+      }, function(x,ok){
+        var v=ok?x:need, Tsim=it.T*1.15, ms=4200;
+        animate(ms,function(p){ var t=Tsim*p; var pos=Math.min(it.L, v*t); place(me, sc.X0+(sc.X1-sc.X0)*pos/it.L, 139); sc.clock.textContent='t = '+Math.floor(t)+' с'; if(t>it.T){ var dx=(t-it.T)*3; bus.setAttribute('x', sc.X1+8+dx); busL.setAttribute('x', sc.X1+31+dx); } });
+        nextBtn(task);
+      });
+    }
+    if(it.kind==='B'){
+      var sc2=trackScene(it.L,'школа');
+      var me2=sprite(sc2.s,'ти','--accent'); place(me2,sc2.X0,139);
+      var tt=it.L/it.v;
+      task.appendChild(h('p',{'class':'ask'},'Ти йдеш зі швидкістю <b>'+fmt(it.v)+' м/с</b>. До школи <b>'+fmt(it.L)+' м</b>. За скільки секунд дійдеш?'));
+      numAnswer(task,'с',function(x){
+        if(near(x,tt,0.01)) return {ok:true, msg:'<b>Так: t = l / v = '+fmt(it.L)+' / '+fmt(it.v)+' = '+fmt(tt)+' с</b>, це '+(Math.abs(tt/60-Math.round(tt/60))<1e-9?fmt(tt/60)+' хв.':'приблизно '+fmt(Math.round(tt/6)/10)+' хв.')};
+        if(near(x,it.L*it.v,0.01)) return {ok:false, msg:'Тут шлях помножено на швидкість, а треба поділити: час = шлях / швидкість.'};
+        if(near(x,tt/60,0.02)) return {ok:false, msg:'Це відповідь у хвилинах, а потрібна в секундах.'};
+        return {ok:false, msg:'Не так. З формули v = l / t випливає t = l / v.', reveal:'Відповідь: '+fmt(tt)+' с.'};
+      }, function(){
+        animate(4000,function(p){ place(me2, sc2.X0+(sc2.X1-sc2.X0)*p, 139); sc2.clock.textContent='t = '+Math.floor(tt*p)+' с'; });
+        nextBtn(task);
+      });
+    }
+    if(it.kind==='C'){
+      var L=it.v*it.t;
+      var sc3=trackScene(L,'фініш');
+      var g=sprite(sc3.s,it.who.toLowerCase(),'--accent'); place(g,sc3.X0,139);
+      task.appendChild(h('p',{'class':'ask'},'<b>'+it.who+'</b> рухається рівномірно зі швидкістю <b>'+it.v+' м/с</b> протягом <b>'+it.t+' с</b>. Яку відстань подолає?'));
+      /* hide the end label until answered */
+      var labels=sc3.s.querySelectorAll('text'); labels[1].textContent='? м';
+      numAnswer(task,'м',function(x){
+        if(near(x,L,0.01)) return {ok:true, msg:'<b>Так: l = v · t = '+it.v+' · '+it.t+' = '+L+' м.</b>'};
+        if(near(x,it.v/it.t,0.02)||near(x,it.t/it.v,0.02)) return {ok:false, msg:'Тут не треба ділити. З формули v = l / t випливає l = v · t.'};
+        return {ok:false, msg:'Не так. Шлях = швидкість × час.', reveal:'Відповідь: '+L+' м.'};
+      }, function(){
+        labels[1].textContent=fmt(L)+' м';
+        animate(3600,function(p){ place(g, sc3.X0+(sc3.X1-sc3.X0)*p, 139); sc3.clock.textContent='t = '+Math.floor(it.t*p)+' с'; });
+        nextBtn(task);
+      });
+    }
+  };
+
+  /* ================= LEVEL 5: MEET ================= */
+  BUILD.meet=function(){
+    /* fixed progression: towards → catching up → harder case with one speed given in m/s */
+    var to=pick([
+      {dir:'to', a:'велосипедист', va:15, b:'автомобіль', vb:65, D:40},
+      {dir:'to', a:'автобус', va:60, b:'вантажівка', vb:90, D:300}
+    ]);
+    var af=pick([
+      {dir:'after', a:'мопед', aAcc:'мопед', va:30, b:'вантажівка', vb:80, D:25},
+      {dir:'after', a:'трактор', aAcc:'трактор', va:40, b:'автомобіль', vb:100, D:30}
+    ]);
+    var hard=pick([
+      {dir:'to', a:'пішохід', va:5, b:'велосипедист', vb:18, msB:true, D:23},
+      {dir:'to', a:'потяг', va:72, msA:true, b:'автомобіль', vb:90, D:81},
+      {dir:'after', a:'пішохід', aAcc:'пішохода', va:5, b:'велосипедист', vb:18, msB:true, D:6.5},
+      {dir:'after', a:'вантажівка', aAcc:'вантажівку', va:54, b:'автомобіль', vb:90, msB:true, D:18}
+    ]);
+    return [to, af, hard];
+  };
+  RUN.meet=function(it, task){
+    var s=clearStage('0 0 700 220');
+    var X0=60, X1=640;
+    s.appendChild(el('rect',{x:X0-14,y:128,width:X1-X0+28,height:22,rx:4,style:'fill:'+css('--track')}));
+    var mixed = !!(it.msA||it.msB);
+    function spd(kmh, ms){ return ms ? fmt(kmh/3.6)+' м/с' : kmh+' км/год'; }
+    var SA=spd(it.va,it.msA), SB=spd(it.vb,it.msB);
+    var vc = it.dir==='to' ? it.va+it.vb : it.vb-it.va;
+    var tm = it.D/vc;
+    var rawA = it.msA ? it.va/3.6 : it.va, rawB = it.msB ? it.vb/3.6 : it.vb;
+    var raw = it.dir==='to' ? rawA+rawB : Math.abs(rawB-rawA);
+    var A,B,ax,bx;
+    /* 'after': scale so the catch-up point lands near the right end of the track */
+    var pxPerKm = it.dir==='to' ? (X1-X0)/it.D : (X1-60-X0)/(it.vb*tm);
+    if(it.dir==='to'){ ax=X0; bx=X1; }
+    else { bx=X0; ax=X0+it.D*pxPerKm; }
+    A=sprite(s,it.a+' · '+SA,'--accent'); place(A,ax,139);
+    B=sprite(s,it.b+' · '+SB,'--teal',true); place(B,bx,139);
+    s.appendChild(el('text',{x:20,y:36,'font-size':'15'}, 'між ними '+fmt(it.D)+' км'+(mixed?' · увага на одиниці!':'')));
+    var clock=el('text',{x:680,y:36,'text-anchor':'end','font-size':'20',style:'fill:'+css('--ink')+';font-weight:600'},'t = 0 год'); s.appendChild(clock);
+    var txt = it.dir==='to'
+      ? '<b>'+cap(it.a)+'</b> ('+SA+') і <b>'+it.b+'</b> ('+SB+') рухаються назустріч один одному.'
+      : '<b>'+cap(it.b)+'</b> ('+SB+') наздоганяє <b>'+it.aAcc+'</b> ('+SA+'). Вони рухаються в одному напрямку.';
+    if(mixed) task.appendChild(h('p',{'class':'ask'},'<b>Складніша задача.</b> Швидкості дано в різних одиницях.'));
+    task.appendChild(h('p',{'class':'ask'}, txt+' З якою швидкістю вони <b>зближуються</b>? Відповідь дай у км/год.'));
+    numAnswer(task,'км/год',function(x){
+      var how = it.dir==='to' ? it.va+' + '+it.vb : it.vb+' − '+it.va;
+      if(near(x,vc,0.005)) return {ok:true, msg:'<b>Так: '+(mixed?(it.msA?SA+' = '+it.va+' км/год; ':SB+' = '+it.vb+' км/год; '):'')+how+' = '+vc+' км/год.</b>'};
+      if(mixed && near(x,raw,0.01)) return {ok:false, msg:'Числа додавати чи віднімати можна лише в однакових одиницях. Спочатку переведи м/с у км/год (помнож на 3,6).'};
+      if(mixed && near(x,raw*3.6,0.01)) return {ok:false, msg:'Обидві швидкості помножено на 3,6, а в км/год треба перевести лише ту, що дана в м/с.'};
+      if(near(x, it.dir==='to'? Math.abs(it.vb-it.va) : it.va+it.vb, 0.005)) return {ok:false, msg: it.dir==='to'?'Вони рухаються назустріч, тож щогодини відстань між ними скорочується на шляхи обох. Швидкості треба додати.':'Вони рухаються в одному напрямку, тож щогодини швидший наближається лише на різницю швидкостей.'};
+      return {ok:false, msg:'Не так. Уяви, на скільки кілометрів щогодини зменшується відстань між ними.', show:(mixed?'Підказка: спершу переведи м/с у км/год.':''), reveal:'Відповідь: '+vc+' км/год.'};
+    }, function(){
+      task.appendChild(h('p',{'class':'ask'},'Між ними <b>'+fmt(it.D)+' км</b>. Через скільки годин '+(it.dir==='to'?'вони зустрінуться':it.b+' наздожене '+it.aAcc)+'?'));
+      numAnswer(task,'год',function(x){
+        if(near(x,tm,0.01)) return {ok:true, msg:'<b>Так: t = '+fmt(it.D)+' / '+vc+' = '+fmt(tm)+' год</b>'+(tm<1?' = '+fmt(tm*60)+' хв.':'.')};
+        if(near(x,tm*60,0.01)) return {ok:false, msg:'Це відповідь у хвилинах, а потрібна в годинах.'};
+        return {ok:false, msg:'Не так. Час = відстань / швидкість зближення.', reveal:'Відповідь: '+fmt(tm)+' год.'};
+      }, function(){
+        animate(4200,function(p){ var t=tm*p; var da=it.va*t*pxPerKm, db=it.vb*t*pxPerKm;
+          if(it.dir==='to'){ place(A,ax+da,139); place(B,bx-db,139); } else { place(A,ax+da,139); place(B,bx+db,139); }
+          clock.textContent='t = '+fmt(Math.round(t*100)/100)+' год'; });
+        nextBtn(task);
+      });
+    });
+  };
+  function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+  renderMenu();
+})();
+</script>
+</body>
+</html>
