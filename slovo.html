@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Машина наступного слова</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Literata:opsz,wght@7..72,400;7..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: three numbered steps top-to-bottom — teach, look inside, generate */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#E9EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --accent-ink:#2E4A7D; --accent-soft:#E2E9F5; --on-accent:#FFFFFF;
+  --warm:#8A570F; --warm-soft:#F5E9D7; --teal:#146B66; --teal-soft:#DDF0EE;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637; --on-accent:#10131A;
+    --warm:#DCA76A; --warm-soft:#2C2318; --teal:#6ACFC5; --teal-soft:#16302D;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Literata",Georgia,serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px 70px}
+header{padding:30px 0 14px;display:grid;gap:6px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"Archivo",Arial,sans-serif;font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:0;letter-spacing:-.02em}
+.lead{margin:0;color:var(--ink-2);max-width:64ch}
+section{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px 20px 20px}
+h2{font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:21px;margin:0 0 4px;display:flex;gap:10px;align-items:baseline}
+h2 .n{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);font-weight:500}
+.sub{color:var(--muted);font-size:14.5px;margin:0 0 12px;max-width:70ch}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:16px;padding:11px 18px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent-ink);border-color:var(--line-strong)}
+.btn.sel{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+.btn:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+textarea{width:100%;min-height:150px;font-family:"Literata",Georgia,serif;font-size:16px;line-height:1.5;padding:12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink);resize:vertical}
+input[type=text]{font-family:"Literata",Georgia,serif;font-size:18px;padding:9px 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink);width:220px}
+.stats{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--ink-2);margin-top:10px}
+.stats b{color:var(--ink)}
+.bars{display:grid;gap:6px;margin-top:12px}
+.bar{display:grid;grid-template-columns:minmax(80px,160px) 1fr 70px;gap:10px;align-items:center}
+.bar .w{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .t{height:20px;background:var(--surface-2);border-radius:3px;position:relative;overflow:hidden}
+.bar .f{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:0 4px 4px 0}
+.bar.pick .f{background:var(--warm)}
+.bar.pick .w{color:var(--warm)}
+.bar .p{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--ink-2);text-align:right}
+.out{font-size:20px;line-height:1.6;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;min-height:70px;margin-top:12px}
+.out .last{background:var(--warm-soft);color:var(--warm);border-radius:3px;padding:0 3px}
+.slider{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:15px}
+.slider input{width:200px}
+.slider .v{font-family:"IBM Plex Mono",monospace;font-weight:500;color:var(--ink-2);min-width:150px}
+.hint{font-size:14.5px;color:var(--muted);margin-top:8px}
+.empty{color:var(--muted);font-style:italic}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+footer{margin-top:24px;font-size:13.5px;color:var(--muted)}
+@media (max-width:560px){.bar{grid-template-columns:90px 1fr 56px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Інформатика · 6 клас · штучний інтелект</div>
+    <h1>Машина наступного слова</h1>
+    <p class="lead">Чат-боти пишуть текст по одному слову: щоразу вгадують, яке слово найчастіше йде далі. Тут — маленька версія такої машини. Вона вчиться на тексті, який ти їй даси, і потім пише сама.</p>
+  </header>
+
+  <section>
+    <h2><span class="n">1</span>Навчи машину</h2>
+    <p class="sub">Обери готовий текст або напиши свій. Машина прочитає його й запам'ятає, яке слово після якого йшло.</p>
+    <div class="seg" role="group" aria-label="Готові тексти">
+      <button class="btn ghost" type="button" data-sample="kazka">Казка</button>
+      <button class="btn ghost" type="button" data-sample="pogoda">Прогноз погоди</button>
+      <button class="btn ghost" type="button" data-sample="recept">Рецепти</button>
+      <button class="btn ghost" type="button" data-sample="own">Свій текст</button>
+    </div>
+    <textarea id="text" aria-label="Текст для навчання" style="margin-top:12px"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" type="button" id="train">Навчити</button>
+      <label class="slider" for="ctx">Пам'ять:
+        <select id="ctx" style="font:inherit;padding:8px 10px;border-radius:6px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink)">
+          <option value="1">1 попереднє слово</option>
+          <option value="2">2 попередні слова</option>
+        </select>
+      </label>
+    </div>
+    <div class="stats" id="stats">Машина ще нічого не читала.</div>
+  </section>
+
+  <section>
+    <h2><span class="n">2</span>Зазирни всередину</h2>
+    <p class="sub">Напиши слово — і побачиш, які слова машина бачила після нього і як часто.</p>
+    <div class="row">
+      <input type="text" id="probe" aria-label="Слово" autocomplete="off">
+      <button class="btn ghost" type="button" id="probeBtn">Показати</button>
+    </div>
+    <div class="bars" id="probeBars"></div>
+  </section>
+
+  <section>
+    <h2><span class="n">3</span>Хай машина пише</h2>
+    <p class="sub">Почни речення одним словом або залиш порожнім. «Ще слово» — машина додає одне слово і показує, з чого обирала. «Написати 30 слів» — пише сама.</p>
+    <div class="row">
+      <input type="text" id="start" aria-label="Перше слово" autocomplete="off" placeholder="перше слово">
+      <button class="btn" type="button" id="step">Ще слово</button>
+      <button class="btn" type="button" id="auto">Написати 30 слів</button>
+      <button class="btn ghost" type="button" id="reset">Почати знову</button>
+    </div>
+    <div class="slider" style="margin-top:14px">
+      <label for="temp">Сміливість:</label>
+      <input type="range" id="temp" min="0" max="4" step="1" value="2">
+      <span class="v" id="tempv"></span>
+    </div>
+    <div class="out" id="out"><span class="empty">Тут з'явиться текст.</span></div>
+    <div class="bars" id="stepBars"></div>
+    <p class="hint" id="stepHint"></p>
+  </section>
+
+  <footer>Справжні чат-боти влаштовані складніше: вони враховують тисячі попередніх слів і вчилися на мільярдах текстів. Але головна ідея та сама — вгадати наступне слово.</footer>
+</div>
+
+<script>
+(function(){
+  var SAMPLES={
+    kazka:"Жила собі в лісі лисиця. Лисиця була хитра й голодна. Одного разу лисиця пішла до річки. Біля річки сидів старий вовк. Вовк сказав лисиці: «Добрий день, сестричко». Лисиця сказала вовкові: «Добрий день, братику. Чи бачив ти рибу?» Вовк сказав, що рибу бачив тільки вранці. Тоді лисиця пішла далі. У лісі лисиця зустріла зайця. Заєць був малий і швидкий. Заєць сказав лисиці, що в лісі живе ведмідь. Ведмідь був великий і сердитий. Лисиця злякалася й пішла до річки. Біля річки знову сидів вовк. Вовк сказав лисиці: «Ходімо разом ловити рибу». Лисиця й вовк пішли ловити рибу. Вовк спіймав велику рибу, а лисиця спіймала малу рибу. Ввечері вони сиділи біля річки й їли рибу. Так лисиця й вовк стали друзями. А ведмідь спав у лісі й нічого не знав.",
+    pogoda:"Завтра в Одесі буде хмарно. Вранці буде прохолодно, вдень буде тепло. Температура вдень плюс п'ятнадцять градусів. Вітер північний, слабкий. Увечері можливий невеликий дощ. Післязавтра буде сонячно. Вранці буде холодно, вдень буде тепло. Температура вдень плюс сімнадцять градусів. Вітер західний, помірний. Увечері дощу не буде. У суботу буде хмарно з проясненнями. Вранці можливий туман. Вдень буде тепло. Температура вдень плюс шістнадцять градусів. Вітер південний, слабкий. У неділю буде дощ. Вдень буде прохолодно. Температура вдень плюс дванадцять градусів. Вітер північний, сильний. Увечері дощ припиниться.",
+    recept:"Візьміть два яйця й склянку молока. Додайте до молока борошно й цукор. Добре перемішайте. Розігрійте сковорідку й додайте трохи олії. Налийте тісто на сковорідку. Смажте млинець дві хвилини. Переверніть млинець і смажте ще хвилину. Подавайте млинці з медом. Для салату візьміть два помідори й огірок. Поріжте помідори й огірок. Додайте трохи солі й олії. Добре перемішайте. Подавайте салат одразу. Для чаю візьміть склянку води. Закип'ятіть воду. Додайте до води чай і трохи цукру. Зачекайте дві хвилини. Подавайте чай з медом.",
+    own:""
+  };
+  var KEY='slovo-own';
+  var $=function(id){return document.getElementById(id);};
+  var model=null, ctxN=1, tokens=[], gen=[];
+  var sampleKey='kazka';
+
+  function tokenize(t){
+    var m=t.toLowerCase().replace(/[«»"“”„]/g,' ').match(/[a-zа-яіїєґ0-9'’ʼ-]+|[.!?,:;]/gi);
+    return m?m.map(function(x){return x.replace(/[’ʼ]/g,"'");}):[];
+  }
+  function key(arr){
+    /* everything up to a sentence end counts as "start of sentence" */
+    var a=arr.slice(), e=-1; for(var i=0;i<a.length;i++){ if(/^[.!?]$/.test(a[i])) e=i; }
+    for(var j=0;j<=e;j++) a[j]='.';
+    return a.join(' ');
+  }
+  function train(){
+    var txt=$('text').value;
+    if(sampleKey==='own'){ try{ localStorage.setItem(KEY,txt); }catch(e){} }
+    tokens=tokenize(txt);
+    ctxN=parseInt($('ctx').value,10);
+    model={};
+    var seq=pad().concat(tokens);
+    for(var i=ctxN;i<seq.length;i++){
+      var k=key(seq.slice(i-ctxN,i));
+      var w=seq[i];
+      if(!model[k]) model[k]={};
+      model[k][w]=(model[k][w]||0)+1;
+    }
+    var words=tokens.filter(function(x){return /[a-zа-яіїєґ]/i.test(x);});
+    var uniq={}; words.forEach(function(w){uniq[w]=1;});
+    $('stats').innerHTML = words.length ? 'Прочитано слів: <b>'+words.length+'</b> · різних слів: <b>'+Object.keys(uniq).length+'</b> · пам\'ять: <b>'+ctxN+'</b> '+(ctxN===1?'слово':'слова') : 'Текст порожній — напиши кілька речень.';
+    resetGen();
+    probe();
+  }
+  function options(ctx){
+    var k=key(ctx); var d=model&&model[k]; if(!d) return [];
+    var tot=0; for(var w in d) tot+=d[w];
+    return Object.keys(d).map(function(w){return {w:w,c:d[w],p:d[w]/tot};}).sort(function(a,b){return b.c-a.c;});
+  }
+  function bars(el, opts, pick, limit){
+    el.innerHTML='';
+    opts.slice(0,limit||10).forEach(function(o){
+      var r=document.createElement('div'); r.className='bar'+(pick===o.w?' pick':'');
+      var w=document.createElement('div'); w.className='w'; w.textContent=o.w;
+      var t=document.createElement('div'); t.className='t'; var f=document.createElement('div'); f.className='f'; f.style.width=(o.p*100)+'%'; t.appendChild(f);
+      var p=document.createElement('div'); p.className='p'; p.textContent=Math.round(o.p*100)+'% · '+o.c;
+      r.appendChild(w); r.appendChild(t); r.appendChild(p); el.appendChild(r);
+    });
+    if(opts.length>(limit||10)){ var more=document.createElement('div'); more.className='hint'; more.textContent='…і ще '+(opts.length-(limit||10)); el.appendChild(more); }
+  }
+  function probe(){
+    var el=$('probeBars');
+    if(!model){ el.innerHTML='<p class="empty">Спершу натисни «Навчити».</p>'; return; }
+    var t=tokenize($('probe').value);
+    if(!t.length){ el.innerHTML='<p class="hint">Напиши слово з тексту, наприклад перше слово, яке бачиш.</p>'; return; }
+    var ctx=t.slice(-ctxN);
+    if(ctx.length<ctxN){ el.innerHTML='<p class="hint">Пам\'ять машини — 2 слова. Напиши два слова поспіль.</p>'; return; }
+    var o=options(ctx);
+    if(!o.length){ el.innerHTML='<p class="empty">Машина ніколи не бачила «'+esc(ctx.join(' '))+'». Вона знає лише слова зі свого тексту.</p>'; return; }
+    bars(el,o,null,12);
+  }
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  var TEMPS=[0,0.5,1,1.6,3];
+  var TNAMES=['обережна — завжди найчастіше','трохи сміливіша','звичайна','смілива','божевільна'];
+  function updTemp(){ $('tempv').textContent=TNAMES[+$('temp').value]; }
+  function choose(opts){
+    var T=TEMPS[+$('temp').value];
+    if(T===0) return opts[0].w;
+    var ws=opts.map(function(o){return Math.pow(o.p,1/T);}); var s=ws.reduce(function(a,b){return a+b;},0);
+    var r=Math.random()*s; for(var i=0;i<opts.length;i++){ r-=ws[i]; if(r<=0) return opts[i].w; } return opts[opts.length-1].w;
+  }
+  function resetGen(){
+    gen=[];
+    var st=tokenize($('start').value);
+    if(st.length) gen=st.slice();
+    render(null); $('stepBars').innerHTML=''; $('stepHint').textContent='';
+  }
+  function pad(){ var a=[]; for(var i=0;i<ctxN;i++) a.push('.'); return a; }
+  function context(){
+    var seq=pad().concat(gen);
+    return seq.slice(-ctxN);
+  }
+  function stepOnce(show){
+    if(!model){ $('stepHint').textContent='Спершу навчи машину в кроці 1.'; return false; }
+    var ctx=context(); var o=options(ctx);
+    if(!o.length){ $('stepHint').textContent='Машина не знає, що буває після «'+ctx.filter(function(x){return x!=='.';}).join(' ')+'». Вона застрягла: такого в її тексті не було.'; return false; }
+    var w=choose(o); gen.push(w);
+    if(show){ bars($('stepBars'),o,w,8); var shown=ctx.filter(function(x){return x!=='.';}).join(' '); $('stepHint').textContent=(shown?'Після «'+shown+'»':'На початку речення')+' машина могла обрати одне з цих слів. Обрала «'+w+'».'; }
+    return true;
+  }
+  function render(lastIdx){
+    var out=$('out');
+    if(!gen.length){ out.innerHTML='<span class="empty">Тут з\'явиться текст.</span>'; return; }
+    var html=''; var cap=true;
+    gen.forEach(function(w,i){
+      var punct=/^[.!?,:;]$/.test(w);
+      var word=cap&&!punct? w.charAt(0).toUpperCase()+w.slice(1) : w;
+      var piece=esc(word);
+      if(i===lastIdx) piece='<span class="last">'+piece+'</span>';
+      html+=(punct||i===0?'':' ')+piece;
+      cap=/^[.!?]$/.test(w);
+    });
+    out.innerHTML=html;
+  }
+  document.querySelectorAll('[data-sample]').forEach(function(b){
+    b.addEventListener('click',function(){
+      sampleKey=b.getAttribute('data-sample');
+      document.querySelectorAll('[data-sample]').forEach(function(x){ x.classList.toggle('sel',x===b); });
+      if(sampleKey==='own'){ var v=''; try{ v=localStorage.getItem(KEY)||''; }catch(e){} $('text').value=v; $('text').placeholder='Напиши хоча б 5–6 речень. Що більше тексту — то краще машина пише.'; $('text').focus(); }
+      else { $('text').value=SAMPLES[sampleKey]; }
+    });
+  });
+  $('text').addEventListener('input',function(){ if(sampleKey==='own'){ try{ localStorage.setItem(KEY,$('text').value); }catch(e){} } });
+  $('train').addEventListener('click',train);
+  $('ctx').addEventListener('change',function(){ if(model) train(); });
+  $('probeBtn').addEventListener('click',probe);
+  $('probe').addEventListener('keydown',function(e){ if(e.key==='Enter') probe(); });
+  $('step').addEventListener('click',function(){ if(!gen.length) resetGen(); if(stepOnce(true)) render(gen.length-1); });
+  $('auto').addEventListener('click',function(){ resetGen(); for(var i=0;i<30;i++){ if(!stepOnce(false)) break; } render(null); $('stepBars').innerHTML=''; });
+  $('reset').addEventListener('click',resetGen);
+  $('start').addEventListener('keydown',function(e){ if(e.key==='Enter') { resetGen(); } });
+  $('temp').addEventListener('input',updTemp);
+  updTemp();
+  document.querySelector('[data-sample="kazka"]').click();
+  train();
+})();
+</script>
+</body>
+</html>

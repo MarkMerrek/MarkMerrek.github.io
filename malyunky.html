@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Навчи машину малюнкам</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: drawing canvas on the left, three class "boxes" with examples on the right, machine's guess under the canvas */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#E9EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --on-accent:#FFFFFF; --accent-soft:#E2E9F5;
+  --c0:#2E4A7D; --c1:#146B66; --c2:#8A570F;
+  --good:#1E6B3A; --good-soft:#E1F1E6; --bad:#8C2F2F; --bad-soft:#F6E3E3;
+  --paper:#FFFFFF; --pen:#151A22;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --on-accent:#10131A; --accent-soft:#1C2637;
+    --c0:#93B4E8; --c1:#6ACFC5; --c2:#DCA76A;
+    --good:#7FD39A; --good-soft:#18291F; --bad:#E89494; --bad-soft:#2E1C1C;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:17px;line-height:1.45}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px 60px}
+header{padding:24px 0 12px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 0 0;letter-spacing:-.02em}
+.score{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-2);text-align:right}
+.score b{font-family:"Archivo",Arial,sans-serif;font-size:26px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(--paper);border:2px solid var(--line-strong);border-radius:8px;touch-action:none;cursor:crosshair;margin:0 auto}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:16px;padding:11px 16px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.guess{margin-top:14px;text-align:center}
+.guess .big{font-size:28px;font-weight:800;min-height:38px}
+.guess .small{font-size:14px;color:var(--muted)}
+.cbar{display:grid;grid-template-columns:90px 1fr 46px;gap:8px;align-items:center;margin-top:6px;font-size:14px}
+.cbar .t{height:14px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.cbar .f{height:100%}
+.cbar .p{font-family:"IBM Plex Mono",monospace;text-align:right;color:var(--ink-2)}
+.cbar .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.check{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.check .btn{font-size:15px;padding:8px 14px}
+.ok{background:var(--good);border-color:var(--good);color:var(--on-accent)}
+.no{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+.classes{display:grid;gap:12px}
+.cls{border:2px solid var(--line);border-radius:10px;padding:12px;background:var(--surface)}
+.cls-head{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cls-head input{font:inherit;font-weight:700;font-size:18px;padding:6px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink);width:160px}
+.cls-head .cnt{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--muted);margin-left:auto}
+.cls .add{border-width:2px}
+.thumbs{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px;min-height:44px}
+.thumbs canvas{width:40px;height:40px;max-width:none;border-width:1px;border-radius:4px;cursor:default}
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block}
+.tip{font-size:14.5px;color:var(--muted);margin:8px 0 0}
+.bottom{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">Інформатика · 4 клас · штучний інтелект</div>
+      <h1>Навчи машину малюнкам</h1>
+    </div>
+    <div class="score">вгадала<br><b id="okc">0</b> з <b id="allc">0</b></div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <canvas id="pad" width="280" height="280" aria-label="Поле для малювання"></canvas>
+      <div class="row">
+        <button class="btn ghost" type="button" id="clear">Стерти</button>
+        <button class="btn" type="button" id="ask">Що це?</button>
+      </div>
+      <div class="guess" aria-live="polite">
+        <div class="big" id="gBig"></div>
+        <div class="small" id="gSmall">Намалюй щось і натисни «Що це?»</div>
+        <div id="gBars"></div>
+        <div class="check" id="checkRow" hidden>
+          <button class="btn ok" type="button" id="yes">Так, вгадала</button>
+          <button class="btn no" type="button" id="nope">Ні, помилилась</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="classes" id="classes"></div>
+      <p class="tip">Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.</p>
+      <div class="bottom">
+        <button class="btn ghost" type="button" id="wipe">Забути все</button>
+        <span class="confirm" id="wipeAsk" hidden>Машина забуде всі приклади. Точно?
+          <button class="btn no" type="button" id="wipeYes">Так</button>
+          <button class="btn ghost" type="button" id="wipeNo">Ні</button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var N=16, K=3, KEY='malyunky-v1';
+  var COLORS=['--c0','--c1','--c2'];
+  var state={names:['Коло','Квадрат','Трикутник'], ex:[[],[],[]], ok:0, all:0};
+  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.ex&&o.names) state=o; } }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+  var $=function(id){return document.getElementById(id);};
+  var pad=$('pad'), ctx=pad.getContext('2d');
+  function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  function clearPad(){ ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,pad.width,pad.height); drew=false; }
+  var drawing=false, last=null, drew=false;
+  function pos(e){ var r=pad.getBoundingClientRect(); return {x:(e.clientX-r.left)*pad.width/r.width, y:(e.clientY-r.top)*pad.height/r.height}; }
+  pad.addEventListener('pointerdown',function(e){ drawing=true; last=pos(e); pad.setPointerCapture(e.pointerId); dot(last); });
+  pad.addEventListener('pointermove',function(e){ if(!drawing) return; var p=pos(e); line(last,p); last=p; });
+  pad.addEventListener('pointerup',function(){ drawing=false; });
+  pad.addEventListener('pointercancel',function(){ drawing=false; });
+  function line(a,b){ ctx.strokeStyle='#151A22'; ctx.lineWidth=12; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); drew=true; }
+  function dot(p){ line(p,{x:p.x+0.1,y:p.y+0.1}); }
+
+  /* the picture becomes a 16×16 grid of numbers: how much ink is in each cell.
+     First the drawing is cut out and stretched to fill the grid, so size and position don't matter, only shape. */
+  var off=document.createElement('canvas'); off.width=64; off.height=64; var octx=off.getContext('2d');
+  function features(){
+    var W=pad.width,H=pad.height, img=ctx.getImageData(0,0,W,H).data;
+    var x0=W,y0=H,x1=-1,y1=-1;
+    for(var y=0;y<H;y+=2){ for(var x=0;x<W;x+=2){ var i=(y*W+x)*4; if(img[i]+img[i+1]+img[i+2]<500){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } } }
+    var f=new Array(N*N).fill(0);
+    if(x1<0) return f;
+    var bw=x1-x0+1, bh=y1-y0+1, side=Math.max(bw,bh)+12;
+    var sx=x0+bw/2-side/2, sy=y0+bh/2-side/2;
+    octx.fillStyle='#FFFFFF'; octx.fillRect(0,0,64,64);
+    octx.drawImage(pad,sx,sy,side,side,4,4,56,56);
+    var d=octx.getImageData(0,0,64,64).data;
+    for(var cy=0;cy<N;cy++) for(var cx=0;cx<N;cx++){
+      var sum=0; for(var yy=0;yy<4;yy++) for(var xx=0;xx<4;xx++){ var k=((cy*4+yy)*64+(cx*4+xx))*4; sum+=1-(d[k]+d[k+1]+d[k+2])/765; }
+      f[cy*N+cx]=Math.min(1,sum/16*2);
+    }
+    /* soften: each cell shares ink with its neighbours, so a line drawn a little to the side still matches */
+    for(var pass=0;pass<2;pass++){
+      var g=new Array(N*N).fill(0);
+      for(var y2=0;y2<N;y2++) for(var x2=0;x2<N;x2++){ var s2=0,n2=0; for(var dy=-1;dy<=1;dy++) for(var dx=-1;dx<=1;dx++){ var X=x2+dx,Y=y2+dy; if(X>=0&&Y>=0&&X<N&&Y<N){ s2+=f[Y*N+X]; n2++; } } g[y2*N+x2]=s2/n2; }
+      f=g;
+    }
+    return f;
+  }
+  function dist(a,b){ var s=0; for(var i=0;i<a.length;i++){ var d=a[i]-b[i]; s+=d*d; } return Math.sqrt(s); }
+  function predict(f){
+    var all=[]; state.ex.forEach(function(list,c){ list.forEach(function(v){ all.push({c:c,d:dist(f,v)}); }); });
+    if(!all.length) return null;
+    all.sort(function(a,b){return a.d-b.d;});
+    var k=Math.min(K,all.length), score=[0,0,0];
+    for(var i=0;i<k;i++){ score[all[i].c]+=1/(all[i].d+0.5); }
+    var tot=score.reduce(function(a,b){return a+b;},0);
+    var p=score.map(function(s){return s/tot;});
+    var best=p.indexOf(Math.max.apply(null,p));
+    return {best:best,p:p};
+  }
+  function thumb(v){ var c=document.createElement('canvas'); c.width=N; c.height=N; var g=c.getContext('2d'); var im=g.createImageData(N,N); for(var i=0;i<N*N;i++){ var val=255-Math.round(v[i]*255); im.data[i*4]=val; im.data[i*4+1]=val; im.data[i*4+2]=val; im.data[i*4+3]=255; } g.putImageData(im,0,0); c.style.imageRendering='pixelated'; return c; }
+  function renderClasses(){
+    var box=$('classes'); box.innerHTML='';
+    state.names.forEach(function(nm,c){
+      var d=document.createElement('div'); d.className='cls'; d.style.borderColor='var('+COLORS[c]+')';
+      var h=document.createElement('div'); h.className='cls-head';
+      var dotEl=document.createElement('span'); dotEl.className='dot'; dotEl.style.background='var('+COLORS[c]+')';
+      var inp=document.createElement('input'); inp.type='text'; inp.value=nm; inp.id='name'+c; inp.setAttribute('aria-label','Назва групи '+(c+1));
+      inp.addEventListener('input',function(){ state.names[c]=inp.value||('Група '+(c+1)); save(); addBtn.textContent='Це — '+state.names[c]; });
+      var addBtn=document.createElement('button'); addBtn.type='button'; addBtn.className='btn add'; addBtn.style.background='var('+COLORS[c]+')'; addBtn.style.borderColor='var('+COLORS[c]+')'; addBtn.textContent='Це — '+nm;
+      addBtn.addEventListener('click',function(){ if(!drew){ $('gSmall').textContent='Спершу намалюй приклад у полі.'; return; } state.ex[c].push(features()); save(); clearPad(); renderClasses(); $('gSmall').textContent='Запам\'ятала. Малюй наступний приклад або натисни «Що це?»'; $('gBig').textContent=''; $('gBars').innerHTML=''; $('checkRow').hidden=true; });
+      var cnt=document.createElement('span'); cnt.className='cnt'; cnt.textContent='прикладів: '+state.ex[c].length;
+      var undo=document.createElement('button'); undo.type='button'; undo.className='btn ghost'; undo.textContent='−'; undo.title='Прибрати останній приклад'; undo.setAttribute('aria-label','Прибрати останній приклад групи '+(c+1)); undo.style.padding='8px 12px';
+      undo.addEventListener('click',function(){ state.ex[c].pop(); save(); renderClasses(); });
+      h.appendChild(dotEl); h.appendChild(inp); h.appendChild(addBtn); h.appendChild(undo); h.appendChild(cnt);
+      var th=document.createElement('div'); th.className='thumbs';
+      state.ex[c].slice(-24).forEach(function(v){ th.appendChild(thumb(v)); });
+      d.appendChild(h); d.appendChild(th); box.appendChild(d);
+    });
+    $('okc').textContent=state.ok; $('allc').textContent=state.all;
+  }
+  $('clear').addEventListener('click',function(){ clearPad(); $('gBig').textContent=''; $('gBars').innerHTML=''; $('gSmall').textContent='Намалюй щось і натисни «Що це?»'; $('checkRow').hidden=true; });
+  $('ask').addEventListener('click',function(){
+    if(!drew){ $('gSmall').textContent='Поле порожнє — намалюй щось.'; return; }
+    var r=predict(features());
+    $('gBars').innerHTML='';
+    if(!r){ $('gBig').textContent='Не знаю…'; $('gSmall').textContent='Мені ще ніхто не показав жодного прикладу. Навчи мене!'; $('checkRow').hidden=true; return; }
+    $('gBig').textContent=state.names[r.best]+'?';
+    $('gBig').style.color='var('+COLORS[r.best]+')';
+    $('gSmall').textContent='Наскільки машина впевнена:';
+    state.names.forEach(function(nm,c){
+      var b=document.createElement('div'); b.className='cbar';
+      b.innerHTML='<span class="nm"></span><span class="t"><span class="f" style="display:block;width:'+Math.round(r.p[c]*100)+'%;background:var('+COLORS[c]+')"></span></span><span class="p">'+Math.round(r.p[c]*100)+'%</span>';
+      b.querySelector('.nm').textContent=nm; $('gBars').appendChild(b);
+    });
+    $('checkRow').hidden=false;
+  });
+  function mark(ok){ state.all++; if(ok) state.ok++; save(); renderClasses(); $('checkRow').hidden=true; clearPad(); $('gSmall').textContent = ok?'Записала. Малюй наступне.':'Записала помилку. Може, їй бракує таких прикладів?'; }
+  $('yes').addEventListener('click',function(){ mark(true); });
+  $('nope').addEventListener('click',function(){ mark(false); });
+  $('wipe').addEventListener('click',function(){ $('wipeAsk').hidden=false; });
+  $('wipeNo').addEventListener('click',function(){ $('wipeAsk').hidden=true; });
+  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; save(); renderClasses(); $('wipeAsk').hidden=true; });
+  clearPad(); renderClasses();
+})();
+</script>
+</body>
+</html>
