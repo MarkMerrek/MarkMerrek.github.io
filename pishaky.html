@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Шість пішаків</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: game board + score on the left, the machine's "brain" (matchboxes) on the right */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#E9EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --on-accent:#FFFFFF;
+  --sq-a:#E8DCC4; --sq-b:#C9B48E; --hl:#F2C94C;
+  --you:#F7F7F2; --you-edge:#151A22; --bot:#2B2F3A; --bot-edge:#000000;
+  --win:#1E6B3A; --lose:#8C2F2F; --win-soft:#E1F1E6; --lose-soft:#F6E3E3;
+  --arrow:#2E4A7D; --dead:#C24B4B;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --on-accent:#10131A;
+    --win:#7FD39A; --lose:#E89494; --win-soft:#18291F; --lose-soft:#2E1C1C;
+    --arrow:#93B4E8; --dead:#E89494;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:17px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding:0 18px 60px}
+header{padding:24px 0 12px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 0 6px;letter-spacing:-.02em}
+.lead{margin:0;color:var(--ink-2);max-width:66ch}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start;margin-top:16px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+h2{font-size:19px;font-weight:700;margin:0 0 8px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);width:100%;max-width:330px;aspect-ratio:1/1;margin:0 auto;border:3px solid var(--ink-2);border-radius:6px;overflow:hidden}
+.sq{position:relative;border:0;padding:0;cursor:pointer;display:grid;place-items:center;font:inherit}
+.sq.a{background:var(--sq-a)} .sq.b{background:var(--sq-b)}
+.sq.sel{box-shadow:inset 0 0 0 5px var(--hl)}
+.sq.tgt::after{content:"";position:absolute;width:28%;height:28%;border-radius:50%;background:var(--hl);opacity:.9}
+.sq.last{box-shadow:inset 0 0 0 4px var(--accent)}
+.sq:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.pawn{width:62%;height:62%;pointer-events:none}
+.status{text-align:center;font-weight:700;font-size:20px;margin:12px 0 4px;min-height:30px}
+.status.win{color:var(--win)} .status.lose{color:var(--lose)}
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:15.5px;padding:10px 15px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.score{display:flex;justify-content:center;gap:22px;margin-top:14px;font-size:15px;color:var(--ink-2)}
+.score b{font-size:28px;display:block;text-align:center;color:var(--ink)}
+.hist{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;margin-top:10px}
+.hist span{width:16px;height:16px;border-radius:3px;display:inline-block}
+.hist .h{background:var(--win)} .hist .m{background:var(--lose)}
+.legend{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
+.rules{font-size:15px;color:var(--ink-2);margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.rules ul{margin:6px 0 0;padding-left:1.1em}
+.brainhead{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline}
+.brainstats{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--muted)}
+.boxes{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-top:12px}
+.box{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center}
+.box.now{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.box.empty{border-color:var(--dead)}
+.box svg{width:100%;height:auto;display:block}
+.box .cap{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);margin-top:2px}
+.tip{font-size:14.5px;color:var(--muted);margin:10px 0 0}
+.train{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Інформатика · 6 клас · штучний інтелект</div>
+    <h1>Шість пішаків</h1>
+    <p class="lead">Машина знає лише правила, але не знає, як грати добре. Після кожної поразки вона забороняє собі хід, який до неї привів. Встигни обіграти її, поки вона не навчилася.</p>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="board" id="board" role="grid" aria-label="Дошка 3 на 3"></div>
+      <div class="status" id="status" aria-live="polite"></div>
+      <div class="row">
+        <button class="btn" type="button" id="newGame">Нова гра</button>
+      </div>
+      <div class="score">
+        <div><b id="sH">0</b>ти</div>
+        <div><b id="sM">0</b>машина</div>
+        <div><b id="sG">0</b>ігор</div>
+      </div>
+      <div class="hist" id="hist"></div>
+      <div class="legend">кожен квадратик — одна гра: зелений — переміг ти, червоний — машина</div>
+      <div class="rules">
+        <strong>Правила.</strong> Ти — білі, ходиш першим.
+        <ul>
+          <li>Пішак іде на одну клітинку вперед, якщо вона порожня.</li>
+          <li>Б'є — на одну клітинку навскіс уперед, якщо там чужий пішак.</li>
+          <li>Перемагає той, хто дійде до протилежного краю, з'їсть усіх чужих пішаків або залишить суперника без ходу.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="brainhead">
+        <h2>Мізки машини</h2>
+        <span class="brainstats" id="bstats"></span>
+      </div>
+      <p class="tip" style="margin-top:0">Кожна картка — позиція, яку машина вже бачила. Стрілки — ходи, які вона ще дозволяє собі зробити. Червоний хрестик — хід, після якого вона програла і більше його не зробить. Синя рамка — позиція на дошці зараз.</p>
+      <div class="boxes" id="boxes"></div>
+      <div class="train">
+        <button class="btn ghost" type="button" id="trainBtn">Тренувальний матч: 20 ігор проти випадкового гравця</button>
+        <button class="btn ghost" type="button" id="forget">Машина забуває все</button>
+        <span class="confirm" id="forgetAsk" hidden>Стерти все, чого машина навчилася?
+          <button class="btn" type="button" id="forgetYes">Так</button>
+          <button class="btn ghost" type="button" id="forgetNo">Ні</button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='pishaky-v1';
+  /* board: 9 cells, row 0 is the machine's home row (B), row 2 is yours (W). Index = r*3+c */
+  var START='BBB...WWW';
+  var brain={}, stats={h:0,m:0,hist:[]};
+  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); brain=o.brain||{}; stats=o.stats||stats; } }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify({brain:brain,stats:stats})); }catch(e){} }
+  var $=function(id){return document.getElementById(id);};
+
+  function moves(b,side){
+    var res=[], dir= side==='W' ? -1 : 1, foe= side==='W' ? 'B':'W';
+    for(var i=0;i<9;i++){ if(b[i]!==side) continue; var r=Math.floor(i/3), c=i%3, nr=r+dir; if(nr<0||nr>2) continue;
+      if(b[nr*3+c]==='.') res.push(i+'-'+(nr*3+c));
+      [c-1,c+1].forEach(function(nc){ if(nc>=0&&nc<=2&&b[nr*3+nc]===foe) res.push(i+'-'+(nr*3+nc)); });
+    }
+    return res;
+  }
+  function apply(b,m){ var p=m.split('-'), f=+p[0], t=+p[1], a=b.split(''); a[t]=a[f]; a[f]='.'; return a.join(''); }
+  /* who wins after `side` just moved; null if game goes on */
+  function winner(b,side){
+    var foe= side==='W' ? 'B':'W';
+    if(side==='W' && (b[0]==='W'||b[1]==='W'||b[2]==='W')) return 'W';
+    if(side==='B' && (b[6]==='B'||b[7]==='B'||b[8]==='B')) return 'B';
+    if(b.indexOf(foe)<0) return side;
+    if(!moves(b,foe).length) return side;
+    return null;
+  }
+
+  var board, sel=null, over=false, memo=[], lastMove=null, current=null;
+  function newGame(){ board=START; sel=null; over=false; memo=[]; lastMove=null; current=null; setStatus('Твій хід. Клацни на свого пішака.',''); render(); }
+  function setStatus(t,cls){ var s=$('status'); s.textContent=t; s.className='status'+(cls?' '+cls:''); }
+
+  function machineMove(){
+    var key=board, ms=moves(board,'B');
+    if(!brain[key]){ brain[key]={}; ms.forEach(function(m){ brain[key][m]=1; }); }
+    current=key;
+    var alive=Object.keys(brain[key]).filter(function(m){ return brain[key][m]>0; });
+    if(!alive.length){ endGame('W','Машина здається: усі ходи в цій позиції вже заборонені.'); return; }
+    var m=alive[Math.floor(Math.random()*alive.length)];
+    memo.push({key:key,m:m});
+    board=apply(board,m); lastMove=m;
+    var w=winner(board,'B');
+    if(w){ endGame(w); return; }
+    setStatus('Твій хід.','');
+    render();
+  }
+  function endGame(w,msg){
+    over=true;
+    if(w==='W'){
+      /* punish: forbid the machine's last move */
+      var last=memo[memo.length-1];
+      if(last){ brain[last.key][last.m]=0; }
+      stats.h++; stats.hist.push('h');
+      setStatus(msg||'Ти переміг! Машина запам\'ятала свою помилку.','win');
+    } else {
+      stats.m++; stats.hist.push('m');
+      setStatus('Машина перемогла.','lose');
+    }
+    save(); render();
+  }
+  function click(i){
+    if(over) return;
+    if(sel!==null){
+      var m=sel+'-'+i;
+      if(moves(board,'W').indexOf(m)>=0){
+        board=apply(board,m); sel=null; lastMove=m;
+        var w=winner(board,'W');
+        if(w){ endGame(w); return; }
+        render(); setStatus('Машина думає…','');
+        setTimeout(machineMove,450);
+        return;
+      }
+      sel=null;
+    }
+    if(board[i]==='W' && moves(board,'W').some(function(m){ return m.split('-')[0]==i; })) sel=i;
+    render();
+  }
+
+  function pawnSVG(side){
+    var fill= side==='W' ? 'var(--you)' : 'var(--bot)', edge= side==='W' ? 'var(--you-edge)' : 'var(--bot-edge)';
+    return '<svg class="pawn" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="12" r="6.5" fill="'+fill+'" stroke="'+edge+'" stroke-width="2"/><path d="M13 34 Q14 22 20 19 Q26 22 27 34 Z" fill="'+fill+'" stroke="'+edge+'" stroke-width="2"/><rect x="10" y="33" width="20" height="4" rx="1.5" fill="'+fill+'" stroke="'+edge+'" stroke-width="2"/></svg>';
+  }
+  function render(){
+    var bEl=$('board'); bEl.innerHTML='';
+    var targets= sel!==null ? moves(board,'W').filter(function(m){ return m.split('-')[0]==sel; }).map(function(m){ return +m.split('-')[1]; }) : [];
+    var lm= lastMove ? lastMove.split('-').map(Number) : [];
+    for(var i=0;i<9;i++){
+      var r=Math.floor(i/3), c=i%3;
+      var sq=document.createElement('button'); sq.type='button';
+      sq.className='sq '+((r+c)%2?'b':'a')+(sel===i?' sel':'')+(targets.indexOf(i)>=0?' tgt':'')+(lm.indexOf(i)>=0?' last':'');
+      var who= board[i]==='W'?'твій пішак': board[i]==='B'?'пішак машини':'порожньо';
+      sq.setAttribute('aria-label','Рядок '+(r+1)+', стовпчик '+(c+1)+': '+who);
+      if(board[i]!=='.') sq.innerHTML=pawnSVG(board[i]);
+      (function(k){ sq.addEventListener('click',function(){ click(k); }); })(i);
+      bEl.appendChild(sq);
+    }
+    $('sH').textContent=stats.h; $('sM').textContent=stats.m; $('sG').textContent=stats.h+stats.m;
+    var h=$('hist'); h.innerHTML=''; stats.hist.slice(-60).forEach(function(x){ var s=document.createElement('span'); s.className=x; s.title= x==='h'?'переміг ти':'перемогла машина'; h.appendChild(s); });
+    renderBrain();
+  }
+  function cellXY(i){ return {x:(i%3)*30+15, y:Math.floor(i/3)*30+15}; }
+  function boxSVG(key){
+    var s='<svg viewBox="0 0 90 90" aria-hidden="true">';
+    for(var i=0;i<9;i++){ var r=Math.floor(i/3), c=i%3; s+='<rect x="'+c*30+'" y="'+r*30+'" width="30" height="30" fill="'+((r+c)%2?'var(--sq-b)':'var(--sq-a)')+'"/>'; }
+    for(var j=0;j<9;j++){ if(key[j]==='.') continue; var p=cellXY(j); s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="9" fill="'+(key[j]==='W'?'var(--you)':'var(--bot)')+'" stroke="'+(key[j]==='W'?'var(--you-edge)':'var(--bot-edge)')+'" stroke-width="1.5"/>'; }
+    var mv=brain[key];
+    Object.keys(mv).forEach(function(m){
+      var p=m.split('-').map(Number), a=cellXY(p[0]), b=cellXY(p[1]);
+      var dx=b.x-a.x, dy=b.y-a.y, len=Math.sqrt(dx*dx+dy*dy), ux=dx/len, uy=dy/len;
+      var x1=a.x+ux*9, y1=a.y+uy*9, x2=b.x-ux*4, y2=b.y-uy*4;
+      if(mv[m]>0){
+        s+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="var(--arrow)" stroke-width="3" stroke-linecap="round"/>';
+        s+='<polygon points="'+(x2+ux*3)+','+(y2+uy*3)+' '+(x2-ux*5-uy*5)+','+(y2-uy*5+ux*5)+' '+(x2-ux*5+uy*5)+','+(y2-uy*5-ux*5)+'" fill="var(--arrow)"/>';
+      } else {
+        var mx=(x1+x2)/2, my=(y1+y2)/2;
+        s+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="var(--dead)" stroke-width="2" stroke-dasharray="3 3"/>';
+        s+='<path d="M'+(mx-5)+' '+(my-5)+' L'+(mx+5)+' '+(my+5)+' M'+(mx+5)+' '+(my-5)+' L'+(mx-5)+' '+(my+5)+'" stroke="var(--dead)" stroke-width="3" stroke-linecap="round"/>';
+      }
+    });
+    return s+'</svg>';
+  }
+  function renderBrain(){
+    var keys=Object.keys(brain), dead=0;
+    keys.forEach(function(k){ Object.keys(brain[k]).forEach(function(m){ if(brain[k][m]<=0) dead++; }); });
+    $('bstats').textContent='позицій: '+keys.length+' · заборонених ходів: '+dead;
+    var el=$('boxes'); el.innerHTML='';
+    if(!keys.length){ el.innerHTML='<p class="tip">Поки порожньо — машина ще не зіграла жодної гри.</p>'; return; }
+    keys.sort(function(a,b){ return (a.split('.').length-b.split('.').length) || (a<b?-1:1); });
+    keys.forEach(function(k){
+      var alive=Object.keys(brain[k]).filter(function(m){ return brain[k][m]>0; }).length;
+      var d=document.createElement('div'); d.className='box'+(k===current&&!over?' now':'')+(alive===0?' empty':'');
+      d.innerHTML=boxSVG(k)+'<div class="cap">'+alive+' з '+Object.keys(brain[k]).length+' ходів</div>';
+      el.appendChild(d);
+    });
+  }
+
+  /* training match: random player for White, the machine learns the same way */
+  function trainMatch(n){
+    var hw=0, mw=0;
+    for(var g=0; g<n; g++){
+      var b=START, mem=[], turn='W', result=null;
+      while(!result){
+        if(turn==='W'){ var ms=moves(b,'W'); var m=ms[Math.floor(Math.random()*ms.length)]; b=apply(b,m); result=winner(b,'W'); turn='B'; }
+        else {
+          var key=b; if(!brain[key]){ brain[key]={}; moves(b,'B').forEach(function(x){ brain[key][x]=1; }); }
+          var alive=Object.keys(brain[key]).filter(function(x){ return brain[key][x]>0; });
+          if(!alive.length){ result='W'; break; }
+          var mm=alive[Math.floor(Math.random()*alive.length)]; mem.push({key:key,m:mm}); b=apply(b,mm); result=winner(b,'B'); turn='W';
+        }
+      }
+      if(result==='W'){ var last=mem[mem.length-1]; if(last) brain[last.key][last.m]=0; hw++; } else mw++;
+    }
+    save(); newGame();
+    setStatus('Тренування: випадковий гравець виграв '+hw+', машина — '+mw+' з '+n+'.','');
+  }
+  $('newGame').addEventListener('click',newGame);
+  $('trainBtn').addEventListener('click',function(){ trainMatch(20); });
+  $('forget').addEventListener('click',function(){ $('forgetAsk').hidden=false; });
+  $('forgetNo').addEventListener('click',function(){ $('forgetAsk').hidden=true; });
+  $('forgetYes').addEventListener('click',function(){ brain={}; stats={h:0,m:0,hist:[]}; save(); $('forgetAsk').hidden=true; newGame(); });
+  newGame();
+})();
+</script>
+</body>
+</html>
