@@ -75,6 +75,14 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
 .tip{font-size:14.5px;color:var(--muted);margin:10px 0 0}
 .train{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.records{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin-top:10px;font-size:14.5px;color:var(--ink-2)}
+.records b{color:var(--ink)}
+.mvm{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
+.mvm h3{margin:0 0 6px;font-size:16px}
+.mvm .rowx{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;font-size:14px;margin-top:4px}
+.mvm .split{display:flex;height:16px;border-radius:3px;overflow:hidden;background:var(--line)}
+.mvm .split .w{background:var(--sq-a)} .mvm .split .b{background:var(--bot)}
+.mvm .note{font-size:13.5px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
@@ -97,6 +105,7 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
         <div><b id="sM">0</b>машина</div>
         <div><b id="sG">0</b>ігор</div>
       </div>
+      <div class="records" id="records"></div>
       <div class="hist" id="hist"></div>
       <div class="legend">кожен квадратик — одна гра: зелений — переміг ти, червоний — машина</div>
       <div class="rules">
@@ -116,8 +125,10 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
       </div>
       <p class="tip" style="margin-top:0">Кожна картка — позиція, яку машина вже бачила. Стрілки — ходи, які вона ще дозволяє собі зробити. Червоний хрестик — хід, після якого вона програла і більше його не зробить. Синя рамка — позиція на дошці зараз.</p>
       <div class="boxes" id="boxes"></div>
+      <div class="mvm" id="mvmBox" hidden></div>
       <div class="train">
         <button class="btn ghost" type="button" id="trainBtn">Тренувальний матч: 20 ігор проти випадкового гравця</button>
+        <button class="btn ghost" type="button" id="mvm">Машина проти машини: 50 ігор</button>
         <button class="btn ghost" type="button" id="forget">Машина забуває все</button>
         <span class="confirm" id="forgetAsk" hidden>Стерти все, чого машина навчилася?
           <button class="btn" type="button" id="forgetYes">Так</button>
@@ -133,9 +144,9 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
   var KEY='pishaky-v1';
   /* board: 9 cells, row 0 is the machine's home row (B), row 2 is yours (W). Index = r*3+c */
   var START='BBB...WWW';
-  var brain={}, stats={h:0,m:0,hist:[]};
-  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); brain=o.brain||{}; stats=o.stats||stats; } }catch(e){}
-  function save(){ try{ localStorage.setItem(KEY,JSON.stringify({brain:brain,stats:stats})); }catch(e){} }
+  var brain={}, wbrain={}, stats={h:0,m:0,hist:[],best:0};
+  try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); brain=o.brain||{}; wbrain=o.wbrain||{}; stats=o.stats||stats; if(stats.best==null) stats.best=0; } }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify({brain:brain,wbrain:wbrain,stats:stats})); }catch(e){} }
   var $=function(id){return document.getElementById(id);};
 
   function moves(b,side){
@@ -157,8 +168,8 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
     return null;
   }
 
-  var board, sel=null, over=false, memo=[], lastMove=null, current=null;
-  function newGame(){ board=START; sel=null; over=false; memo=[]; lastMove=null; current=null; setStatus('Твій хід. Клацни на свого пішака.',''); render(); }
+  var board, sel=null, over=false, memo=[], lastMove=null, current=null, myMoves=0;
+  function newGame(){ board=START; sel=null; over=false; memo=[]; lastMove=null; current=null; myMoves=0; setStatus('Твій хід. Клацни на свого пішака.',''); render(); }
   function setStatus(t,cls){ var s=$('status'); s.textContent=t; s.className='status'+(cls?' '+cls:''); }
 
   function machineMove(){
@@ -182,7 +193,8 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
       var last=memo[memo.length-1];
       if(last){ brain[last.key][last.m]=0; }
       stats.h++; stats.hist.push('h');
-      setStatus(msg||'Ти переміг! Машина запам\'ятала свою помилку.','win');
+      var rec=''; if(myMoves>0 && (!stats.best || myMoves<stats.best)){ stats.best=myMoves; rec=' Новий рекорд: перемога за '+myMoves+' '+hody(myMoves)+'!'; }
+      setStatus((msg||'Ти переміг! Машина запам\'ятала свою помилку.')+rec,'win');
     } else {
       stats.m++; stats.hist.push('m');
       setStatus('Машина перемогла.','lose');
@@ -194,7 +206,7 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
     if(sel!==null){
       var m=sel+'-'+i;
       if(moves(board,'W').indexOf(m)>=0){
-        board=apply(board,m); sel=null; lastMove=m;
+        board=apply(board,m); sel=null; lastMove=m; myMoves++;
         var w=winner(board,'W');
         if(w){ endGame(w); return; }
         render(); setStatus('Машина думає…','');
@@ -226,6 +238,8 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
       bEl.appendChild(sq);
     }
     $('sH').textContent=stats.h; $('sM').textContent=stats.m; $('sG').textContent=stats.h+stats.m;
+    var streak=0; for(var q=stats.hist.length-1;q>=0&&stats.hist[q]==='m';q--) streak++;
+    $('records').innerHTML='<span>найшвидша перемога: <b>'+(stats.best? stats.best+' '+hody(stats.best) : '—')+'</b></span><span>машина виграла поспіль: <b>'+streak+'</b></span>';
     var h=$('hist'); h.innerHTML=''; stats.hist.slice(-60).forEach(function(x){ var s=document.createElement('span'); s.className=x; s.title= x==='h'?'переміг ти':'перемогла машина'; h.appendChild(s); });
     renderBrain();
   }
@@ -284,11 +298,46 @@ h2{font-size:19px;font-weight:700;margin:0 0 8px}
     save(); newGame();
     setStatus('Тренування: випадковий гравець виграв '+hw+', машина — '+mw+' з '+n+'.','');
   }
+  function hody(n){ var d=n%10, dd=n%100; if(d===1&&dd!==11) return 'хід'; if(d>=2&&d<=4&&(dd<12||dd>14)) return 'ходи'; return 'ходів'; }
+  function pick(br,b,side){
+    if(!br[b]){ br[b]={}; moves(b,side).forEach(function(x){ br[b][x]=1; }); }
+    var alive=Object.keys(br[b]).filter(function(x){ return br[b][x]>0; });
+    return alive.length ? alive[Math.floor(Math.random()*alive.length)] : null;
+  }
+  /* two learning machines play each other: White = new machine, Black = your machine */
+  function machineVsMachine(n){
+    var res=[];
+    for(var g=0; g<n; g++){
+      var b=START, wm=[], bm=[], turn='W', result=null;
+      while(!result){
+        var br= turn==='W' ? wbrain : brain, mem= turn==='W' ? wm : bm;
+        var m=pick(br,b,turn);
+        if(!m){ result= turn==='W' ? 'B' : 'W'; break; }
+        mem.push({key:b,m:m}); b=apply(b,m); result=winner(b,turn);
+        turn= turn==='W' ? 'B' : 'W';
+      }
+      var loserMem= result==='W' ? bm : wm, loserBrain= result==='W' ? brain : wbrain;
+      var last=loserMem[loserMem.length-1]; if(last) loserBrain[last.key][last.m]=0;
+      res.push(result);
+    }
+    save(); newGame();
+    var box=$('mvmBox'); box.hidden=false;
+    var html='<h3>Машина проти машини: '+n+' ігор</h3>';
+    for(var i=0;i<n;i+=10){
+      var part=res.slice(i,i+10), w=part.filter(function(x){return x==='W';}).length, bl=part.length-w;
+      html+='<div class="rowx"><span>ігри '+(i+1)+'–'+(i+part.length)+'</span><span class="split"><span class="w" style="width:'+(w/part.length*100)+'%"></span><span class="b" style="width:'+(bl/part.length*100)+'%"></span></span></div>';
+    }
+    var tw=res.filter(function(x){return x==='W';}).length;
+    html+='<div class="note">Світле — виграли білі (нова машина), темне — чорні (твоя машина). Разом: білі '+tw+', чорні '+(n-tw)+'. Натисни ще раз — машини зіграють ще 50 ігор, і навчання продовжиться. Якщо зрештою білі програють усе — це не поломка: у цій грі той, хто ходить другим, за ідеальної гри завжди виграє, і машини самі до цього дійшли.</div>';
+    box.innerHTML=html;
+    setStatus('Машини зіграли '+n+' ігор між собою.','');
+  }
+  $('mvm').addEventListener('click',function(){ machineVsMachine(50); });
   $('newGame').addEventListener('click',newGame);
   $('trainBtn').addEventListener('click',function(){ trainMatch(20); });
   $('forget').addEventListener('click',function(){ $('forgetAsk').hidden=false; });
   $('forgetNo').addEventListener('click',function(){ $('forgetAsk').hidden=true; });
-  $('forgetYes').addEventListener('click',function(){ brain={}; stats={h:0,m:0,hist:[]}; save(); $('forgetAsk').hidden=true; newGame(); });
+  $('forgetYes').addEventListener('click',function(){ brain={}; wbrain={}; stats={h:0,m:0,hist:[],best:0}; $('mvmBox').hidden=true; save(); $('forgetAsk').hidden=true; newGame(); });
   newGame();
 })();
 </script>
