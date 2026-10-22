@@ -70,6 +70,26 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
 .tip{font-size:14.5px;color:var(--muted);margin:8px 0 0}
 .bottom{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* mission card: opened by a code the teacher says aloud, so nobody needs the teacher's screen */
+.mission{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.mission.up{border-color:var(--bad);background:var(--bad-soft)}
+.m-code{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.m-code input{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:600;width:72px;padding:6px 8px;border:2px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink);text-align:center}
+.m-code .btn{padding:7px 14px;font-size:15px}
+.m-err{color:var(--bad);font-size:14.5px}
+.m-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.m-no{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.m-time{font-family:"IBM Plex Mono",monospace;font-size:30px;font-weight:600;color:var(--ink)}
+.mission.up .m-time{color:var(--bad)}
+.m-title{font-size:21px;font-weight:800;margin:2px 0 6px}
+.m-list{margin:0 0 8px;padding-left:22px}
+.m-list li{margin:3px 0}
+.m-up{font-weight:700;color:var(--bad);margin:6px 0}
+.m-end{font-weight:700;margin:6px 0}
+.m-sec{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:6px;padding:8px 12px;margin:8px 0}
+.m-foot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-top:8px}
+.m-foot .m-code{font-weight:500;font-size:15px;color:var(--ink-2)}
+.m-foot .m-code input{font-size:16px;width:60px;padding:4px 6px}
 .hright{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 .lang{display:inline-flex;border:2px solid var(--line-strong);border-radius:8px;overflow:hidden}
 .lang button{appearance:none;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;padding:6px 12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
@@ -81,7 +101,7 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
 <div class="wrap">
   <header>
     <div>
-      <div class="kicker" data-i18n="kicker">Інформатика · 4 клас · штучний інтелект</div>
+      <div class="kicker" data-i18n="kicker">Інформатика · штучний інтелект</div>
       <h1 data-i18n="title">Навчи машину малюнкам</h1>
     </div>
     <div class="hright">
@@ -112,6 +132,7 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
     </div>
 
     <div>
+      <section class="mission" id="mission" aria-live="polite"></section>
       <div class="classes" id="classes"></div>
       <p class="tip" data-i18n="tip">Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.</p>
       <div class="bottom">
@@ -135,7 +156,7 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
   var DEFAULTS={uk:['Коло','Квадрат','Трикутник'], en:['Circle','Square','Triangle']};
   var T={
     uk:{
-      doc:'Навчи машину малюнкам', kicker:'Інформатика · 4 клас · штучний інтелект', title:'Навчи машину малюнкам',
+      doc:'Навчи машину малюнкам', kicker:'Інформатика · штучний інтелект', title:'Навчи машину малюнкам',
       scoreA:'вгадала', of:'з', pad:'Поле для малювання', clear:'Стерти', ask:'Що це?',
       yes:'Так, вгадала', nope:'Ні, помилилась',
       tip:'Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам\'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.',
@@ -146,12 +167,12 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
       noEx:'Мені ще ніхто не показав жодного прикладу. Навчи мене!', conf:'Наскільки машина впевнена:',
       markOk:'Записала. Малюй наступне.', markNo:'Записала помилку. Може, їй бракує таких прикладів?',
       wipeEx:'Машина забуде всі приклади, назви груп лишаться. Точно?',
-      wipeAll:'Стерти приклади, рахунок і повернути назви «{names}»?',
+      wipeAll:'Стерти приклади, рахунок, місію й повернути назви «{names}»?',
       groupName:'Назва групи {n}', group:'Група {n}', thisIs:'Це — ', count:'прикладів: ',
       undo:'Прибрати останній приклад', undoAria:'Прибрати останній приклад групи {n}'
     },
     en:{
-      doc:'Teach the Machine Your Drawings', kicker:'Computer science · Grade 4 · AI', title:'Teach the Machine Your Drawings',
+      doc:'Teach the Machine Your Drawings', kicker:'Computer science · AI', title:'Teach the Machine Your Drawings',
       scoreA:'guessed', of:'of', pad:'Drawing area', clear:'Clear', ask:'What is it?',
       yes:'Yes, correct', nope:'No, wrong',
       tip:'Draw an example in the box and press “This is: …” next to the right group. The machine will remember the drawing. The more different examples you give, the better it guesses.',
@@ -162,11 +183,49 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
       noEx:'Nobody has shown me a single example yet. Teach me!', conf:'How sure the machine is:',
       markOk:'Noted. Draw the next one.', markNo:'Mistake noted. Maybe it needs more examples like this?',
       wipeEx:'The machine will forget all examples. Group names stay. Sure?',
-      wipeAll:'Erase the examples and score and restore the names “{names}”?',
+      wipeAll:'Erase the examples, score and mission and restore the names “{names}”?',
       groupName:'Group {n} name', group:'Group {n}', thisIs:'This is: ', count:'examples: ',
       undo:'Remove the last example', undoAria:'Remove the last example from group {n}'
     }
   };
+  T.uk.mCode='Код місії від учителя:'; T.en.mCode='Mission code from your teacher:';
+  T.uk.mNext='Код наступної місії:'; T.en.mNext='Next mission code:';
+  T.uk.mBad='Такого коду немає. Перепитай учителя.'; T.en.mBad='There is no such code. Ask your teacher again.';
+  T.uk.mOf='Місія {n} з {m}'; T.en.mOf='Mission {n} of {m}';
+  T.uk.mDone='Готово! Дай секретне завдання'; T.en.mDone='Done! Give me a secret task';
+  T.uk.mSec='Секретне завдання'; T.en.mSec='Secret task';
+  T.uk.mUp='Час! Руки від мишки — дивись на вчителя.'; T.en.mUp='Time is up! Hands off the mouse — look at your teacher.';
+  /* missions: the code itself picks the lesson (3 or 4 grade) and the mission */
+  var MIS={
+    '14':{set:'3',n:1,min:7,
+      uk:{t:'Перші уроки',x:['Навчи машину: 2 кола, 2 квадрати і 2 трикутники. Після кожного малюнка тисни «Це — …».','Потім 5 перевірок: малюєш → «Що це?» → чесно «Так» або «Ні».'],end:'Покажи на пальцях: скільки з 5 вгадала?',s:'Рекорд: з якою найменшою кількістю прикладів машина вгадає 5 з 5? Натисни «Забути все» і спробуй.'},
+      en:{t:'First lessons',x:['Teach the machine: 2 circles, 2 squares and 2 triangles. After each drawing press “This is: …”.','Then 5 checks: draw → “What is it?” → honestly “Yes” or “No”.'],end:'Show on your fingers: how many out of 5 did it guess?',s:'Record: what is the smallest number of examples that lets the machine guess 5 out of 5? Press “Forget everything” and try.'}},
+    '27':{set:'3',n:2,min:6,
+      uk:{t:'Обдури машину — і навчи її',x:['Знайди малюнок, на якому машина помиляється: коло з кутами, дуже витягнутий трикутник, зафарбований квадрат.','Є такий? Намалюй таку саму підступну фігуру ще раз і натисни правильну кнопку «Це — …». Спробуй обдурити знову.','Запам\'ятай свій найпідступніший малюнок — він знадобиться в батлі.'],end:'Зараз буде батл машин.',s:'Знайди фігуру, на якій машина помиляється навіть після трьох уроків.'},
+      en:{t:'Trick the machine — then teach it',x:['Find a drawing the machine gets wrong: a circle with corners, a very long triangle, a filled-in square.','Found one? Draw the same tricky shape again and press the right “This is: …” button. Try to trick it again.','Remember your trickiest drawing — you will need it in the battle.'],end:'The machine battle is next.',s:'Find a shape the machine still gets wrong even after three lessons.'}},
+    '39':{set:'3',n:3,min:5,
+      uk:{t:'Чарівний звіринець',x:['Натисни «Забути все».','Клацни на назви груп і перейменуй їх, наприклад: Кіт, Риба, Сонце (або як скаже вчитель).','Навчи машину: по 3–4 приклади кожної групи. Малюй по-різному!'],end:'Далі підеш до сусіда перевіряти його машину.',s:'Намалюй кота так, щоб машина сказала «риба». Потім навчи її не помилятися на такому малюнку.'},
+      en:{t:'Magic zoo',x:['Press “Forget everything”.','Click the group names and rename them, for example: Cat, Fish, Sun (or what your teacher says).','Teach the machine 3–4 examples of each group. Draw them differently!'],end:'Next you will test your neighbour’s machine.',s:'Draw a cat so that the machine says “fish”. Then teach it not to make that mistake.'}},
+    '45':{set:'3',n:4,min:6,
+      uk:{t:'Вгадайко',x:['Пересядь за сусідній комп\'ютер.','Малюй для чужої машини: «Що це?» → чесно «Так» чи «Ні».','Лічильник «вгадала X з Y» угорі — оцінка тому, хто вчив цю машину.'],end:'Повертайся на своє місце. Скільки вгадала твоя машина?',s:'Скільки малюнків поспіль ця машина вгадає без жодної помилки?'},
+      en:{t:'Guessing game',x:['Move to your neighbour’s computer.','Draw for their machine: “What is it?” → honestly “Yes” or “No”.','The “guessed X of Y” counter at the top is the score of whoever taught this machine.'],end:'Go back to your seat. How many did your machine guess?',s:'How many drawings in a row will this machine guess without a single mistake?'}},
+    '58':{set:'3',n:5,min:5,
+      uk:{t:'Звір, якого машина не знає',x:['Намалюй те, чого машина ніколи не бачила: слона, будинок, машинку.','Натисни «Що це?». Що вона відповідає?','Подумай: чому машина не каже «не знаю»?'],end:'Підсумок — дивись на вчителя.',s:'Перейменуй одну групу на «Не знаю» і навчи її всякими каракулями. Чи стане машина чеснішою?'},
+      en:{t:'An animal the machine doesn’t know',x:['Draw something the machine has never seen: an elephant, a house, a car.','Press “What is it?”. What does it answer?','Think: why doesn’t the machine say “I don’t know”?'],end:'Wrap-up — look at your teacher.',s:'Rename one group to “I don’t know” and teach it with random scribbles. Does the machine become more honest?'}},
+    '61':{set:'4',n:1,
+      uk:{t:'Один приклад',x:['Намалюй по одному колу, квадрату й трикутнику — кожен кнопкою «Це — …».','Потім 6 перевірок: малюнок → «Що це?» → чесно «Так, вгадала» чи «Ні, помилилась».','Скільки з шести вгадала? Запам\'ятай число.'],s:'Обдури машину: намалюй коло так, щоб вона сказала «Квадрат».'},
+      en:{t:'One example',x:['Draw one circle, one square and one triangle — each with its “This is: …” button.','Then 6 checks: drawing → “What is it?” → honestly “Yes, correct” or “No, wrong”.','How many out of six did it guess? Remember the number.'],s:'Trick the machine: draw a circle so that it says “Square”.'}},
+    '72':{set:'4',n:2,
+      uk:{t:'Різні приклади',x:['Додай ще по 4 приклади кожної фігури — різні: великий, маленький, кривий, тонкий, витягнутий.','Знову 6 перевірок — саме тими підступними малюнками, якими обдурював машину.','Стало краще? Чому?'],s:'Рекорд: з якою найменшою кількістю прикладів машина вгадає 5 з 5? Перевіряти має сусід.'},
+      en:{t:'Different examples',x:['Add 4 more examples of each shape — all different: big, small, wobbly, thin, stretched.','6 checks again — with exactly the tricky drawings you used to fool the machine.','Did it get better? Why?'],s:'Record: what is the smallest number of examples that lets the machine guess 5 out of 5? Your neighbour does the checking.'}},
+    '83':{set:'4',n:3,
+      uk:{t:'Чого машина не знає',x:['Намалюй те, чого машина ніколи не бачила: будинок, сонце, кота, зафарбований квадрат.','Натисни «Що це?». Наскільки машина впевнена?','Чому вона не каже «не знаю»?'],s:'Перейменуй одну групу на «Не знаю» і навчи її всякими каракулями. Чи стане машина чеснішою?'},
+      en:{t:'What the machine doesn’t know',x:['Draw something the machine has never seen: a house, a sun, a cat, a filled-in square.','Press “What is it?”. How sure is the machine?','Why doesn’t it say “I don’t know”?'],s:'Rename one group to “I don’t know” and teach it with random scribbles. Does the machine become more honest?'}},
+    '96':{set:'4',n:4,
+      uk:{t:'Свої малюнки',x:['Натисни «Забути все» і перейменуй групи: наприклад, сонце, будинок, риба або веселий, сумний і здивований смайлик.','Навчи машину своїм малюнкам — мінімум по 4 приклади.','Пересядь за сусідній комп\'ютер і малюй для чужої машини. Лічильник угорі — оцінка тому, хто її вчив.'],s:'Двійники: дві дуже схожі групи — коло й овал, яблуко й помідор. Скільки прикладів треба, щоб машина їх не плутала?'},
+      en:{t:'Your own drawings',x:['Press “Forget everything” and rename the groups: for example sun, house, fish — or a happy, a sad and a surprised smiley.','Teach the machine your drawings — at least 4 examples each.','Move to your neighbour’s computer and draw for their machine. The counter at the top is the score of whoever taught it.'],s:'Twins: two very similar groups — circle and oval, apple and tomato. How many examples does the machine need to stop mixing them up?'}}
+  };
+  var SETSIZE={'3':5,'4':4}, MKEY='malyunky-mission', TTL=3*3600*1000;
   var lang='uk';
   try{ var sl=localStorage.getItem(LANGKEY); if(sl&&T[sl]) lang=sl; }catch(e){}
   try{ var qp=new URLSearchParams(location.search).get('lang'); if(qp&&T[qp]) lang=qp; }catch(e){}
@@ -278,8 +337,45 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
   $('wipe').addEventListener('click',function(){ wipeMode='ex'; wipeText(); $('wipeAsk').hidden=false; });
   $('fresh').addEventListener('click',function(){ wipeMode='all'; wipeText(); $('wipeAsk').hidden=false; });
   $('wipeNo').addEventListener('click',function(){ $('wipeAsk').hidden=true; });
-  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; if(wipeMode==='all') state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); clearPad(); resetGuess(); say('hint'); $('wipeAsk').hidden=true; });
+  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; if(wipeMode==='all'){ state.names=DEFAULT_NAMES.slice(); mis=null; saveMis(); renderMission(); } save(); renderClasses(); clearPad(); resetGuess(); say('hint'); $('wipeAsk').hidden=true; });
   $('names').addEventListener('click',function(){ state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); });
+  var mis=null, tick=null;
+  try{ var mr=JSON.parse(localStorage.getItem(MKEY)||'null'); if(mr&&MIS[mr.code]&&Date.now()-mr.start<TTL) mis=mr; }catch(e){}
+  function saveMis(){ try{ if(mis) localStorage.setItem(MKEY,JSON.stringify(mis)); else localStorage.removeItem(MKEY); }catch(e){} }
+  function codeForm(labelKey,id){
+    return '<div class="m-code"><label for="'+id+'">'+t(labelKey)+'</label><input id="'+id+'" type="text" inputmode="numeric" maxlength="2" autocomplete="off"><button class="btn" type="button" data-go="'+id+'">OK</button><span class="m-err" id="'+id+'Err"></span></div>';
+  }
+  function esc(x){ var d=document.createElement('div'); d.textContent=x; return d.innerHTML; }
+  function left(){ var m=MIS[mis.code]; return m.min ? m.min*60000-(Date.now()-mis.start) : null; }
+  function fmt(ms){ var s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
+  function renderMission(){
+    var box=$('mission'); clearInterval(tick);
+    if(!mis){ box.className='mission'; box.innerHTML=codeForm('mCode','mc'); wireCode('mc'); return; }
+    var m=MIS[mis.code], L=m[lang], h='';
+    h+='<div class="m-head"><span class="m-no">'+t('mOf').replace('{n}',m.n).replace('{m}',SETSIZE[m.set])+'</span>'+(m.min?'<span class="m-time" id="mTime"></span>':'')+'</div>';
+    h+='<div class="m-title">'+esc(L.t)+'</div><ul class="m-list">'+L.x.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+    if(m.min) h+='<div class="m-up" id="mUp" hidden>'+esc(t('mUp'))+(L.end?' '+esc(L.end):'')+'</div>';
+    else if(L.end) h+='<div class="m-end">'+esc(L.end)+'</div>';
+    if(L.s) h+= mis.sec ? '<div class="m-sec"><b>'+t('mSec')+'.</b> '+esc(L.s)+'</div>' : '';
+    h+='<div class="m-foot">'+(L.s&&!mis.sec?'<button class="btn ghost" type="button" id="mDone">'+t('mDone')+'</button>':'<span></span>')+codeForm('mNext','mn')+'</div>';
+    box.innerHTML=h; wireCode('mn');
+    if($('mDone')) $('mDone').addEventListener('click',function(){ mis.sec=true; saveMis(); renderMission(); });
+    if(m.min){
+      var upd=function(){ var l=left(); $('mTime').textContent=fmt(l); var up=l<=0; box.className='mission'+(up?' up':''); $('mUp').hidden=!up; if(up) clearInterval(tick); };
+      upd(); tick=setInterval(upd,1000);
+    } else box.className='mission';
+  }
+  function wireCode(id){
+    var inp=$(id), go=function(){
+      var c=inp.value.replace(/\D/g,'');
+      if(!MIS[c]){ $(id+'Err').textContent=t('mBad'); inp.select(); return; }
+      if(mis&&mis.code===c){ inp.value=''; return; }
+      mis={code:c,start:Date.now(),sec:false}; saveMis(); renderMission();
+    };
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') go(); });
+    inp.addEventListener('input',function(){ $(id+'Err').textContent=''; });
+    document.querySelector('[data-go="'+id+'"]').addEventListener('click',go);
+  }
   /* language: static texts via data-i18n; group names that are still the other language's defaults get translated, custom names stay */
   function applyLang(){
     document.documentElement.lang=lang;
@@ -289,7 +385,7 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
     document.querySelectorAll('.lang button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-lang')===lang?'true':'false'); });
     $('gSmall').textContent=t(msgKey);
     if(bigKey) $('gBig').textContent=t(bigKey);
-    showGuess(); wipeText(); renderClasses();
+    showGuess(); wipeText(); renderClasses(); renderMission();
   }
   function setLang(nl){
     if(nl===lang||!T[nl]) return;
