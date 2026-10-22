@@ -105,7 +105,9 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
       <p class="tip">Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.</p>
       <div class="bottom">
         <button class="btn ghost" type="button" id="wipe">Забути все</button>
-        <span class="confirm" id="wipeAsk" hidden>Машина забуде всі приклади. Точно?
+        <button class="btn ghost" type="button" id="names">Повернути назви</button>
+        <button class="btn ghost" type="button" id="fresh">Новий урок: усе з нуля</button>
+        <span class="confirm" id="wipeAsk" hidden><span id="wipeText">Машина забуде всі приклади. Точно?</span>
           <button class="btn no" type="button" id="wipeYes">Так</button>
           <button class="btn ghost" type="button" id="wipeNo">Ні</button>
         </span>
@@ -118,7 +120,8 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
 (function(){
   var N=16, K=3, KEY='malyunky-v1';
   var COLORS=['--c0','--c1','--c2'];
-  var state={names:['Коло','Квадрат','Трикутник'], ex:[[],[],[]], ok:0, all:0};
+  var DEFAULT_NAMES=['Коло','Квадрат','Трикутник'];
+  var state={names:DEFAULT_NAMES.slice(), ex:[[],[],[]], ok:0, all:0};
   try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.ex&&o.names) state=o; } }catch(e){}
   function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
   var $=function(id){return document.getElementById(id);};
@@ -212,9 +215,12 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
   function mark(ok){ state.all++; if(ok) state.ok++; save(); renderClasses(); $('checkRow').hidden=true; clearPad(); $('gSmall').textContent = ok?'Записала. Малюй наступне.':'Записала помилку. Може, їй бракує таких прикладів?'; }
   $('yes').addEventListener('click',function(){ mark(true); });
   $('nope').addEventListener('click',function(){ mark(false); });
-  $('wipe').addEventListener('click',function(){ $('wipeAsk').hidden=false; });
+  var wipeMode='ex';
+  $('wipe').addEventListener('click',function(){ wipeMode='ex'; $('wipeText').textContent='Машина забуде всі приклади, назви груп лишаться. Точно?'; $('wipeAsk').hidden=false; });
+  $('fresh').addEventListener('click',function(){ wipeMode='all'; $('wipeText').textContent='Стерти приклади, рахунок і повернути назви «Коло, Квадрат, Трикутник»?'; $('wipeAsk').hidden=false; });
   $('wipeNo').addEventListener('click',function(){ $('wipeAsk').hidden=true; });
-  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; save(); renderClasses(); $('wipeAsk').hidden=true; });
+  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; if(wipeMode==='all') state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); clearPad(); $('gBig').textContent=''; $('gBars').innerHTML=''; $('checkRow').hidden=true; $('gSmall').textContent='Намалюй щось і натисни «Що це?»'; $('wipeAsk').hidden=true; });
+  $('names').addEventListener('click',function(){ state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); });
   clearPad(); renderClasses();
 })();
 </script>
