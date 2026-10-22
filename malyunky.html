@@ -70,46 +70,57 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
 .tip{font-size:14.5px;color:var(--muted);margin:8px 0 0}
 .bottom{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hright{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.lang{display:inline-flex;border:2px solid var(--line-strong);border-radius:8px;overflow:hidden}
+.lang button{appearance:none;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;padding:6px 12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.lang button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <div class="kicker">Інформатика · 4 клас · штучний інтелект</div>
-      <h1>Навчи машину малюнкам</h1>
+      <div class="kicker" data-i18n="kicker">Інформатика · 4 клас · штучний інтелект</div>
+      <h1 data-i18n="title">Навчи машину малюнкам</h1>
     </div>
-    <div class="score">вгадала<br><b id="okc">0</b> з <b id="allc">0</b></div>
+    <div class="hright">
+      <div class="lang" role="group" aria-label="Мова / Language">
+        <button type="button" data-lang="uk" aria-pressed="true">UA</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="score"><span data-i18n="scoreA">вгадала</span><br><b id="okc">0</b> <span data-i18n="of">з</span> <b id="allc">0</b></div>
+    </div>
   </header>
 
   <div class="grid">
     <div class="card">
-      <canvas id="pad" width="280" height="280" aria-label="Поле для малювання"></canvas>
+      <canvas id="pad" width="280" height="280" data-i18n-aria="pad" aria-label="Поле для малювання"></canvas>
       <div class="row">
-        <button class="btn ghost" type="button" id="clear">Стерти</button>
-        <button class="btn" type="button" id="ask">Що це?</button>
+        <button class="btn ghost" type="button" id="clear" data-i18n="clear">Стерти</button>
+        <button class="btn" type="button" id="ask" data-i18n="ask">Що це?</button>
       </div>
       <div class="guess" aria-live="polite">
         <div class="big" id="gBig"></div>
         <div class="small" id="gSmall">Намалюй щось і натисни «Що це?»</div>
         <div id="gBars"></div>
         <div class="check" id="checkRow" hidden>
-          <button class="btn ok" type="button" id="yes">Так, вгадала</button>
-          <button class="btn no" type="button" id="nope">Ні, помилилась</button>
+          <button class="btn ok" type="button" id="yes" data-i18n="yes">Так, вгадала</button>
+          <button class="btn no" type="button" id="nope" data-i18n="nope">Ні, помилилась</button>
         </div>
       </div>
     </div>
 
     <div>
       <div class="classes" id="classes"></div>
-      <p class="tip">Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.</p>
+      <p class="tip" data-i18n="tip">Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.</p>
       <div class="bottom">
-        <button class="btn ghost" type="button" id="wipe">Забути все</button>
-        <button class="btn ghost" type="button" id="names">Повернути назви</button>
-        <button class="btn ghost" type="button" id="fresh">Новий урок: усе з нуля</button>
+        <button class="btn ghost" type="button" id="wipe" data-i18n="wipe">Забути все</button>
+        <button class="btn ghost" type="button" id="names" data-i18n="names">Повернути назви</button>
+        <button class="btn ghost" type="button" id="fresh" data-i18n="fresh">Новий урок: усе з нуля</button>
         <span class="confirm" id="wipeAsk" hidden><span id="wipeText">Машина забуде всі приклади. Точно?</span>
-          <button class="btn no" type="button" id="wipeYes">Так</button>
-          <button class="btn ghost" type="button" id="wipeNo">Ні</button>
+          <button class="btn no" type="button" id="wipeYes" data-i18n="y">Так</button>
+          <button class="btn ghost" type="button" id="wipeNo" data-i18n="n">Ні</button>
         </span>
       </div>
     </div>
@@ -120,11 +131,53 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
 (function(){
   var N=16, K=3, KEY='malyunky-v1';
   var COLORS=['--c0','--c1','--c2'];
-  var DEFAULT_NAMES=['Коло','Квадрат','Трикутник'];
+  var LANGKEY='malyunky-lang';
+  var DEFAULTS={uk:['Коло','Квадрат','Трикутник'], en:['Circle','Square','Triangle']};
+  var T={
+    uk:{
+      doc:'Навчи машину малюнкам', kicker:'Інформатика · 4 клас · штучний інтелект', title:'Навчи машину малюнкам',
+      scoreA:'вгадала', of:'з', pad:'Поле для малювання', clear:'Стерти', ask:'Що це?',
+      yes:'Так, вгадала', nope:'Ні, помилилась',
+      tip:'Намалюй у полі приклад і натисни «Це — …» біля потрібної групи. Машина запам\'ятає малюнок. Що більше різних прикладів, то краще вона вгадує.',
+      wipe:'Забути все', names:'Повернути назви', fresh:'Новий урок: усе з нуля', y:'Так', n:'Ні',
+      hint:'Намалюй щось і натисни «Що це?»', drawFirst:'Спершу намалюй приклад у полі.',
+      saved:'Запам\'ятала. Малюй наступний приклад або натисни «Що це?»',
+      blank:'Поле порожнє — намалюй щось.', dunno:'Не знаю…',
+      noEx:'Мені ще ніхто не показав жодного прикладу. Навчи мене!', conf:'Наскільки машина впевнена:',
+      markOk:'Записала. Малюй наступне.', markNo:'Записала помилку. Може, їй бракує таких прикладів?',
+      wipeEx:'Машина забуде всі приклади, назви груп лишаться. Точно?',
+      wipeAll:'Стерти приклади, рахунок і повернути назви «{names}»?',
+      groupName:'Назва групи {n}', group:'Група {n}', thisIs:'Це — ', count:'прикладів: ',
+      undo:'Прибрати останній приклад', undoAria:'Прибрати останній приклад групи {n}'
+    },
+    en:{
+      doc:'Teach the Machine Your Drawings', kicker:'Computer science · Grade 4 · AI', title:'Teach the Machine Your Drawings',
+      scoreA:'guessed', of:'of', pad:'Drawing area', clear:'Clear', ask:'What is it?',
+      yes:'Yes, correct', nope:'No, wrong',
+      tip:'Draw an example in the box and press “This is: …” next to the right group. The machine will remember the drawing. The more different examples you give, the better it guesses.',
+      wipe:'Forget everything', names:'Restore names', fresh:'New lesson: start from scratch', y:'Yes', n:'No',
+      hint:'Draw something and press “What is it?”', drawFirst:'Draw an example in the box first.',
+      saved:'Got it. Draw the next example or press “What is it?”',
+      blank:'The box is empty — draw something.', dunno:'I don\'t know…',
+      noEx:'Nobody has shown me a single example yet. Teach me!', conf:'How sure the machine is:',
+      markOk:'Noted. Draw the next one.', markNo:'Mistake noted. Maybe it needs more examples like this?',
+      wipeEx:'The machine will forget all examples. Group names stay. Sure?',
+      wipeAll:'Erase the examples and score and restore the names “{names}”?',
+      groupName:'Group {n} name', group:'Group {n}', thisIs:'This is: ', count:'examples: ',
+      undo:'Remove the last example', undoAria:'Remove the last example from group {n}'
+    }
+  };
+  var lang='uk';
+  try{ var sl=localStorage.getItem(LANGKEY); if(sl&&T[sl]) lang=sl; }catch(e){}
+  try{ var qp=new URLSearchParams(location.search).get('lang'); if(qp&&T[qp]) lang=qp; }catch(e){}
+  function t(k,n){ var s=T[lang][k]; if(n!=null) s=s.replace('{n}',n); return s; }
+  var DEFAULT_NAMES=DEFAULTS[lang];
   var state={names:DEFAULT_NAMES.slice(), ex:[[],[],[]], ok:0, all:0};
   try{ var raw=localStorage.getItem(KEY); if(raw){ var o=JSON.parse(raw); if(o&&o.ex&&o.names) state=o; } }catch(e){}
   function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
   var $=function(id){return document.getElementById(id);};
+  var msgKey='hint', bigKey=null, lastR=null;
+  function say(k){ msgKey=k; $('gSmall').textContent=t(k); }
   var pad=$('pad'), ctx=pad.getContext('2d');
   function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
   function clearPad(){ ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,pad.width,pad.height); drew=false; }
@@ -182,12 +235,12 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
       var d=document.createElement('div'); d.className='cls'; d.style.borderColor='var('+COLORS[c]+')';
       var h=document.createElement('div'); h.className='cls-head';
       var dotEl=document.createElement('span'); dotEl.className='dot'; dotEl.style.background='var('+COLORS[c]+')';
-      var inp=document.createElement('input'); inp.type='text'; inp.value=nm; inp.id='name'+c; inp.setAttribute('aria-label','Назва групи '+(c+1));
-      inp.addEventListener('input',function(){ state.names[c]=inp.value||('Група '+(c+1)); save(); addBtn.textContent='Це — '+state.names[c]; });
-      var addBtn=document.createElement('button'); addBtn.type='button'; addBtn.className='btn add'; addBtn.style.background='var('+COLORS[c]+')'; addBtn.style.borderColor='var('+COLORS[c]+')'; addBtn.textContent='Це — '+nm;
-      addBtn.addEventListener('click',function(){ if(!drew){ $('gSmall').textContent='Спершу намалюй приклад у полі.'; return; } state.ex[c].push(features()); save(); clearPad(); renderClasses(); $('gSmall').textContent='Запам\'ятала. Малюй наступний приклад або натисни «Що це?»'; $('gBig').textContent=''; $('gBars').innerHTML=''; $('checkRow').hidden=true; });
-      var cnt=document.createElement('span'); cnt.className='cnt'; cnt.textContent='прикладів: '+state.ex[c].length;
-      var undo=document.createElement('button'); undo.type='button'; undo.className='btn ghost'; undo.textContent='−'; undo.title='Прибрати останній приклад'; undo.setAttribute('aria-label','Прибрати останній приклад групи '+(c+1)); undo.style.padding='8px 12px';
+      var inp=document.createElement('input'); inp.type='text'; inp.value=nm; inp.id='name'+c; inp.setAttribute('aria-label',t('groupName',c+1));
+      inp.addEventListener('input',function(){ state.names[c]=inp.value||t('group',c+1); save(); addBtn.textContent=t('thisIs')+state.names[c]; });
+      var addBtn=document.createElement('button'); addBtn.type='button'; addBtn.className='btn add'; addBtn.style.background='var('+COLORS[c]+')'; addBtn.style.borderColor='var('+COLORS[c]+')'; addBtn.textContent=t('thisIs')+nm;
+      addBtn.addEventListener('click',function(){ if(!drew){ say('drawFirst'); return; } state.ex[c].push(features()); save(); clearPad(); renderClasses(); say('saved'); resetGuess(); $('checkRow').hidden=true; });
+      var cnt=document.createElement('span'); cnt.className='cnt'; cnt.textContent=t('count')+state.ex[c].length;
+      var undo=document.createElement('button'); undo.type='button'; undo.className='btn ghost'; undo.textContent='−'; undo.title=t('undo'); undo.setAttribute('aria-label',t('undoAria',c+1)); undo.style.padding='8px 12px';
       undo.addEventListener('click',function(){ state.ex[c].pop(); save(); renderClasses(); });
       h.appendChild(dotEl); h.appendChild(inp); h.appendChild(addBtn); h.appendChild(undo); h.appendChild(cnt);
       var th=document.createElement('div'); th.className='thumbs';
@@ -196,32 +249,61 @@ canvas{display:block;width:100%;max-width:300px;aspect-ratio:1/1;background:var(
     });
     $('okc').textContent=state.ok; $('allc').textContent=state.all;
   }
-  $('clear').addEventListener('click',function(){ clearPad(); $('gBig').textContent=''; $('gBars').innerHTML=''; $('gSmall').textContent='Намалюй щось і натисни «Що це?»'; $('checkRow').hidden=true; });
+  function resetGuess(){ lastR=null; bigKey=null; $('gBig').textContent=''; $('gBars').innerHTML=''; $('checkRow').hidden=true; }
+  $('clear').addEventListener('click',function(){ clearPad(); resetGuess(); say('hint'); });
   $('ask').addEventListener('click',function(){
-    if(!drew){ $('gSmall').textContent='Поле порожнє — намалюй щось.'; return; }
+    if(!drew){ say('blank'); return; }
     var r=predict(features());
+    resetGuess();
+    if(!r){ bigKey='dunno'; $('gBig').style.color=''; $('gBig').textContent=t('dunno'); say('noEx'); return; }
+    lastR=r; showGuess(); say('conf');
+    $('checkRow').hidden=false;
+  });
+  function showGuess(){
+    var r=lastR; if(!r) return;
     $('gBars').innerHTML='';
-    if(!r){ $('gBig').textContent='Не знаю…'; $('gSmall').textContent='Мені ще ніхто не показав жодного прикладу. Навчи мене!'; $('checkRow').hidden=true; return; }
     $('gBig').textContent=state.names[r.best]+'?';
     $('gBig').style.color='var('+COLORS[r.best]+')';
-    $('gSmall').textContent='Наскільки машина впевнена:';
     state.names.forEach(function(nm,c){
       var b=document.createElement('div'); b.className='cbar';
       b.innerHTML='<span class="nm"></span><span class="t"><span class="f" style="display:block;width:'+Math.round(r.p[c]*100)+'%;background:var('+COLORS[c]+')"></span></span><span class="p">'+Math.round(r.p[c]*100)+'%</span>';
       b.querySelector('.nm').textContent=nm; $('gBars').appendChild(b);
     });
-    $('checkRow').hidden=false;
-  });
-  function mark(ok){ state.all++; if(ok) state.ok++; save(); renderClasses(); $('checkRow').hidden=true; clearPad(); $('gSmall').textContent = ok?'Записала. Малюй наступне.':'Записала помилку. Може, їй бракує таких прикладів?'; }
+  }
+  function mark(ok){ state.all++; if(ok) state.ok++; save(); renderClasses(); resetGuess(); clearPad(); say(ok?'markOk':'markNo'); }
   $('yes').addEventListener('click',function(){ mark(true); });
   $('nope').addEventListener('click',function(){ mark(false); });
   var wipeMode='ex';
-  $('wipe').addEventListener('click',function(){ wipeMode='ex'; $('wipeText').textContent='Машина забуде всі приклади, назви груп лишаться. Точно?'; $('wipeAsk').hidden=false; });
-  $('fresh').addEventListener('click',function(){ wipeMode='all'; $('wipeText').textContent='Стерти приклади, рахунок і повернути назви «Коло, Квадрат, Трикутник»?'; $('wipeAsk').hidden=false; });
+  function wipeText(){ $('wipeText').textContent = wipeMode==='all' ? T[lang].wipeAll.replace('{names}',DEFAULT_NAMES.join(', ')) : t('wipeEx'); }
+  $('wipe').addEventListener('click',function(){ wipeMode='ex'; wipeText(); $('wipeAsk').hidden=false; });
+  $('fresh').addEventListener('click',function(){ wipeMode='all'; wipeText(); $('wipeAsk').hidden=false; });
   $('wipeNo').addEventListener('click',function(){ $('wipeAsk').hidden=true; });
-  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; if(wipeMode==='all') state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); clearPad(); $('gBig').textContent=''; $('gBars').innerHTML=''; $('checkRow').hidden=true; $('gSmall').textContent='Намалюй щось і натисни «Що це?»'; $('wipeAsk').hidden=true; });
+  $('wipeYes').addEventListener('click',function(){ state.ex=[[],[],[]]; state.ok=0; state.all=0; if(wipeMode==='all') state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); clearPad(); resetGuess(); say('hint'); $('wipeAsk').hidden=true; });
   $('names').addEventListener('click',function(){ state.names=DEFAULT_NAMES.slice(); save(); renderClasses(); });
-  clearPad(); renderClasses();
+  /* language: static texts via data-i18n; group names that are still the other language's defaults get translated, custom names stay */
+  function applyLang(){
+    document.documentElement.lang=lang;
+    document.title=t('doc');
+    document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent=t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el){ el.setAttribute('aria-label',t(el.getAttribute('data-i18n-aria'))); });
+    document.querySelectorAll('.lang button').forEach(function(b){ b.setAttribute('aria-pressed', b.getAttribute('data-lang')===lang?'true':'false'); });
+    $('gSmall').textContent=t(msgKey);
+    if(bigKey) $('gBig').textContent=t(bigKey);
+    showGuess(); wipeText(); renderClasses();
+  }
+  function setLang(nl){
+    if(nl===lang||!T[nl]) return;
+    var oldD=DEFAULTS[lang], newD=DEFAULTS[nl];
+    state.names=state.names.map(function(nm,i){ return nm===oldD[i] ? newD[i] : nm; });
+    lang=nl; DEFAULT_NAMES=newD; save();
+    try{ localStorage.setItem(LANGKEY,lang); }catch(e){}
+    applyLang();
+  }
+  document.querySelectorAll('.lang button').forEach(function(b){ b.addEventListener('click',function(){ setLang(b.getAttribute('data-lang')); }); });
+  /* saved names may be defaults of the other language (e.g. opened with ?lang=en) */
+  var otherD=DEFAULTS[lang==='uk'?'en':'uk'];
+  state.names=state.names.map(function(nm,i){ return nm===otherD[i] ? DEFAULT_NAMES[i] : nm; });
+  clearPad(); applyLang();
 })();
 </script>
 </body>
