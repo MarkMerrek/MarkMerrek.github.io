@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Навчи спам-фільтр</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* A spam filter that only counts words (naive Bayes). Students label the inbox, then try to fool it. Works offline. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#E9EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --on-accent:#FFFFFF; --accent-soft:#E2E9F5;
+  --yes:#1E6B3A; --yes-soft:#E1F1E6; --no:#8C2F2F; --no-soft:#F6E3E3;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --on-accent:#10131A; --accent-soft:#1C2637;
+    --yes:#7FD39A; --yes-soft:#18291F; --no:#E89494; --no-soft:#2E1C1C;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:17px;line-height:1.45}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 60px}
+header{padding:24px 0 12px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 0 0;letter-spacing:-.02em}
+.score{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-2);text-align:right}
+.score b{font-family:"Archivo",Arial,sans-serif;font-size:26px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,390px);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card+.card{margin-top:14px}
+h2{font-size:19px;margin:0 0 8px}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:17px;padding:11px 18px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn.spam{background:var(--no);border-color:var(--no);color:var(--on-accent);font-size:19px;padding:12px 22px}
+.btn.ham{background:var(--yes);border-color:var(--yes);color:var(--on-accent);font-size:19px;padding:12px 22px}
+.btn:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.msg{border:1px solid var(--line-strong);border-radius:10px;padding:14px 16px;background:var(--bg)}
+.from{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);margin-bottom:4px}
+.text{font-size:21px;font-weight:600;line-height:1.35}
+.guess{margin:12px 0 0;font-size:16px;color:var(--ink-2);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.meter{flex:1;min-width:140px;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--yes) 0 50%,var(--no) 50% 100%);position:relative;opacity:.9}
+.meter i{position:absolute;top:-4px;width:6px;height:22px;border-radius:3px;background:var(--ink);transform:translateX(-50%)}
+.verdict{font-weight:800}
+.verdict.s{color:var(--no)} .verdict.h{color:var(--yes)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.info{font-size:15px;color:var(--muted);margin-top:8px;min-height:22px}
+textarea{width:100%;min-height:84px;font:inherit;font-size:18px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.marked{font-size:18px;line-height:1.7;margin-top:10px;min-height:30px}
+.marked span{border-radius:4px;padding:1px 3px}
+.marked .ws{background:var(--no-soft);color:var(--no);font-weight:700}
+.marked .wh{background:var(--yes-soft);color:var(--yes);font-weight:700}
+.marked .wu{color:var(--muted)}
+.ideas{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ideas button{appearance:none;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer;font:inherit;font-size:14px}
+.words{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.words h3{font-size:14px;margin:0 0 6px;font-family:"IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+.words .s h3{color:var(--no)} .words .h h3{color:var(--yes)}
+.words ol{margin:0;padding-left:20px;font-size:15.5px}
+.words li{margin:2px 0}
+.words small{font-family:"IBM Plex Mono",monospace;color:var(--muted)}
+.note{font-size:14.5px;color:var(--muted);margin-top:10px}
+.bottom{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.confirm .btn{padding:8px 14px;font-size:15px}
+.btn.no{background:var(--no);border-color:var(--no);color:var(--on-accent)}
+/* mission card */
+.mission{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.mission.up{border-color:var(--no);background:var(--no-soft)}
+.m-code{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.m-code input{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:600;width:72px;padding:6px 8px;border:2px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink);text-align:center}
+.m-code .btn{padding:7px 14px;font-size:15px}
+.m-err{color:var(--no);font-size:14.5px}
+.m-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.m-no{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.m-time{font-family:"IBM Plex Mono",monospace;font-size:30px;font-weight:600}
+.mission.up .m-time{color:var(--no)}
+.m-title{font-size:21px;font-weight:800;margin:2px 0 6px}
+.m-list{margin:0 0 8px;padding-left:22px}
+.m-list li{margin:3px 0}
+.m-up{font-weight:700;color:var(--no);margin:6px 0}
+.m-sec{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:6px;padding:8px 12px;margin:8px 0}
+.m-foot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-top:8px}
+.m-foot .m-code{font-weight:500;font-size:15px;color:var(--ink-2)}
+.m-foot .m-code input{font-size:16px;width:60px;padding:4px 6px}
+.m-foot .btn.ghost{font-size:15px;padding:8px 14px}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">Інформатика · штучний інтелект</div>
+      <h1>Навчи спам-фільтр</h1>
+    </div>
+    <div class="score">фільтр вгадав<br><b id="ok">0</b> з <b id="all">0</b></div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <section class="card" aria-live="polite">
+        <h2>Пошта <small style="font-weight:500;color:var(--muted);font-size:15px" id="left"></small></h2>
+        <div id="inbox"></div>
+      </section>
+      <section class="card">
+        <h2>Перевір своє повідомлення</h2>
+        <label for="mine" class="note" style="display:block;margin:0 0 6px">Напиши будь-що — фільтр одразу скаже, що думає.</label>
+        <textarea id="mine" maxlength="300" placeholder="Наприклад: Привіт! Ти виграв приз, перейди за посиланням…"></textarea>
+        <div class="guess" id="mineGuess"></div>
+        <div class="marked" id="marked"></div>
+        <div class="ideas" id="ideas"></div>
+      </section>
+      <div class="bottom">
+        <button class="btn ghost" type="button" id="brainBtn">Показати мізки фільтра</button>
+        <button class="btn ghost" type="button" id="newBtn">Новий фільтр</button>
+        <span class="confirm" id="ask" hidden>Фільтр забуде все й пошта почнеться заново. Точно?
+          <button class="btn no" type="button" id="askYes">Так</button>
+          <button class="btn ghost" type="button" id="askNo">Ні</button>
+        </span>
+      </div>
+    </div>
+    <div>
+      <section class="mission" id="mission" aria-live="polite"></section>
+      <aside class="card" id="brain" hidden>
+        <h2>Мізки фільтра</h2>
+        <div class="note" id="brainMeta" style="margin:0 0 10px"></div>
+        <div class="words">
+          <div class="s"><h3>Слова шахраїв</h3><ol id="wS"></ol></div>
+          <div class="h"><h3>Звичайні слова</h3><ol id="wH"></ol></div>
+        </div>
+        <p class="note">Фільтр бачить лише слова. Хто написав повідомлення, він не знає й не розуміє, про що воно. Число в дужках — у скількох спамах і скількох звичайних повідомленнях траплялось це слово.</p>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='filtr-v1', MKEY='filtr-mission', TTL=3*3600*1000;
+  /* s:1 — spam or scam, s:0 — ordinary message. Some ordinary ones are tricky on purpose. */
+  var MAIL=[
+    {f:'Невідомий номер',t:'Вітаємо! Ти виграв новий телефон. Тисни на посилання й забери приз',s:1},
+    {f:'Максим',t:'Привіт! Підемо після уроків на футбол?',s:0},
+    {f:'GameBonus',t:'Безкоштовні скіни для гри! Введи пароль від акаунта за посиланням',s:1},
+    {f:'Мама',t:'Не забудь шапку, на вулиці холодно',s:0},
+    {f:'Банк',t:'Терміново! Твоя картка заблокована. Надішли код з SMS',s:1},
+    {f:'Клас 5',t:'Завтра контрольна з математики, повторіть дроби',s:0},
+    {f:'Магазин',t:'Тільки сьогодні знижка 90%! Тисни на посилання',s:1},
+    {f:'Соня',t:'Ти вже зробив домашку з англійської?',s:0},
+    {f:'Невідомий номер',t:'Ти отримав подарунок! Щоб забрати, напиши номер маминої картки',s:1},
+    {f:'Тато',t:'Заберу тебе зі школи о 15:00',s:0},
+    {f:'Невідомий номер',t:'Заробляй 1000 гривень за день! Пиши в приват і надішли номер картки',s:1},
+    {f:'Олег',t:'Скинь, будь ласка, фото розкладу уроків на завтра',s:0},
+    {f:'Підтримка',t:'Терміново підтвердь пароль, інакше акаунт буде видалено',s:1},
+    {f:'Бабуся',t:'Спекла пиріжки, приходь у неділю',s:0},
+    {f:'Розіграш',t:'Ти переможець розіграшу! Оплати доставку приза карткою',s:1},
+    {f:'Андрій',t:'Ми виграли матч 3:1! Ти бачив гол?',s:0},
+    {f:'Невідомий номер',t:'Секретний спосіб отримати мільйон підписників. Тисни на посилання',s:1},
+    {f:'Класний керівник',t:'Батьківські збори в школі в четвер о 18:00',s:0},
+    {f:'Акція',t:'Перші 100 людей отримають телефон безкоштовно. Тисни швидше',s:1},
+    {f:'Дарина',t:'Вітаю з днем народження! Бажаю гарного настрою',s:0},
+    {f:'Підтримка гри',t:'Привіт, це підтримка гри. Надішли свій пароль для перевірки акаунта',s:1},
+    {f:'Клас 5',t:'Нагадування: завтра екскурсія, візьміть воду й перекус',s:0},
+    {f:'Невідомий номер',t:'Ти виграв приз! Забери його за посиланням до кінця дня',s:1},
+    {f:'Іра',t:'Дякую за подарунок, мені дуже сподобалось!',s:0},
+    {f:'Невідомий номер',t:'Мамо, я розбив телефон. Терміново скинь гроші на цю картку',s:1},
+    {f:'Тренер',t:'Тренування перенесли на суботу',s:0},
+    {f:'Додаток',t:'Безкоштовний преміум для тебе! Встанови додаток за посиланням',s:1},
+    {f:'Мама',t:'Купи хліба, коли будеш іти додому',s:0},
+    {f:'Магазин',t:'Супер знижка тільки для тебе! Тисни, поки не закінчилось',s:1},
+    {f:'Школа',t:'Безкоштовна екскурсія в музей для 5 класу в п\'ятницю',s:0},
+    {f:'GameBonus',t:'Безкоштовні гроші в грі! Введи логін і пароль за посиланням',s:1},
+    {f:'Олег',t:'Пограємо ввечері в гру? Я буду онлайн о сьомій',s:0},
+    {f:'Бонус',t:'Твій акаунт виграв бонус! Отримай його за посиланням',s:1},
+    {f:'Тато',t:'Сьогодні вечеряємо в бабусі, не запізнюйся',s:0},
+    {f:'Невідомий номер',t:'Вітаємо! Ти виграв 5000 гривень. Надішли номер картки',s:1},
+    {f:'Вчитель',t:'Привіт! Завтра урок фізкультури на вулиці, візьми форму',s:0},
+    {f:'Магазин ігор',t:'Знижка на всі ігри! Тисни на посилання, щоб отримати подарунок',s:1},
+    {f:'Мама',t:'Ввечері зателефоную, як прийду додому',s:0},
+    {f:'Невідомий номер',t:'Привіт! Завтра роздаємо безкоштовні телефони, тисни на посилання',s:1},
+    {f:'Соня',t:'Привіт, ти будеш завтра в школі? Принеси мені книжку',s:0}
+  ];
+  var IDEAS=['Привіт, мамо! Скинь, будь ласка, гроші на цю картку','Ти виграв подарунок від школи, забери в п\'ятницю','Бабуся просить твій пароль від гри','Безкоштовна піца для 5 класу після уроків'];
+  /* words are cut to 5 letters so that "картка", "картку" and "картки" count as one word */
+  function words(t){ var m=t.toLowerCase().replace(/[’ʼ`]/g,"'").match(/[a-zа-яіїєґ']+/g)||[]; return m.filter(function(w){ return w.replace(/'/g,'').length>=3; }); }
+  function stem(w){ return w.replace(/'/g,'').slice(0,5); }
+  function fresh(){ var o=[]; for(var i=0;i<MAIL.length;i++) o.push(i); for(var j=o.length-1;j>0;j--){ var k=Math.floor(Math.random()*(j+1)); var x=o[j]; o[j]=o[k]; o[k]=x; } return {order:o,pos:0,cS:{},cH:{},form:{},nS:0,nH:0,ok:0,all:0}; }
+  var st=fresh();
+  try{ var raw=JSON.parse(localStorage.getItem(KEY)||'null'); if(raw&&raw.order&&raw.order.length===MAIL.length) st=raw; }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ var d=document.createElement('div'); d.textContent=x; return d.innerHTML; }
+
+  function learn(t,isSpam){
+    var seen={};
+    words(t).forEach(function(w){ var s=stem(w); if(seen[s]) return; seen[s]=1; var c=isSpam?st.cS:st.cH; c[s]=(c[s]||0)+1; if(!st.form[s]) st.form[s]=w; });
+    if(isSpam) st.nS++; else st.nH++;
+  }
+  /* how much a word points to spam: log of (share of spam messages with it) / (share of ordinary ones) */
+  function lean(s){ return Math.log(((st.cS[s]||0)+1)/(st.nS+2)) - Math.log(((st.cH[s]||0)+1)/(st.nH+2)); }
+  function known(s){ return (st.cS[s]||0)+(st.cH[s]||0)>0; }
+  function predict(t){
+    if(st.nS<1||st.nH<1) return null;
+    var L=Math.log((st.nS+1)/(st.nH+1)), seen={}, k=0;
+    words(t).forEach(function(w){ var s=stem(w); if(seen[s]||!known(s)) return; seen[s]=1; k++; L+=lean(s); });
+    if(!k) return -1; /* not a single familiar word: the filter cannot decide */
+    return 1/(1+Math.exp(-L));
+  }
+  function guessHTML(p){
+    if(p==null) return '<span>Фільтр ще нічого не знає. Покажи йому хоча б один спам і одне звичайне повідомлення.</span>';
+    if(p===-1) return '<span>Фільтр не знає жодного слова з цього повідомлення — не може вирішити.</span>';
+    var pc=Math.round(p*100), sp=p>=0.5;
+    return '<span>Фільтр думає:</span> <span class="verdict '+(sp?'s':'h')+'">'+(sp?'🚫 спам':'✅ звичайне')+' · '+(sp?pc:100-pc)+'%</span><span class="meter" aria-hidden="true"><i style="left:'+pc+'%"></i></span>';
+  }
+  function stats(){ $('ok').textContent=st.ok; $('all').textContent=st.all; }
+
+  var lastInfo='';
+  function renderInbox(){
+    var left=MAIL.length-st.pos;
+    $('left').textContent=left>0?'· лишилось '+left:'';
+    if(left<=0){ $('inbox').innerHTML='<p style="margin:0">Пошта скінчилась: усі '+MAIL.length+' повідомлень розібрано. Тепер перевіряй свої повідомлення внизу.</p><div class="info">'+esc(lastInfo)+'</div>'; return; }
+    var m=MAIL[st.order[st.pos]];
+    $('inbox').innerHTML='<div class="msg"><div class="from">Від: '+esc(m.f)+'</div><div class="text">'+esc(m.t)+'</div></div><div class="guess">'+guessHTML(predict(m.t))+'</div><div class="acts"><button class="btn spam" type="button" id="bS">🚫 Спам</button><button class="btn ham" type="button" id="bH">✅ Не спам</button></div><div class="info">'+esc(lastInfo)+'</div>';
+    $('bS').addEventListener('click',function(){ label(true); });
+    $('bH').addEventListener('click',function(){ label(false); });
+  }
+  function label(isSpam){
+    var m=MAIL[st.order[st.pos]], p=predict(m.t);
+    if(p!=null&&p!==-1){ st.all++; var right=(p>=0.5)===isSpam; if(right) st.ok++; lastInfo=right?'Фільтр вгадав.':'Фільтр помилився — тепер він знає більше.'; }
+    else lastInfo='Запам\'ятав.';
+    learn(m.t,isSpam); st.pos++; save(); stats(); renderInbox(); renderMine(); renderBrain();
+  }
+
+  function renderMine(){
+    var t=$('mine').value;
+    if(!t.trim()){ $('mineGuess').innerHTML=''; $('marked').innerHTML=''; return; }
+    $('mineGuess').innerHTML=guessHTML(predict(t));
+    var parts=t.split(/([a-zA-Zа-яА-ЯіІїЇєЄґҐ'’ʼ`]+)/);
+    $('marked').innerHTML=parts.map(function(x){
+      if(!/[a-zA-Zа-яА-ЯіІїЇєЄґҐ]/.test(x)) return esc(x);
+      var w=x.toLowerCase().replace(/[’ʼ`]/g,"'"); if(w.replace(/'/g,'').length<3) return esc(x);
+      var s=stem(w); if(!known(s)||st.nS<1||st.nH<1) return '<span class="wu">'+esc(x)+'</span>';
+      var l=lean(s); return '<span class="'+(l>0.4?'ws':l<-0.4?'wh':'wu')+'">'+esc(x)+'</span>';
+    }).join('');
+  }
+  $('mine').addEventListener('input',renderMine);
+  $('ideas').innerHTML='<span class="note" style="margin:0;align-self:center">Не хочеш писати — спробуй:</span>'+IDEAS.map(function(x,i){ return '<button type="button" data-i="'+i+'">'+esc(x)+'</button>'; }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('#ideas button'),function(b){ b.addEventListener('click',function(){ $('mine').value=IDEAS[+b.getAttribute('data-i')]; renderMine(); }); });
+
+  var brainOpen=false;
+  function renderBrain(){
+    if(!brainOpen) return;
+    var all=Object.keys(st.form), rows=all.map(function(s){ return {s:s,l:lean(s),n:(st.cS[s]||0)+(st.cH[s]||0)}; });
+    var sp=rows.filter(function(r){ return r.l>0.4; }).sort(function(a,b){ return b.l-a.l||b.n-a.n; }).slice(0,12);
+    var hm=rows.filter(function(r){ return r.l<-0.4; }).sort(function(a,b){ return a.l-b.l||b.n-a.n; }).slice(0,12);
+    function li(r){ return '<li>'+esc(st.form[r.s])+' <small>('+(st.cS[r.s]||0)+' / '+(st.cH[r.s]||0)+')</small></li>'; }
+    $('wS').innerHTML=sp.length?sp.map(li).join(''):'<li style="list-style:none;margin-left:-20px;color:var(--muted)">поки немає</li>';
+    $('wH').innerHTML=hm.length?hm.map(li).join(''):'<li style="list-style:none;margin-left:-20px;color:var(--muted)">поки немає</li>';
+    $('brainMeta').textContent='Розібрано: спаму '+st.nS+', звичайних '+st.nH+'. Знає слів: '+all.length+'.';
+  }
+  $('brainBtn').addEventListener('click',function(){ brainOpen=!brainOpen; $('brain').hidden=!brainOpen; $('brainBtn').textContent=brainOpen?'Сховати мізки фільтра':'Показати мізки фільтра'; renderBrain(); });
+  $('newBtn').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  function reset(){ st=fresh(); lastInfo=''; save(); stats(); renderInbox(); renderMine(); renderBrain(); }
+  $('askYes').addEventListener('click',function(){ reset(); $('ask').hidden=true; });
+
+  /* missions: the teacher says a code aloud, it opens the task and starts the timer */
+  var MIS={
+    '25':{n:1,min:9,t:'Навчи фільтр',x:['Фільтр нічого не знає. Читай пошту й натискай «Спам» або «Не спам».','Спам — це реклама, обман і шахраї. Перед кожною відповіддю глянь: що думає фільтр?','Розбери щонайменше 20 повідомлень.'],end:'Скільки повідомлень фільтр вгадав? Число вгорі праворуч.',s:'Яке повідомлення фільтр найдовше не міг вгадати? Чому саме воно?'},
+    '41':{n:2,min:6,t:'Мізки фільтра',x:['Натисни «Показати мізки фільтра».','Які слова фільтр вважає шахрайськими? А які — звичайними?','Знайди слово, яке потрапило не туди. Наприклад, «виграли» — це про матч чи про приз?'],end:'Яке слово в твоєму фільтрі найбільш «шахрайське»?',s:'Чому фільтр підозрює слово «подарунок»? Знайди повідомлення, яке його цього навчило.'},
+    '56':{n:3,min:9,t:'Обдури фільтр',x:['Унизу — «Перевір своє повідомлення».','Напиши повідомлення від шахрая, яке фільтр назве звичайним.','Червоні слова видають шахрая, зелені — ховають. Заміни червоні слова іншими.'],end:'Запам\'ятай своє найхитріше повідомлення — воно знадобиться.',s:'А навпаки: напиши чесне повідомлення від мами чи друга, яке фільтр назве спамом.'},
+    '73':{n:4,min:7,t:'Шахрай у гостях',x:['Пересядь до сусіда.','Набери своє найхитріше повідомлення в «Перевір своє повідомлення» його фільтра.','Чужий фільтр теж обдурено? Чий фільтр важче обдурити?'],end:'Повертайся на місце. Чий фільтр виявився найпильнішим?',s:'Придумай правило для людини, не для фільтра: як упізнати шахрая, навіть якщо слова звичайні?'}
+  };
+  var mis=null, tick=null;
+  try{ var mr=JSON.parse(localStorage.getItem(MKEY)||'null'); if(mr&&MIS[mr.code]&&Date.now()-mr.start<TTL) mis=mr; }catch(e){}
+  function saveMis(){ try{ if(mis) localStorage.setItem(MKEY,JSON.stringify(mis)); else localStorage.removeItem(MKEY); }catch(e){} }
+  function codeForm(label,id){ return '<div class="m-code"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="text" inputmode="numeric" maxlength="2" autocomplete="off"><button class="btn" type="button" data-go="'+id+'">OK</button><span class="m-err" id="'+id+'Err"></span></div>'; }
+  function fmt(ms){ var s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
+  function renderMission(){
+    var box=$('mission'); clearInterval(tick);
+    if(!mis){ box.className='mission'; box.innerHTML=codeForm('Код місії від учителя:','mc'); wire('mc'); return; }
+    var m=MIS[mis.code], h='';
+    h+='<div class="m-head"><span class="m-no">Місія '+m.n+' з 4</span><span class="m-time" id="mTime"></span></div>';
+    h+='<div class="m-title">'+esc(m.t)+'</div><ul class="m-list">'+m.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+    h+='<div class="m-up" id="mUp" hidden>Час! Руки від мишки — дивись на вчителя. '+esc(m.end)+'</div>';
+    if(mis.sec) h+='<div class="m-sec"><b>Секретне завдання.</b> '+esc(m.s)+'</div>';
+    h+='<div class="m-foot">'+(!mis.sec?'<button class="btn ghost" type="button" id="mDone">Готово! Дай секретне завдання</button>':'<span></span>')+codeForm('Код наступної місії:','mn')+'</div>';
+    box.innerHTML=h; wire('mn');
+    if($('mDone')) $('mDone').addEventListener('click',function(){ mis.sec=true; saveMis(); renderMission(); });
+    var upd=function(){ var l=m.min*60000-(Date.now()-mis.start); $('mTime').textContent=fmt(l); var up=l<=0; box.className='mission'+(up?' up':''); $('mUp').hidden=!up; if(up) clearInterval(tick); };
+    upd(); tick=setInterval(upd,1000);
+  }
+  function wire(id){
+    var inp=$(id), go=function(){
+      var c=inp.value.replace(/\D/g,'');
+      if(!MIS[c]){ $(id+'Err').textContent='Такого коду немає. Перепитай учителя.'; inp.select(); return; }
+      if(mis&&mis.code===c){ inp.value=''; return; }
+      if(c==='25') reset(); /* first mission starts from a clean filter for every new class */
+      mis={code:c,start:Date.now(),sec:false}; saveMis(); renderMission();
+    };
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') go(); });
+    inp.addEventListener('input',function(){ $(id+'Err').textContent=''; });
+    document.querySelector('[data-go="'+id+'"]').addEventListener('click',go);
+  }
+
+
+  stats(); renderMission(); renderInbox(); renderMine();
+})();
+</script>
+</body>
+</html>
