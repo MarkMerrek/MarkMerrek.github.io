@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Моя стрічка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* A toy video feed: it learns from likes AND from how long you look at each card, and narrows into a bubble. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#E9EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --on-accent:#FFFFFF; --accent-soft:#E2E9F5;
+  --like:#B0284A; --like-soft:#F8E1E7; --bad:#8C2F2F; --bad-soft:#F6E3E3;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --on-accent:#10131A; --accent-soft:#1C2637;
+    --like:#F08AA3; --like-soft:#3A1C25; --bad:#E89494; --bad-soft:#2E1C1C;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:17px;line-height:1.45}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 60px}
+header{padding:24px 0 12px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 0 0;letter-spacing:-.02em}
+.score{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-2);text-align:right}
+.score b{font-family:"Archivo",Arial,sans-serif;font-size:26px;color:var(--ink)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:20px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:17px;padding:11px 18px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn.like{background:var(--like);border-color:var(--like);color:#fff;font-size:19px;padding:12px 18px;white-space:nowrap}
+.btn.next{font-size:19px;padding:12px 18px;white-space:nowrap}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.phone{max-width:360px;margin:0 auto;background:var(--surface);border:2px solid var(--line-strong);border-radius:22px;padding:14px}
+.video{border-radius:14px;height:clamp(280px,46vh,400px);display:flex;flex-direction:column;justify-content:space-between;padding:14px;color:#fff;position:relative;overflow:hidden}
+.video .em{font-size:clamp(64px,10vh,96px);text-align:center;line-height:1}
+.video .topic{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.9}
+.video .title{font-size:22px;font-weight:800;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.video .views{font-family:"IBM Plex Mono",monospace;font-size:13px;opacity:.9;margin-top:4px}
+.acts{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.counter{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--muted);margin-top:8px}
+.panel h2{font-size:20px;margin:0 0 4px}
+.panel .meta{font-size:14.5px;color:var(--muted);margin-bottom:10px}
+.bar{display:grid;grid-template-columns:120px 1fr 44px;gap:8px;align-items:center;margin:5px 0;font-size:15px}
+.bar .t{height:14px;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.bar .f{height:100%;transition:width .3s}
+.bar .p{font-family:"IBM Plex Mono",monospace;text-align:right;color:var(--ink-2);font-size:14px}
+.hist{display:flex;flex-wrap:wrap;gap:3px;margin:8px 0 4px}
+.hist i{width:14px;height:14px;border-radius:3px;display:block}
+.facts{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--ink-2);border-top:1px solid var(--line);margin-top:12px;padding-top:10px;display:grid;gap:4px}
+.div{font-size:18px;font-weight:700;margin:4px 0}
+.bottom{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.confirm .btn{padding:8px 14px;font-size:15px}
+.btn.no{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+/* mission card */
+.mission{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.mission.up{border-color:var(--bad);background:var(--bad-soft)}
+.m-code{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.m-code input{font-family:"IBM Plex Mono",monospace;font-size:20px;font-weight:600;width:72px;padding:6px 8px;border:2px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink);text-align:center}
+.m-code .btn{padding:7px 14px;font-size:15px}
+.m-err{color:var(--bad);font-size:14.5px}
+.m-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.m-no{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.m-time{font-family:"IBM Plex Mono",monospace;font-size:30px;font-weight:600}
+.mission.up .m-time{color:var(--bad)}
+.m-title{font-size:21px;font-weight:800;margin:2px 0 6px}
+.m-list{margin:0 0 8px;padding-left:22px}
+.m-list li{margin:3px 0}
+.m-up{font-weight:700;color:var(--bad);margin:6px 0}
+.m-sec{background:var(--accent-soft);border-left:4px solid var(--accent);border-radius:6px;padding:8px 12px;margin:8px 0}
+.m-foot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-top:8px}
+.m-foot .m-code{font-weight:500;font-size:15px;color:var(--ink-2)}
+.m-foot .m-code input{font-size:16px;width:60px;padding:4px 6px}
+.m-foot .btn.ghost{font-size:15px;padding:8px 14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker">Інформатика · штучний інтелект</div>
+      <h1>Моя стрічка</h1>
+    </div>
+    <div class="score">переглянуто <b id="seen">0</b><br>❤ <b id="likes">0</b></div>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="phone">
+        <div class="video" id="video"></div>
+        <div class="acts">
+          <button class="btn like" type="button" id="like">❤ Подобається</button>
+          <button class="btn next" type="button" id="next">Далі ↓</button>
+        </div>
+      </div>
+      <div class="bottom">
+        <button class="btn ghost" type="button" id="panelBtn">Що стрічка думає про мене</button>
+        <button class="btn ghost" type="button" id="newBtn">Нова стрічка</button>
+        <span class="confirm" id="ask" hidden>Стрічка забуде все про тебе. Точно?
+          <button class="btn no" type="button" id="askYes">Так</button>
+          <button class="btn ghost" type="button" id="askNo">Ні</button>
+        </span>
+      </div>
+    </div>
+    <div>
+      <section class="mission" id="mission" aria-live="polite"></section>
+    <aside class="card panel" id="panel" hidden>
+      <h2>Що стрічка думає про тебе</h2>
+      <div class="meta">Що більша смужка, то частіше стрічка показує цю тему.</div>
+      <div id="bars"></div>
+      <div class="meta" style="margin-top:12px;margin-bottom:0">Останні відео, від старих до нових:</div>
+      <div class="hist" id="hist"></div>
+      <div class="div" id="div"></div>
+      <div class="facts" id="facts"></div>
+    </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='strichka-v1', MKEY='strichka-mission', TTL=3*3600*1000;
+  var TOPICS=[
+    {n:'Котики',e:'🐱',c:'#C26A12',v:['Кіт уперше бачить огірок','Кошеня проти дзеркала','Кіт, який сам відчиняє двері','10 котів, що заснули в дивних позах','Кіт ловить лазерну точку','Кіт охороняє свою коробку']},
+    {n:'Футбол',e:'⚽',c:'#1F7A3E',v:['Найкращі голи тижня','Воротар, який врятував усе','Фінт, якого навчишся за 5 хвилин','Гол через себе у дворі','Пенальті із заплющеними очима','Один день професійного футболіста']},
+    {n:'Ігри',e:'🎮',c:'#5B3FA8',v:['Будую замок із кубиків','Рівень без жодного удару','Найсмішніші баги в іграх','Гра, яку ніхто не може пройти','Секретна кімната, про яку ніхто не знав','Пройшов гру за 3 хвилини']},
+    {n:'Музика',e:'🎵',c:'#B0284A',v:['Пісня, що застрягне в голові','Гітарист грає ногами','Хор із 100 дітей','Барабани з каструль','Хіт року на піаніно','Співає вся вулиця']},
+    {n:'Смаколики',e:'🍰',c:'#A3561F',v:['Торт, схожий на кавун','Піца за 10 хвилин','Найбільший млинець','Шоколадний вибух','Морозиво з трьох інгредієнтів','Кекс-монстр']},
+    {n:'Досліди',e:'🔬',c:'#0F6F80',v:['Вулкан із соди й оцту','Сухий лід у воді','Яйце, що не тоне','Ракета з пляшки','Лампочка від лимона','Магніт проти монети']},
+    {n:'Танці',e:'💃',c:'#B23A8A',v:['Танець, який повторюють усі','Брейк-данс у 8 років','Танцюючий робот','Флешмоб у торговому центрі','Танець на льоду','Навчись за 30 секунд']},
+    {n:'Машини',e:'🚗',c:'#3B4A5E',v:['Найшвидша машина світу','Машина-трансформер','Перегони радіокерованих авто','Вантажівка-монстр','Електромобіль зсередини','Паркування як у кіно']},
+    {n:'Малювання',e:'🎨',c:'#2E6CB0',v:['Очі за 1 хвилину','Картина з кави','Малюнок, що оживає','Портрет однією лінією','Фарби, що світяться','Персонаж крок за кроком']},
+    {n:'Природа',e:'🦁',c:'#6B7A1A',v:['Дельфіни граються з хвилею','Як спить жираф','Ведмежата вперше бачать сніг','Найменша мавпа світу','Восьминіг ховається','Пінгвіни на прогулянці']}
+  ];
+  var T=TOPICS.length;
+  function fresh(){ var w=[]; for(var i=0;i<T;i++) w.push(1); return {w:w,hist:[],seen:0,likes:0,watched:0,quick:0,idx:new Array(T).fill(0),cur:null}; }
+  var st=fresh();
+  try{ var raw=JSON.parse(localStorage.getItem(KEY)||'null'); if(raw&&raw.w&&raw.w.length===T) st=raw; }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ var d=document.createElement('div'); d.textContent=x; return d.innerHTML; }
+
+  /* the recommender: 1 in 10 videos is a random topic, the rest are chosen in proportion to the weights */
+  function pick(){
+    if(Math.random()<0.1) return Math.floor(Math.random()*T);
+    var tot=st.w.reduce(function(a,b){ return a+b; },0), r=Math.random()*tot;
+    for(var i=0;i<T;i++){ r-=st.w[i]; if(r<=0) return i; }
+    return T-1;
+  }
+  var shownAt=Date.now();
+  function showVideo(){
+    if(st.cur==null){
+      var t=pick(); if(st.hist.length&&st.hist[st.hist.length-1]===t&&Math.random()<0.5) t=pick();
+      var k=st.idx[t]%TOPICS[t].v.length; st.idx[t]++;
+      st.cur={t:t,k:k,views:(Math.random()*4.8+0.2).toFixed(1)}; save();
+    }
+    var tp=TOPICS[st.cur.t];
+    $('video').style.background='linear-gradient(160deg,'+tp.c+','+shade(tp.c)+')';
+    $('video').innerHTML='<div class="topic">#'+esc(tp.n.toLowerCase())+'</div><div class="em">'+tp.e+'</div><div><div class="title">'+esc(tp.v[st.cur.k])+'</div><div class="views">'+st.cur.views.replace('.',',')+' млн переглядів</div></div>';
+    shownAt=Date.now();
+  }
+  function shade(hex){ var n=parseInt(hex.slice(1),16), r=(n>>16)*.55|0, g=(n>>8&255)*.55|0, b=(n&255)*.55|0; return 'rgb('+r+','+g+','+b+')'; }
+  function act(liked){
+    var t=st.cur.t, d=(Date.now()-shownAt)/1000;
+    if(liked){ st.w[t]*=1.6; st.likes++; }
+    else if(d>=4){ st.w[t]*=1.3; st.watched++; }      /* looked for a long time: probably interesting */
+    else if(d<2){ st.w[t]*=0.75; st.quick++; }        /* scrolled away at once: probably boring */
+    var tot=st.w.reduce(function(a,b){ return a+b; },0); st.w=st.w.map(function(x){ return Math.max(x/tot*T,0.1); });
+    st.hist.push(t); if(st.hist.length>60) st.hist.shift();
+    st.seen++; st.cur=null; save(); stats(); showVideo(); renderPanel();
+  }
+  $('like').addEventListener('click',function(){ act(true); });
+  $('next').addEventListener('click',function(){ act(false); });
+  function stats(){ $('seen').textContent=st.seen; $('likes').textContent=st.likes; }
+
+  var open=false;
+  function renderPanel(){
+    if(!open) return;
+    var tot=st.w.reduce(function(a,b){ return a+b; },0);
+    var order=TOPICS.map(function(_,i){ return i; }).sort(function(a,b){ return st.w[b]-st.w[a]; });
+    $('bars').innerHTML=order.map(function(i){ var p=Math.round(st.w[i]/tot*100); return '<div class="bar"><span>'+TOPICS[i].e+' '+esc(TOPICS[i].n)+'</span><span class="t"><span class="f" style="display:block;width:'+p+'%;background:'+TOPICS[i].c+'"></span></span><span class="p">'+p+'%</span></div>'; }).join('');
+    $('hist').innerHTML=st.hist.slice(-40).map(function(t){ return '<i title="'+esc(TOPICS[t].n)+'" style="background:'+TOPICS[t].c+'"></i>'; }).join('');
+    var last=st.hist.slice(-20), u={}; last.forEach(function(t){ u[t]=1; });
+    var k=Object.keys(u).length;
+    $('div').textContent=last.length<20?'Різноманітність: подивись ще '+(20-last.length)+' відео':'Різноманітність: '+k+' з 10 тем в останніх 20 відео';
+    $('facts').hidden=!(mis&&(mis.code==='62'||mis.code==='88'));
+    $('facts').innerHTML='<div>❤ лайків: '+st.likes+'</div><div>👀 дивився довше 4 секунд: '+st.watched+'</div><div>⏩ гортав одразу, за 2 секунди: '+st.quick+'</div>';
+  }
+  $('panelBtn').addEventListener('click',function(){ open=!open; $('panel').hidden=!open; $('panelBtn').textContent=open?'Сховати':'Що стрічка думає про мене'; renderPanel(); });
+  $('newBtn').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ st=fresh(); save(); stats(); showVideo(); renderPanel(); $('ask').hidden=true; });
+
+  /* missions */
+  var MIS={
+    '34':{n:1,min:7,t:'Твоя стрічка',x:['Гортай стрічку так, як гортаєш удома: ❤ — якщо подобається, «Далі» — якщо ні.','Не поспішай і нічого не вигадуй. Подивись щонайменше 40 відео.','Кнопку «Що стрічка думає про мене» поки не натискай.'],end:'Не закривай сторінку — чекай на код.',s:'Спробуй вгадати тему наступного відео до того, як воно з\'явиться. Скільки разів поспіль вгадав?'},
+    '47':{n:2,min:6,t:'Що стрічка про тебе знає',x:['Натисни «Що стрічка думає про мене». Це правда ти?','Пересядь до сусіда. Не питаючи, подивись на його панель і вгадай три його улюблені теми.','Перевір у нього. Чи знає стрічка сусіда краще, ніж ти?'],end:'Повертайся на місце. Хто з вас вгадав усі три?',s:'Подивись на смужку «Останні відео». Після якого відео стрічка тебе «зрозуміла»?'},
+    '62':{n:3,min:8,t:'Секрет стрічки',x:['Натисни «Нова стрічка».','Тепер НЕ став жодного ❤. Обери одну тему, яка тобі байдужа.','На цій темі затримуйся на 5 секунд, а все інше гортай одразу. 30 відео.','Відкрий «Що стрічка думає про мене». Що сталося?'],end:'Як стрічка дізналася, що тобі «подобається», якщо ти нічого не лайкав?',s:'А навпаки: лайкай усе, але гортай одразу. Що переможе — лайки чи час?'},
+    '88':{n:4,min:7,t:'Втеча з бульбашки',x:['Не скидай стрічку! Зараз вона показує майже одну тему.','Поверни в неї різні теми. Ціль — «Різноманітність: 8 з 10» або більше. Вона на панелі «Що стрічка думає про мене».','Порахуй, скільки відео тобі знадобилося. Це твій рекорд — скажеш учителю.'],end:'Яка хитрість допомогла найбільше?',s:'Напиши одне речення-пораду для молодшого брата чи сестри: як не застрягти в бульбашці?'}
+  };
+  var mis=null, tick=null;
+  try{ var mr=JSON.parse(localStorage.getItem(MKEY)||'null'); if(mr&&MIS[mr.code]&&Date.now()-mr.start<TTL) mis=mr; }catch(e){}
+  function saveMis(){ try{ if(mis) localStorage.setItem(MKEY,JSON.stringify(mis)); else localStorage.removeItem(MKEY); }catch(e){} }
+  function codeForm(label,id){ return '<div class="m-code"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="text" inputmode="numeric" maxlength="2" autocomplete="off"><button class="btn" type="button" data-go="'+id+'">OK</button><span class="m-err" id="'+id+'Err"></span></div>'; }
+  function fmt(ms){ var s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
+  function renderMission(){
+    var box=$('mission'); clearInterval(tick);
+    if(!mis){ box.className='mission'; box.innerHTML=codeForm('Код місії від учителя:','mc'); wire('mc'); return; }
+    var m=MIS[mis.code], h='';
+    h+='<div class="m-head"><span class="m-no">Місія '+m.n+' з 4</span><span class="m-time" id="mTime"></span></div>';
+    h+='<div class="m-title">'+esc(m.t)+'</div><ul class="m-list">'+m.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+    h+='<div class="m-up" id="mUp" hidden>Час! Руки від мишки — дивись на вчителя. '+esc(m.end)+'</div>';
+    if(mis.sec) h+='<div class="m-sec"><b>Секретне завдання.</b> '+esc(m.s)+'</div>';
+    h+='<div class="m-foot">'+(!mis.sec?'<button class="btn ghost" type="button" id="mDone">Готово! Дай секретне завдання</button>':'<span></span>')+codeForm('Код наступної місії:','mn')+'</div>';
+    box.innerHTML=h; wire('mn');
+    if($('mDone')) $('mDone').addEventListener('click',function(){ mis.sec=true; saveMis(); renderMission(); });
+    var upd=function(){ var l=m.min*60000-(Date.now()-mis.start); $('mTime').textContent=fmt(l); var up=l<=0; box.className='mission'+(up?' up':''); $('mUp').hidden=!up; if(up) clearInterval(tick); };
+    upd(); tick=setInterval(upd,1000);
+  }
+  function wire(id){
+    var inp=$(id), go=function(){
+      var c=inp.value.replace(/\D/g,'');
+      if(!MIS[c]){ $(id+'Err').textContent='Такого коду немає. Перепитай учителя.'; inp.select(); return; }
+      if(mis&&mis.code===c){ inp.value=''; return; }
+      if(c==='34'){ st=fresh(); save(); stats(); showVideo(); if(typeof renderPanel==='function') renderPanel(); } /* first mission starts from a clean machine for every new class */
+      mis={code:c,start:Date.now(),sec:false}; saveMis(); renderMission(); renderPanel();
+    };
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+    inp.addEventListener('input',function(){ $(id+'Err').textContent=''; });
+    document.querySelector('[data-go="'+id+'"]').addEventListener('click',go);
+  }
+
+  stats(); renderMission(); showVideo();
+})();
+</script>
+</body>
+</html>
