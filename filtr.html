@@ -119,6 +119,11 @@ textarea{width:100%;min-height:84px;font:inherit;font-size:18px;padding:10px 12p
         <textarea id="mine" maxlength="300" placeholder="Наприклад: Привіт! Ти виграв приз, перейди за посиланням…"></textarea>
         <div class="guess" id="mineGuess"></div>
         <div class="marked" id="marked"></div>
+        <div class="acts" id="teachRow" hidden>
+          <button class="btn ghost" type="button" id="tS">🚫 Запам'ятай як спам</button>
+          <button class="btn ghost" type="button" id="tH">✅ Запам'ятай як звичайне</button>
+        </div>
+        <div class="info" id="teachInfo"></div>
         <div class="ideas" id="ideas"></div>
       </section>
       <div class="bottom">
@@ -244,6 +249,7 @@ textarea{width:100%;min-height:84px;font:inherit;font-size:18px;padding:10px 12p
 
   function renderMine(){
     var t=$('mine').value;
+    $('teachRow').hidden=!t.trim();
     if(!t.trim()){ $('mineGuess').innerHTML=''; $('marked').innerHTML=''; return; }
     $('mineGuess').innerHTML=guessHTML(predict(t));
     var parts=t.split(/([a-zA-Zа-яА-ЯіІїЇєЄґҐ'’ʼ`]+)/);
@@ -255,6 +261,9 @@ textarea{width:100%;min-height:84px;font:inherit;font-size:18px;padding:10px 12p
     }).join('');
   }
   $('mine').addEventListener('input',renderMine);
+  function teach(isSpam){ var t=$('mine').value; if(!t.trim()) return; learn(t,isSpam); save(); $('teachInfo').textContent=isSpam?'Запам\'ятав як спам. Тепер фільтр знає більше.':'Запам\'ятав як звичайне. Тепер фільтр знає більше.'; renderMine(); renderBrain(); }
+  $('tS').addEventListener('click',function(){ teach(true); });
+  $('tH').addEventListener('click',function(){ teach(false); });
   $('ideas').innerHTML='<span class="note" style="margin:0;align-self:center">Не хочеш писати — спробуй:</span>'+IDEAS.map(function(x,i){ return '<button type="button" data-i="'+i+'">'+esc(x)+'</button>'; }).join('');
   Array.prototype.forEach.call(document.querySelectorAll('#ideas button'),function(b){ b.addEventListener('click',function(){ $('mine').value=IDEAS[+b.getAttribute('data-i')]; renderMine(); }); });
 
@@ -277,10 +286,12 @@ textarea{width:100%;min-height:84px;font:inherit;font-size:18px;padding:10px 12p
 
   /* missions: the teacher says a code aloud, it opens the task and starts the timer */
   var MIS={
-    '25':{n:1,min:9,t:'Навчи фільтр',x:['Фільтр нічого не знає. Читай пошту й натискай «Спам» або «Не спам».','Спам — це реклама, обман і шахраї. Перед кожною відповіддю глянь: що думає фільтр?','Розбери щонайменше 20 повідомлень.'],end:'Скільки повідомлень фільтр вгадав? Число вгорі праворуч.',s:'Яке повідомлення фільтр найдовше не міг вгадати? Чому саме воно?'},
-    '41':{n:2,min:6,t:'Мізки фільтра',x:['Натисни «Показати мізки фільтра».','Які слова фільтр вважає шахрайськими? А які — звичайними?','Знайди слово, яке потрапило не туди. Наприклад, «виграли» — це про матч чи про приз?'],end:'Яке слово в твоєму фільтрі найбільш «шахрайське»?',s:'Чому фільтр підозрює слово «подарунок»? Знайди повідомлення, яке його цього навчило.'},
-    '56':{n:3,min:9,t:'Обдури фільтр',x:['Унизу — «Перевір своє повідомлення».','Напиши повідомлення від шахрая, яке фільтр назве звичайним.','Червоні слова видають шахрая, зелені — ховають. Заміни червоні слова іншими.'],end:'Запам\'ятай своє найхитріше повідомлення — воно знадобиться.',s:'А навпаки: напиши чесне повідомлення від мами чи друга, яке фільтр назве спамом.'},
-    '73':{n:4,min:7,t:'Шахрай у гостях',x:['Пересядь до сусіда.','Набери своє найхитріше повідомлення в «Перевір своє повідомлення» його фільтра.','Чужий фільтр теж обдурено? Чий фільтр важче обдурити?'],end:'Повертайся на місце. Чий фільтр виявився найпильнішим?',s:'Придумай правило для людини, не для фільтра: як упізнати шахрая, навіть якщо слова звичайні?'}
+    '25':{n:1,min:6,t:'Навчи фільтр',x:['Фільтр нічого не знає. Читай пошту й натискай «Спам» або «Не спам».','Спам — це реклама, обман і шахраї. Перед кожною відповіддю глянь: що думає фільтр?','Розбери щонайменше 20 повідомлень.'],end:'Скільки повідомлень фільтр вгадав? Число вгорі праворуч.',s:['Яке повідомлення фільтр найдовше не міг вгадати? Чому саме воно?','Розбери всю пошту — 40 повідомлень. Скільки з останніх 10 фільтр вгадав?']},
+    '41':{n:2,min:4,t:'Мізки фільтра',x:['Натисни «Показати мізки фільтра».','Які слова фільтр вважає шахрайськими? А які — звичайними?','Знайди слово, яке потрапило не туди. Наприклад, «виграли» — це про матч чи про приз?'],end:'Яке слово в твоєму фільтрі найбільш «шахрайське»?',s:['Чому фільтр підозрює слово «подарунок»? Знайди повідомлення, яке його цього навчило.','Знайди слово, яке трапилось і в спамі, і у звичайних. Куди його відніс фільтр і чому?']},
+    '56':{n:3,min:6,t:'Обдури фільтр',x:['Унизу — «Перевір своє повідомлення».','Напиши повідомлення від шахрая, яке фільтр назве звичайним.','Червоні слова видають шахрая, зелені — ховають. Заміни червоні слова іншими.'],end:'Запам\'ятай своє найхитріше повідомлення — воно знадобиться.',s:['А навпаки: напиши чесне повідомлення від мами чи друга, яке фільтр назве спамом.','Шахрайське повідомлення, яке фільтр вважає звичайним на 80% і більше.']},
+    '73':{n:4,min:5,t:'Шахрай у гостях',x:['Пересядь до сусіда.','Набери своє найхитріше повідомлення в «Перевір своє повідомлення» його фільтра.','Чужий фільтр теж обдурено? Чий фільтр важче обдурити?'],end:'Повертайся на місце. Чий фільтр виявився найпильнішим?',s:['Придумай правило для людини, не для фільтра: як упізнати шахрая, навіть якщо слова звичайні?','Знайди повідомлення, яке обдурить і твій фільтр, і сусідський.']},
+    '64':{n:5,min:6,t:'Фільтр-суддя',x:['Напиши три повідомлення. Перше фільтр має вважати спамом на 90% і більше.','Друге — звичайним на 90% і більше.','Третє — на самій межі: від 45% до 55%. Це найважче.'],end:'Яке повідомлення вийшло на межі? Що в ньому змішано?',s:['Найкоротше повідомлення, яке фільтр упевнено (понад 90%) вважає спамом. Скільки слів вистачило?','Повідомлення, яке стає зі спаму звичайним, якщо змінити лише одне слово. Яке слово?']},
+    '89':{n:6,min:7,t:'Гонка озброєнь',x:['Пари: один — шахрай, другий — захисник. Сідайте за комп\'ютер захисника.','Шахрай пише повідомлення, яке проходить фільтр. Захисник натискає «Запам\'ятай як спам» — фільтр вчиться.','Шахрай пише нове, яке знову проходить. 3 раунди, потім поміняйтеся ролями.'],end:'Хто виграв гонку — шахраї чи фільтр? Чи можна виграти її назавжди?',s:['Захисник: перевір, чи фільтр після навчання не зіпсувався. «Привіт! Підемо на футбол?» він і досі вважає звичайним?','Знайди чесне слово, яке фільтр після гонки почав вважати шахрайським. Чому так сталося?']}
   };
   var mis=null, tick=null;
   try{ var mr=JSON.parse(localStorage.getItem(MKEY)||'null'); if(mr&&MIS[mr.code]&&Date.now()-mr.start<TTL) mis=mr; }catch(e){}
@@ -291,13 +302,14 @@ textarea{width:100%;min-height:84px;font:inherit;font-size:18px;padding:10px 12p
     var box=$('mission'); clearInterval(tick);
     if(!mis){ box.className='mission'; box.innerHTML=codeForm('Код місії від учителя:','mc'); wire('mc'); return; }
     var m=MIS[mis.code], h='';
-    h+='<div class="m-head"><span class="m-no">Місія '+m.n+' з 4</span><span class="m-time" id="mTime"></span></div>';
+    h+='<div class="m-head"><span class="m-no">Місія '+m.n+' з 6</span><span class="m-time" id="mTime"></span></div>';
     h+='<div class="m-title">'+esc(m.t)+'</div><ul class="m-list">'+m.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
     h+='<div class="m-up" id="mUp" hidden>Час! Руки від мишки — дивись на вчителя. '+esc(m.end)+'</div>';
-    if(mis.sec) h+='<div class="m-sec"><b>Секретне завдання.</b> '+esc(m.s)+'</div>';
-    h+='<div class="m-foot">'+(!mis.sec?'<button class="btn ghost" type="button" id="mDone">Готово! Дай секретне завдання</button>':'<span></span>')+codeForm('Код наступної місії:','mn')+'</div>';
+    var SS=[].concat(m.s||[]), got=Math.min(+mis.sec||0,SS.length);
+    for(var si=0;si<got;si++) h+='<div class="m-sec"><b>'+(si===0?'Секретне завдання.':'Рівень '+(si+1)+'.')+'</b> '+esc(SS[si])+'</div>';
+    h+='<div class="m-foot">'+(got<SS.length?'<button class="btn ghost" type="button" id="mDone">'+(got===0?'Готово! Дай секретне завдання':'Готово! Ще складніше')+'</button>':'<span></span>')+codeForm('Код наступної місії:','mn')+'</div>';
     box.innerHTML=h; wire('mn');
-    if($('mDone')) $('mDone').addEventListener('click',function(){ mis.sec=true; saveMis(); renderMission(); });
+    if($('mDone')) $('mDone').addEventListener('click',function(){ mis.sec=(+mis.sec||0)+1; saveMis(); renderMission(); });
     var upd=function(){ var l=m.min*60000-(Date.now()-mis.start); $('mTime').textContent=fmt(l); var up=l<=0; box.className='mission'+(up?' up':''); $('mUp').hidden=!up; if(up) clearInterval(tick); };
     upd(); tick=setInterval(upd,1000);
   }
