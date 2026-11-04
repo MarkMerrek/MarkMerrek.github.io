@@ -34,6 +34,11 @@ header{padding:24px 0 12px;display:flex;flex-wrap:wrap;justify-content:space-bet
 .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
 h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 0 0;letter-spacing:-.02em}
 .score{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ink-2);text-align:right}
+.hright{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.lang{display:inline-flex;border:2px solid var(--line-strong);border-radius:8px;overflow:hidden}
+.lang button{appearance:none;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;padding:6px 12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.lang button:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .score b{font-family:"Archivo",Arial,sans-serif;font-size:26px;color:var(--ink)}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);gap:20px;align-items:start}
 @media (max-width:820px){.grid{grid-template-columns:1fr}}
@@ -91,10 +96,16 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
 <div class="wrap">
   <header>
     <div>
-      <div class="kicker">Інформатика · штучний інтелект</div>
-      <h1>Моя стрічка</h1>
+      <div class="kicker" data-i18n="kicker">Інформатика · штучний інтелект</div>
+      <h1 data-i18n="title">Моя стрічка</h1>
     </div>
-    <div class="score">переглянуто <b id="seen">0</b><br>❤ <b id="likes">0</b></div>
+    <div class="hright">
+      <div class="lang" role="group" aria-label="Мова / Language">
+        <button type="button" data-lang="uk" aria-pressed="true">UA</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="score"><span data-i18n="seenL">переглянуто</span> <b id="seen">0</b><br>❤ <b id="likes">0</b></div>
+    </div>
   </header>
 
   <div class="grid">
@@ -102,26 +113,26 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
       <div class="phone">
         <div class="video" id="video"></div>
         <div class="acts">
-          <button class="btn like" type="button" id="like">❤ Подобається</button>
-          <button class="btn next" type="button" id="next">Далі ↓</button>
+          <button class="btn like" type="button" id="like" data-i18n="like">❤ Подобається</button>
+          <button class="btn next" type="button" id="next" data-i18n="next">Далі ↓</button>
         </div>
       </div>
       <div class="bottom">
         <button class="btn ghost" type="button" id="panelBtn">Що стрічка думає про мене</button>
-        <button class="btn ghost" type="button" id="newBtn">Нова стрічка</button>
-        <span class="confirm" id="ask" hidden>Стрічка забуде все про тебе. Точно?
-          <button class="btn no" type="button" id="askYes">Так</button>
-          <button class="btn ghost" type="button" id="askNo">Ні</button>
+        <button class="btn ghost" type="button" id="newBtn" data-i18n="newBtn">Нова стрічка</button>
+        <span class="confirm" id="ask" hidden><span data-i18n="askText">Стрічка забуде все про тебе. Точно?</span>
+          <button class="btn no" type="button" id="askYes" data-i18n="yes">Так</button>
+          <button class="btn ghost" type="button" id="askNo" data-i18n="no">Ні</button>
         </span>
       </div>
     </div>
     <div>
       <section class="mission" id="mission" aria-live="polite"></section>
     <aside class="card panel" id="panel" hidden>
-      <h2>Що стрічка думає про тебе</h2>
-      <div class="meta">Що більша смужка, то частіше стрічка показує цю тему.</div>
+      <h2 data-i18n="panelH">Що стрічка думає про тебе</h2>
+      <div class="meta" data-i18n="panelMeta">Що більша смужка, то частіше стрічка показує цю тему.</div>
       <div id="bars"></div>
-      <div class="meta" style="margin-top:12px;margin-bottom:0">Останні відео, від старих до нових:</div>
+      <div class="meta" style="margin-top:12px;margin-bottom:0" data-i18n="histL">Останні відео, від старих до нових:</div>
       <div class="hist" id="hist"></div>
       <div class="div" id="div"></div>
       <div class="facts" id="facts"></div>
@@ -132,19 +143,47 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
 
 <script>
 (function(){
-  var KEY='strichka-v1', MKEY='strichka-mission', TTL=3*3600*1000;
+  var KEY='strichka-v1', MKEY='strichka-mission', LANGKEY='strichka-lang', TTL=3*3600*1000;
   var TOPICS=[
-    {n:'Котики',e:'🐱',c:'#C26A12',v:['Кіт уперше бачить огірок','Кошеня проти дзеркала','Кіт, який сам відчиняє двері','10 котів, що заснули в дивних позах','Кіт ловить лазерну точку','Кіт охороняє свою коробку']},
-    {n:'Футбол',e:'⚽',c:'#1F7A3E',v:['Найкращі голи тижня','Воротар, який врятував усе','Фінт, якого навчишся за 5 хвилин','Гол через себе у дворі','Пенальті із заплющеними очима','Один день професійного футболіста']},
-    {n:'Ігри',e:'🎮',c:'#5B3FA8',v:['Будую замок із кубиків','Рівень без жодного удару','Найсмішніші баги в іграх','Гра, яку ніхто не може пройти','Секретна кімната, про яку ніхто не знав','Пройшов гру за 3 хвилини']},
-    {n:'Музика',e:'🎵',c:'#B0284A',v:['Пісня, що застрягне в голові','Гітарист грає ногами','Хор із 100 дітей','Барабани з каструль','Хіт року на піаніно','Співає вся вулиця']},
-    {n:'Смаколики',e:'🍰',c:'#A3561F',v:['Торт, схожий на кавун','Піца за 10 хвилин','Найбільший млинець','Шоколадний вибух','Морозиво з трьох інгредієнтів','Кекс-монстр']},
-    {n:'Досліди',e:'🔬',c:'#0F6F80',v:['Вулкан із соди й оцту','Сухий лід у воді','Яйце, що не тоне','Ракета з пляшки','Лампочка від лимона','Магніт проти монети']},
-    {n:'Танці',e:'💃',c:'#B23A8A',v:['Танець, який повторюють усі','Брейк-данс у 8 років','Танцюючий робот','Флешмоб у торговому центрі','Танець на льоду','Навчись за 30 секунд']},
-    {n:'Машини',e:'🚗',c:'#3B4A5E',v:['Найшвидша машина світу','Машина-трансформер','Перегони радіокерованих авто','Вантажівка-монстр','Електромобіль зсередини','Паркування як у кіно']},
-    {n:'Малювання',e:'🎨',c:'#2E6CB0',v:['Очі за 1 хвилину','Картина з кави','Малюнок, що оживає','Портрет однією лінією','Фарби, що світяться','Персонаж крок за кроком']},
-    {n:'Природа',e:'🦁',c:'#6B7A1A',v:['Дельфіни граються з хвилею','Як спить жираф','Ведмежата вперше бачать сніг','Найменша мавпа світу','Восьминіг ховається','Пінгвіни на прогулянці']}
+    {e:'🐱',c:'#C26A12',uk:{n:'Котики',v:['Кіт уперше бачить огірок','Кошеня проти дзеркала','Кіт, який сам відчиняє двері','10 котів, що заснули в дивних позах','Кіт ловить лазерну точку','Кіт охороняє свою коробку']},
+      en:{n:'Cats',v:['Cat sees a cucumber for the first time','Kitten vs the mirror','The cat that opens doors by itself','10 cats asleep in weird poses','Cat chases a laser dot','Cat guards its box']}},
+    {e:'⚽',c:'#1F7A3E',uk:{n:'Футбол',v:['Найкращі голи тижня','Воротар, який врятував усе','Фінт, якого навчишся за 5 хвилин','Гол через себе у дворі','Пенальті із заплющеними очима','Один день професійного футболіста']},
+      en:{n:'Football',v:['Best goals of the week','The goalkeeper who saved everything','A trick you can learn in 5 minutes','Bicycle kick in the backyard','Penalty with eyes closed','A day in the life of a pro footballer']}},
+    {e:'🎮',c:'#5B3FA8',uk:{n:'Ігри',v:['Будую замок із кубиків','Рівень без жодного удару','Найсмішніші баги в іграх','Гра, яку ніхто не може пройти','Секретна кімната, про яку ніхто не знав','Пройшов гру за 3 хвилини']},
+      en:{n:'Games',v:['Building a castle out of blocks','A level without a single hit','The funniest bugs in games','The game nobody can beat','A secret room nobody knew about','Beat the game in 3 minutes']}},
+    {e:'🎵',c:'#B0284A',uk:{n:'Музика',v:['Пісня, що застрягне в голові','Гітарист грає ногами','Хор із 100 дітей','Барабани з каструль','Хіт року на піаніно','Співає вся вулиця']},
+      en:{n:'Music',v:['A song that will get stuck in your head','Guitarist plays with his feet','A choir of 100 kids','Drums made of pots','Hit of the year on piano','The whole street sings']}},
+    {e:'🍰',c:'#A3561F',uk:{n:'Смаколики',v:['Торт, схожий на кавун','Піца за 10 хвилин','Найбільший млинець','Шоколадний вибух','Морозиво з трьох інгредієнтів','Кекс-монстр']},
+      en:{n:'Treats',v:['A cake that looks like a watermelon','Pizza in 10 minutes','The biggest pancake ever','Chocolate explosion','Three-ingredient ice cream','Monster cupcake']}},
+    {e:'🔬',c:'#0F6F80',uk:{n:'Досліди',v:['Вулкан із соди й оцту','Сухий лід у воді','Яйце, що не тоне','Ракета з пляшки','Лампочка від лимона','Магніт проти монети']},
+      en:{n:'Experiments',v:['Baking soda and vinegar volcano','Dry ice in water','The egg that doesn’t sink','Bottle rocket','A light bulb powered by a lemon','Magnet vs coin']}},
+    {e:'💃',c:'#B23A8A',uk:{n:'Танці',v:['Танець, який повторюють усі','Брейк-данс у 8 років','Танцюючий робот','Флешмоб у торговому центрі','Танець на льоду','Навчись за 30 секунд']},
+      en:{n:'Dance',v:['The dance everyone copies','An 8-year-old breakdancer','Dancing robot','Flash mob at the mall','Dancing on ice','Learn it in 30 seconds']}},
+    {e:'🚗',c:'#3B4A5E',uk:{n:'Машини',v:['Найшвидша машина світу','Машина-трансформер','Перегони радіокерованих авто','Вантажівка-монстр','Електромобіль зсередини','Паркування як у кіно']},
+      en:{n:'Cars',v:['The fastest car in the world','Transformer car','Remote-control car race','Monster truck','Inside an electric car','Parking like in a movie']}},
+    {e:'🎨',c:'#2E6CB0',uk:{n:'Малювання',v:['Очі за 1 хвилину','Картина з кави','Малюнок, що оживає','Портрет однією лінією','Фарби, що світяться','Персонаж крок за кроком']},
+      en:{n:'Drawing',v:['Eyes in 1 minute','A painting made of coffee','A drawing that comes alive','A portrait in one line','Glow-in-the-dark paint','A character step by step']}},
+    {e:'🦁',c:'#6B7A1A',uk:{n:'Природа',v:['Дельфіни граються з хвилею','Як спить жираф','Ведмежата вперше бачать сніг','Найменша мавпа світу','Восьминіг ховається','Пінгвіни на прогулянці']},
+      en:{n:'Nature',v:['Dolphins playing with a wave','How a giraffe sleeps','Bear cubs see snow for the first time','The smallest monkey in the world','An octopus hides','Penguins out for a walk']}}
   ];
+  var S={
+    uk:{doc:'Моя стрічка',kicker:'Інформатика · штучний інтелект',title:'Моя стрічка',seenL:'переглянуто',like:'❤ Подобається',next:'Далі ↓',panelBtn:'Що стрічка думає про мене',hide:'Сховати',newBtn:'Нова стрічка',askText:'Стрічка забуде все про тебе. Точно?',yes:'Так',no:'Ні',
+      panelH:'Що стрічка думає про тебе',panelMeta:'Що більша смужка, то частіше стрічка показує цю тему.',histL:'Останні відео, від старих до нових:',
+      divWait:'Різноманітність: подивись ще {n} відео',div:'Різноманітність: {k} з 10 тем в останніх 20 відео',fLikes:'❤ лайків: ',fWatch:'👀 дивився довше 4 секунд: ',fQuick:'⏩ гортав одразу, за 2 секунди: ',
+      views:function(v){ return v.replace('.',',')+' млн переглядів'; },
+      mCode:'Код місії від учителя:',mNext:'Код наступної місії:',mBad:'Такого коду немає. Перепитай учителя.',mOf:'Місія {n} з 4',mUp:'Час! Руки від мишки — дивись на вчителя.',mSec:'Секретне завдання.',mDone:'Готово! Дай секретне завдання'},
+    en:{doc:'My Feed',kicker:'Computer science · AI',title:'My Feed',seenL:'watched',like:'❤ Like',next:'Next ↓',panelBtn:'What the feed thinks about me',hide:'Hide',newBtn:'New feed',askText:'The feed will forget everything about you. Sure?',yes:'Yes',no:'No',
+      panelH:'What the feed thinks about you',panelMeta:'The bigger the bar, the more often the feed shows this topic.',histL:'Latest videos, oldest to newest:',
+      divWait:'Variety: watch {n} more videos',div:'Variety: {k} of 10 topics in the last 20 videos',fLikes:'❤ likes: ',fWatch:'👀 watched for longer than 4 seconds: ',fQuick:'⏩ scrolled past at once, within 2 seconds: ',
+      views:function(v){ return v+'M views'; },
+      mCode:'Mission code from your teacher:',mNext:'Next mission code:',mBad:'There is no such code. Ask your teacher again.',mOf:'Mission {n} of 4',mUp:'Time is up! Hands off the mouse — look at your teacher.',mSec:'Secret task.',mDone:'Done! Give me a secret task'}
+  };
+  var lang='uk';
+  try{ var sl=localStorage.getItem(LANGKEY); if(sl&&S[sl]) lang=sl; }catch(e){}
+  try{ var qp=new URLSearchParams(location.search).get('lang'); if(qp&&S[qp]) lang=qp; }catch(e){}
+  function t(k){ return S[lang][k]; }
+  function tn(i){ return TOPICS[i][lang].n; }
+
   var T=TOPICS.length;
   function fresh(){ var w=[]; for(var i=0;i<T;i++) w.push(1); return {w:w,hist:[],seen:0,likes:0,watched:0,quick:0,idx:new Array(T).fill(0),cur:null}; }
   var st=fresh();
@@ -161,25 +200,25 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
     return T-1;
   }
   var shownAt=Date.now();
-  function showVideo(){
+  function showVideo(keepTimer){
     if(st.cur==null){
-      var t=pick(); if(st.hist.length&&st.hist[st.hist.length-1]===t&&Math.random()<0.5) t=pick();
-      var k=st.idx[t]%TOPICS[t].v.length; st.idx[t]++;
-      st.cur={t:t,k:k,views:(Math.random()*4.8+0.2).toFixed(1)}; save();
+      var p=pick(); if(st.hist.length&&st.hist[st.hist.length-1]===p&&Math.random()<0.5) p=pick();
+      var k=st.idx[p]%TOPICS[p].uk.v.length; st.idx[p]++;
+      st.cur={t:p,k:k,views:(Math.random()*4.8+0.2).toFixed(1)}; save();
     }
     var tp=TOPICS[st.cur.t];
     $('video').style.background='linear-gradient(160deg,'+tp.c+','+shade(tp.c)+')';
-    $('video').innerHTML='<div class="topic">#'+esc(tp.n.toLowerCase())+'</div><div class="em">'+tp.e+'</div><div><div class="title">'+esc(tp.v[st.cur.k])+'</div><div class="views">'+st.cur.views.replace('.',',')+' млн переглядів</div></div>';
-    shownAt=Date.now();
+    $('video').innerHTML='<div class="topic">#'+esc(tn(st.cur.t).toLowerCase())+'</div><div class="em">'+tp.e+'</div><div><div class="title">'+esc(tp[lang].v[st.cur.k])+'</div><div class="views">'+esc(t('views')(st.cur.views))+'</div></div>';
+    if(!keepTimer) shownAt=Date.now();
   }
   function shade(hex){ var n=parseInt(hex.slice(1),16), r=(n>>16)*.55|0, g=(n>>8&255)*.55|0, b=(n&255)*.55|0; return 'rgb('+r+','+g+','+b+')'; }
   function act(liked){
-    var t=st.cur.t, d=(Date.now()-shownAt)/1000;
-    if(liked){ st.w[t]*=1.6; st.likes++; }
-    else if(d>=4){ st.w[t]*=1.3; st.watched++; }      /* looked for a long time: probably interesting */
-    else if(d<2){ st.w[t]*=0.75; st.quick++; }        /* scrolled away at once: probably boring */
+    var p=st.cur.t, d=(Date.now()-shownAt)/1000;
+    if(liked){ st.w[p]*=1.6; st.likes++; }
+    else if(d>=4){ st.w[p]*=1.3; st.watched++; }      /* looked for a long time: probably interesting */
+    else if(d<2){ st.w[p]*=0.75; st.quick++; }        /* scrolled away at once: probably boring */
     var tot=st.w.reduce(function(a,b){ return a+b; },0); st.w=st.w.map(function(x){ return Math.max(x/tot*T,0.1); });
-    st.hist.push(t); if(st.hist.length>60) st.hist.shift();
+    st.hist.push(p); if(st.hist.length>60) st.hist.shift();
     st.seen++; st.cur=null; save(); stats(); showVideo(); renderPanel();
   }
   $('like').addEventListener('click',function(){ act(true); });
@@ -191,40 +230,49 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
     if(!open) return;
     var tot=st.w.reduce(function(a,b){ return a+b; },0);
     var order=TOPICS.map(function(_,i){ return i; }).sort(function(a,b){ return st.w[b]-st.w[a]; });
-    $('bars').innerHTML=order.map(function(i){ var p=Math.round(st.w[i]/tot*100); return '<div class="bar"><span>'+TOPICS[i].e+' '+esc(TOPICS[i].n)+'</span><span class="t"><span class="f" style="display:block;width:'+p+'%;background:'+TOPICS[i].c+'"></span></span><span class="p">'+p+'%</span></div>'; }).join('');
-    $('hist').innerHTML=st.hist.slice(-40).map(function(t){ return '<i title="'+esc(TOPICS[t].n)+'" style="background:'+TOPICS[t].c+'"></i>'; }).join('');
-    var last=st.hist.slice(-20), u={}; last.forEach(function(t){ u[t]=1; });
+    $('bars').innerHTML=order.map(function(i){ var p=Math.round(st.w[i]/tot*100); return '<div class="bar"><span>'+TOPICS[i].e+' '+esc(tn(i))+'</span><span class="t"><span class="f" style="display:block;width:'+p+'%;background:'+TOPICS[i].c+'"></span></span><span class="p">'+p+'%</span></div>'; }).join('');
+    $('hist').innerHTML=st.hist.slice(-40).map(function(i){ return '<i title="'+esc(tn(i))+'" style="background:'+TOPICS[i].c+'"></i>'; }).join('');
+    var last=st.hist.slice(-20), u={}; last.forEach(function(i){ u[i]=1; });
     var k=Object.keys(u).length;
-    $('div').textContent=last.length<20?'Різноманітність: подивись ще '+(20-last.length)+' відео':'Різноманітність: '+k+' з 10 тем в останніх 20 відео';
+    $('div').textContent=last.length<20?t('divWait').replace('{n}',20-last.length):t('div').replace('{k}',k);
     $('facts').hidden=!(mis&&(mis.code==='62'||mis.code==='88'));
-    $('facts').innerHTML='<div>❤ лайків: '+st.likes+'</div><div>👀 дивився довше 4 секунд: '+st.watched+'</div><div>⏩ гортав одразу, за 2 секунди: '+st.quick+'</div>';
+    $('facts').innerHTML='<div>'+esc(t('fLikes'))+st.likes+'</div><div>'+esc(t('fWatch'))+st.watched+'</div><div>'+esc(t('fQuick'))+st.quick+'</div>';
   }
-  $('panelBtn').addEventListener('click',function(){ open=!open; $('panel').hidden=!open; $('panelBtn').textContent=open?'Сховати':'Що стрічка думає про мене'; renderPanel(); });
+  function panelLabel(){ $('panelBtn').textContent=open?t('hide'):t('panelBtn'); }
+  $('panelBtn').addEventListener('click',function(){ open=!open; $('panel').hidden=!open; panelLabel(); renderPanel(); });
   $('newBtn').addEventListener('click',function(){ $('ask').hidden=false; });
   $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
   $('askYes').addEventListener('click',function(){ st=fresh(); save(); stats(); showVideo(); renderPanel(); $('ask').hidden=true; });
 
   /* missions */
   var MIS={
-    '34':{n:1,min:7,t:'Твоя стрічка',x:['Гортай стрічку так, як гортаєш удома: ❤ — якщо подобається, «Далі» — якщо ні.','Не поспішай і нічого не вигадуй. Подивись щонайменше 40 відео.','Кнопку «Що стрічка думає про мене» поки не натискай.'],end:'Не закривай сторінку — чекай на код.',s:'Спробуй вгадати тему наступного відео до того, як воно з\'явиться. Скільки разів поспіль вгадав?'},
-    '47':{n:2,min:6,t:'Що стрічка про тебе знає',x:['Натисни «Що стрічка думає про мене». Це правда ти?','Пересядь до сусіда. Не питаючи, подивись на його панель і вгадай три його улюблені теми.','Перевір у нього. Чи знає стрічка сусіда краще, ніж ти?'],end:'Повертайся на місце. Хто з вас вгадав усі три?',s:'Подивись на смужку «Останні відео». Після якого відео стрічка тебе «зрозуміла»?'},
-    '62':{n:3,min:8,t:'Секрет стрічки',x:['Натисни «Нова стрічка».','Тепер НЕ став жодного ❤. Обери одну тему, яка тобі байдужа.','На цій темі затримуйся на 5 секунд, а все інше гортай одразу. 30 відео.','Відкрий «Що стрічка думає про мене». Що сталося?'],end:'Як стрічка дізналася, що тобі «подобається», якщо ти нічого не лайкав?',s:'А навпаки: лайкай усе, але гортай одразу. Що переможе — лайки чи час?'},
-    '88':{n:4,min:7,t:'Втеча з бульбашки',x:['Не скидай стрічку! Зараз вона показує майже одну тему.','Поверни в неї різні теми. Ціль — «Різноманітність: 8 з 10» або більше. Вона на панелі «Що стрічка думає про мене».','Порахуй, скільки відео тобі знадобилося. Це твій рекорд — скажеш учителю.'],end:'Яка хитрість допомогла найбільше?',s:'Напиши одне речення-пораду для молодшого брата чи сестри: як не застрягти в бульбашці?'}
+    '34':{n:1,min:7,
+      uk:{t:'Твоя стрічка',x:['Гортай стрічку так, як гортаєш удома: ❤ — якщо подобається, «Далі» — якщо ні.','Не поспішай і нічого не вигадуй. Подивись щонайменше 40 відео.','Кнопку «Що стрічка думає про мене» поки не натискай.'],end:'Не закривай сторінку — чекай на код.',s:'Спробуй вгадати тему наступного відео до того, як воно з\'явиться. Скільки разів поспіль вгадав?'},
+      en:{t:'Your feed',x:['Scroll the feed the way you do at home: ❤ if you like it, “Next” if you don’t.','Don’t rush and don’t make things up. Watch at least 40 videos.','Don’t press “What the feed thinks about me” yet.'],end:'Don’t close the page — wait for the code.',s:'Try to guess the topic of the next video before it appears. How many times in a row did you get it right?'}},
+    '47':{n:2,min:6,
+      uk:{t:'Що стрічка про тебе знає',x:['Натисни «Що стрічка думає про мене». Це правда ти?','Пересядь до сусіда. Не питаючи, подивись на його панель і вгадай три його улюблені теми.','Перевір у нього. Чи знає стрічка сусіда краще, ніж ти?'],end:'Повертайся на місце. Хто з вас вгадав усі три?',s:'Подивись на смужку «Останні відео». Після якого відео стрічка тебе «зрозуміла»?'},
+      en:{t:'What the feed knows about you',x:['Press “What the feed thinks about me”. Is that really you?','Move to your neighbour’s computer. Without asking, look at their panel and guess their three favourite topics.','Check with them. Does the feed know your neighbour better than you do?'],end:'Go back to your seat. Which of you guessed all three?',s:'Look at the “Latest videos” strip. After which video did the feed “figure you out”?'}},
+    '62':{n:3,min:8,
+      uk:{t:'Секрет стрічки',x:['Натисни «Нова стрічка».','Тепер НЕ став жодного ❤. Обери одну тему, яка тобі байдужа.','На цій темі затримуйся на 5 секунд, а все інше гортай одразу. 30 відео.','Відкрий «Що стрічка думає про мене». Що сталося?'],end:'Як стрічка дізналася, що тобі «подобається», якщо ти нічого не лайкав?',s:'А навпаки: лайкай усе, але гортай одразу. Що переможе — лайки чи час?'},
+      en:{t:'The feed’s secret',x:['Press “New feed”.','Now DON’T give a single ❤. Pick one topic you don’t care about.','Stay on that topic for 5 seconds and scroll past everything else at once. 30 videos.','Open “What the feed thinks about me”. What happened?'],end:'How did the feed find out what you “like” if you didn’t like anything?',s:'Now the opposite: like everything, but scroll past at once. Which wins — likes or time?'}},
+    '88':{n:4,min:7,
+      uk:{t:'Втеча з бульбашки',x:['Не скидай стрічку! Зараз вона показує майже одну тему.','Поверни в неї різні теми. Ціль — «Різноманітність: 8 з 10» або більше. Вона на панелі «Що стрічка думає про мене».','Порахуй, скільки відео тобі знадобилося. Це твій рекорд — скажеш учителю.'],end:'Яка хитрість допомогла найбільше?',s:'Напиши одне речення-пораду для молодшого брата чи сестри: як не застрягти в бульбашці?'},
+      en:{t:'Escape the bubble',x:['Don’t reset the feed! Right now it shows almost one topic.','Bring different topics back. Goal: “Variety: 8 of 10” or more. You’ll find it on the “What the feed thinks about me” panel.','Count how many videos it took you. That’s your record — tell your teacher.'],end:'Which trick helped the most?',s:'Write one sentence of advice for a younger brother or sister: how not to get stuck in a bubble?'}}
   };
   var mis=null, tick=null;
   try{ var mr=JSON.parse(localStorage.getItem(MKEY)||'null'); if(mr&&MIS[mr.code]&&Date.now()-mr.start<TTL) mis=mr; }catch(e){}
   function saveMis(){ try{ if(mis) localStorage.setItem(MKEY,JSON.stringify(mis)); else localStorage.removeItem(MKEY); }catch(e){} }
-  function codeForm(label,id){ return '<div class="m-code"><label for="'+id+'">'+label+'</label><input id="'+id+'" type="text" inputmode="numeric" maxlength="2" autocomplete="off"><button class="btn" type="button" data-go="'+id+'">OK</button><span class="m-err" id="'+id+'Err"></span></div>'; }
+  function codeForm(label,id){ return '<div class="m-code"><label for="'+id+'">'+esc(label)+'</label><input id="'+id+'" type="text" inputmode="numeric" maxlength="2" autocomplete="off"><button class="btn" type="button" data-go="'+id+'">OK</button><span class="m-err" id="'+id+'Err"></span></div>'; }
   function fmt(ms){ var s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s/60)+':'+('0'+s%60).slice(-2); }
   function renderMission(){
     var box=$('mission'); clearInterval(tick);
-    if(!mis){ box.className='mission'; box.innerHTML=codeForm('Код місії від учителя:','mc'); wire('mc'); return; }
-    var m=MIS[mis.code], h='';
-    h+='<div class="m-head"><span class="m-no">Місія '+m.n+' з 4</span><span class="m-time" id="mTime"></span></div>';
-    h+='<div class="m-title">'+esc(m.t)+'</div><ul class="m-list">'+m.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
-    h+='<div class="m-up" id="mUp" hidden>Час! Руки від мишки — дивись на вчителя. '+esc(m.end)+'</div>';
-    if(mis.sec) h+='<div class="m-sec"><b>Секретне завдання.</b> '+esc(m.s)+'</div>';
-    h+='<div class="m-foot">'+(!mis.sec?'<button class="btn ghost" type="button" id="mDone">Готово! Дай секретне завдання</button>':'<span></span>')+codeForm('Код наступної місії:','mn')+'</div>';
+    if(!mis){ box.className='mission'; box.innerHTML=codeForm(t('mCode'),'mc'); wire('mc'); return; }
+    var m=MIS[mis.code], L=m[lang], h='';
+    h+='<div class="m-head"><span class="m-no">'+esc(t('mOf').replace('{n}',m.n))+'</span><span class="m-time" id="mTime"></span></div>';
+    h+='<div class="m-title">'+esc(L.t)+'</div><ul class="m-list">'+L.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>';
+    h+='<div class="m-up" id="mUp" hidden>'+esc(t('mUp'))+' '+esc(L.end)+'</div>';
+    if(mis.sec) h+='<div class="m-sec"><b>'+esc(t('mSec'))+'</b> '+esc(L.s)+'</div>';
+    h+='<div class="m-foot">'+(!mis.sec?'<button class="btn ghost" type="button" id="mDone">'+esc(t('mDone'))+'</button>':'<span></span>')+codeForm(t('mNext'),'mn')+'</div>';
     box.innerHTML=h; wire('mn');
     if($('mDone')) $('mDone').addEventListener('click',function(){ mis.sec=true; saveMis(); renderMission(); });
     var upd=function(){ var l=m.min*60000-(Date.now()-mis.start); $('mTime').textContent=fmt(l); var up=l<=0; box.className='mission'+(up?' up':''); $('mUp').hidden=!up; if(up) clearInterval(tick); };
@@ -233,9 +281,9 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
   function wire(id){
     var inp=$(id), go=function(){
       var c=inp.value.replace(/\D/g,'');
-      if(!MIS[c]){ $(id+'Err').textContent='Такого коду немає. Перепитай учителя.'; inp.select(); return; }
+      if(!MIS[c]){ $(id+'Err').textContent=t('mBad'); inp.select(); return; }
       if(mis&&mis.code===c){ inp.value=''; return; }
-      if(c==='34'){ st=fresh(); save(); stats(); showVideo(); if(typeof renderPanel==='function') renderPanel(); } /* first mission starts from a clean machine for every new class */
+      if(c==='34'){ st=fresh(); save(); stats(); showVideo(); } /* first mission starts from a clean feed for every new class */
       mis={code:c,start:Date.now(),sec:false}; saveMis(); renderMission(); renderPanel();
     };
     inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
@@ -243,7 +291,16 @@ h1{font-weight:800;font-size:clamp(28px,4.6vw,42px);line-height:1.05;margin:4px 
     document.querySelector('[data-go="'+id+'"]').addEventListener('click',go);
   }
 
-  stats(); renderMission(); showVideo();
+  /* language: switching does not reset the feed or the watch timer of the current video */
+  function applyLang(){
+    document.documentElement.lang=lang; document.title=t('doc');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'),function(el){ el.textContent=t(el.getAttribute('data-i18n')); });
+    Array.prototype.forEach.call(document.querySelectorAll('.lang button'),function(b){ b.setAttribute('aria-pressed',b.getAttribute('data-lang')===lang?'true':'false'); });
+    panelLabel(); showVideo(true); renderPanel(); renderMission();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.lang button'),function(b){ b.addEventListener('click',function(){ var nl=b.getAttribute('data-lang'); if(nl===lang) return; lang=nl; try{ localStorage.setItem(LANGKEY,lang); }catch(e){} applyLang(); }); });
+
+  stats(); showVideo(); applyLang();
 })();
 </script>
 </body>
