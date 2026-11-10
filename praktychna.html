@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Практична: навчи й перевір ШІ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Practical work: students pick training examples (fruit or vegetable), the machine learns ONE rule (the OneR algorithm),
+   then it is tested on 12 products it has never seen. Tasks are checked automatically and scored out of 12. Works offline. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --surface-2:#E9EDF3;
+  --ink:#151A22; --ink-2:#3C4656; --muted:#687386;
+  --line:#D8DFE8; --line-strong:#BEC8D6;
+  --accent:#2E4A7D; --on-accent:#FFFFFF; --accent-soft:#E2E9F5;
+  --fruit:#B0284A; --fruit-soft:#F8E1E7; --veg:#1E6B3A; --veg-soft:#E1F1E6;
+  --ok:#1E6B3A; --bad:#8C2F2F; --bad-soft:#F6E3E3; --warm:#8A570F; --warm-soft:#F5E9D7;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#10131A; --surface:#181C25; --surface-2:#222836;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --on-accent:#10131A; --accent-soft:#1C2637;
+    --fruit:#F08AA3; --fruit-soft:#3A1C25; --veg:#7FD39A; --veg-soft:#18291F;
+    --ok:#7FD39A; --bad:#E89494; --bad-soft:#2E1C1C; --warm:#DCA76A; --warm-soft:#2C2318;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",Arial,sans-serif;font-size:16.5px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px 60px}
+header{padding:22px 0 10px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:800;font-size:clamp(26px,4vw,38px);line-height:1.05;margin:4px 0 0;letter-spacing:-.02em}
+h2{font-size:19px;margin:0 0 8px}
+h3{font-size:16px;margin:0 0 6px}
+.hright{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.lang{display:inline-flex;border:2px solid var(--line-strong);border-radius:8px;overflow:hidden}
+.lang button{appearance:none;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:14px;padding:6px 12px;border:0;background:transparent;color:var(--ink-2);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.who{font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--ink-2);text-align:right}
+.who b{font-family:"Archivo",Arial,sans-serif;font-size:22px;color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:700;font-size:16px;padding:10px 16px;border-radius:8px;border:2px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-strong)}
+.btn.sm{font-size:14.5px;padding:7px 12px}
+.btn.no{background:var(--bad);border-color:var(--bad);color:var(--on-accent)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,input:focus-visible,.item:focus-visible,.tab:focus-visible,.lab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+input[type=text]{font:inherit;font-size:17px;padding:8px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--bg);color:var(--ink)}
+.note{font-size:14.5px;color:var(--muted)}
+/* start */
+.start{max-width:560px;margin:40px auto;display:grid;gap:14px}
+.start label{font-weight:600;display:grid;gap:6px}
+.err{color:var(--bad);font-size:14.5px;min-height:20px}
+/* tasks */
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;font:inherit;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);font-weight:500}
+.tab.full .pt{color:var(--ok);font-weight:700}
+.task{border-left:4px solid var(--accent)}
+.task ol,.task ul{margin:6px 0 10px;padding-left:22px}
+.task li{margin:3px 0}
+.q{margin:10px 0;padding:10px 12px;background:var(--surface-2);border-radius:8px}
+.q p{margin:0 0 6px;font-weight:600}
+.q label{display:flex;gap:8px;align-items:flex-start;margin:4px 0;cursor:pointer}
+.q input[type=text]{width:90px;text-align:center;font-family:"IBM Plex Mono",monospace}
+.feedback{margin-top:8px;font-weight:700;min-height:22px}
+.feedback.ok{color:var(--ok)} .feedback.part{color:var(--warm)}
+.feedback ul{font-weight:500;color:var(--ink-2);margin:4px 0 0}
+.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start;margin-top:14px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.item{appearance:none;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 8px;cursor:pointer;font:inherit;display:grid;grid-template-columns:auto 1fr;gap:0 8px;align-items:center}
+.item .em{font-size:30px;grid-row:span 2;line-height:1}
+.item .nm{font-weight:700;font-size:15px}
+.item .ft{font-size:12px;color:var(--muted);line-height:1.25}
+.item.in{border-color:var(--accent);background:var(--accent-soft)}
+.item.F .nm{color:var(--fruit)} .item.V .nm{color:var(--veg)}
+.train{display:flex;flex-wrap:wrap;gap:6px;min-height:40px}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line-strong);border-radius:999px;padding:3px 4px 3px 9px;background:var(--surface);font-size:15px}
+.chip .x{appearance:none;border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
+.lab{appearance:none;border:0;border-radius:999px;padding:2px 9px;font:inherit;font-size:13px;font-weight:700;cursor:default}
+.lab.F{background:var(--fruit-soft);color:var(--fruit)} .lab.V{background:var(--veg-soft);color:var(--veg)}
+.lab.flip{cursor:pointer;outline:2px dashed var(--warm);outline-offset:1px}
+.rule{background:var(--warm-soft);border-radius:8px;padding:10px 12px;margin:10px 0}
+.rule b{color:var(--warm)}
+.rule ul{margin:4px 0 0;padding-left:20px}
+.tests{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:8px}
+.t{border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:grid;grid-template-columns:auto 1fr auto;gap:6px;align-items:center;font-size:14px}
+.t .em{font-size:26px}
+.t .mk{font-size:18px;font-weight:800}
+.t.good{background:var(--veg-soft)} .t.bad{background:var(--bad-soft)}
+.t.good .mk{color:var(--ok)} .t.bad .mk{color:var(--bad)}
+.acc{font-size:20px;font-weight:800;margin:8px 0 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px}
+/* result */
+.result{max-width:640px;margin:20px auto}
+.big{font-size:64px;font-weight:800;line-height:1}
+table.res{width:100%;border-collapse:collapse;margin:10px 0}
+table.res td{padding:6px 4px;border-bottom:1px solid var(--line)}
+table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;font-weight:600}
+.confirm{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="kicker" data-i18n="kicker">Інформатика · практична робота · штучний інтелект</div>
+      <h1 data-i18n="title">Навчи й перевір ШІ</h1>
+    </div>
+    <div class="hright">
+      <div class="lang" role="group" aria-label="Мова / Language">
+        <button type="button" data-lang="uk" aria-pressed="true">UA</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <div class="who" id="who" hidden></div>
+    </div>
+  </header>
+
+  <!-- start -->
+  <section class="card start" id="startBox" hidden>
+    <h2 data-i18n="startH">Початок</h2>
+    <label><span data-i18n="nameL">Твоє ім'я та прізвище</span><input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <label><span data-i18n="codeL">Код від учителя</span><input type="text" id="codeIn" maxlength="2" inputmode="numeric" autocomplete="off" style="width:90px;font-family:'IBM Plex Mono',monospace"></label>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo" data-i18n="startGo">Почати</button></div>
+    <p class="note" data-i18n="startNote">Машина вчиться відрізняти фрукти від овочів. Вона бачить лише чотири ознаки: колір, форму, де росте і смак. Ти обираєш, на яких прикладах її вчити, а потім перевіряєш на продуктах, яких вона ніколи не бачила.</p>
+  </section>
+
+  <!-- work -->
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+
+    <div class="grid" id="lab">
+      <section class="card">
+        <h2 data-i18n="poolH">Продукти для навчання</h2>
+        <p class="note" style="margin:0 0 8px" data-i18n="poolNote">Натисни на продукт, щоб додати його в навчальні приклади або прибрати. Під назвою — те, що бачить машина.</p>
+        <div class="pool" id="pool"></div>
+      </section>
+      <div style="display:grid;gap:16px">
+        <section class="card">
+          <h2><span data-i18n="trainH">Навчальні приклади</span> <span class="note" id="trainN"></span></h2>
+          <div class="train" id="train"></div>
+          <div class="row"><button class="btn ghost sm" type="button" id="clearBtn" data-i18n="clear">Прибрати все</button></div>
+          <div class="rule" id="rule"></div>
+        </section>
+        <section class="card">
+          <h2 data-i18n="testH">Перевірка</h2>
+          <div class="row">
+            <button class="btn" type="button" id="testBtn" data-i18n="testBtn">Перевірити на нових продуктах</button>
+            <button class="btn ghost" type="button" id="trainTestBtn" data-i18n="trainTestBtn">Перевірити на навчальних</button>
+          </div>
+          <div id="testOut"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- result -->
+  <section class="card result" id="resultBox" hidden></section>
+
+  <p class="note" style="margin-top:24px">
+    <button class="btn ghost sm" type="button" id="restart" data-i18n="restart">Почати заново</button>
+    <span class="confirm" id="ask" hidden><span data-i18n="restartQ">Усі бали зітруться. Точно?</span>
+      <button class="btn no sm" type="button" id="askYes" data-i18n="yes">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo" data-i18n="no">Ні</button>
+    </span>
+  </p>
+</div>
+
+<script>
+(function(){
+  var KEY='prakt-v1', LANGKEY='prakt-lang';
+  var F=1, V=0;
+  /* id, emoji, class, colour, shape, where it grows, taste, uk name, en name */
+  var RAW=[
+    ['apple','🍎',F,'red','round','tree','sweet','Яблуко','Apple'],
+    ['gapple','🍏',F,'green','round','tree','sour','Зелене яблуко','Green apple'],
+    ['pear','🍐',F,'yellow','other','tree','sweet','Груша','Pear'],
+    ['orange','🍊',F,'orange','round','tree','sweet','Апельсин','Orange'],
+    ['lemon','🍋',F,'yellow','round','tree','sour','Лимон','Lemon'],
+    ['banana','🍌',F,'yellow','long','tree','sweet','Банан','Banana'],
+    ['grapes','🍇',F,'purple','other','bush','sweet','Виноград','Grapes'],
+    ['strawberry','🍓',F,'red','other','bed','sweet','Полуниця','Strawberry'],
+    ['cherry','🍒',F,'red','round','tree','sour','Вишня','Cherry'],
+    ['peach','🍑',F,'orange','round','tree','sweet','Персик','Peach'],
+    ['kiwi','🥝',F,'brown','round','bush','sour','Ківі','Kiwi'],
+    ['melon','🍈',F,'yellow','round','bed','sweet','Диня','Melon'],
+    ['pineapple','🍍',F,'yellow','other','bed','sweet','Ананас','Pineapple'],
+    ['mango','🥭',F,'orange','other','tree','sweet','Манго','Mango'],
+    ['watermelon','🍉',F,'green','round','bed','sweet','Кавун','Watermelon'],
+    ['carrot','🥕',V,'orange','long','under','plain','Морква','Carrot'],
+    ['cucumber','🥒',V,'green','long','bed','plain','Огірок','Cucumber'],
+    ['eggplant','🍆',V,'purple','long','bed','plain','Баклажан','Aubergine'],
+    ['corn','🌽',V,'yellow','long','bed','sweet','Кукурудза','Corn'],
+    ['potato','🥔',V,'brown','round','under','plain','Картопля','Potato'],
+    ['onion','🧅',V,'brown','round','under','plain','Цибуля','Onion'],
+    ['broccoli','🥦',V,'green','other','bed','plain','Броколі','Broccoli'],
+    ['chili','🌶️',V,'red','long','bed','plain','Перець чилі','Chili pepper'],
+    ['tomato','🍅',V,'red','round','bed','sour','Помідор','Tomato'],
+    ['cabbage','🥬',V,'green','round','bed','plain','Капуста','Cabbage'],
+    ['garlic','🧄',V,'white','round','under','plain','Часник','Garlic'],
+    ['pumpkin','🎃',V,'orange','round','bed','sweet','Гарбуз','Pumpkin'],
+    ['sweetpotato','🍠',V,'brown','long','under','sweet','Батат','Sweet potato']
+  ];
+  var IT={}; RAW.forEach(function(r){ IT[r[0]]={id:r[0],e:r[1],c:r[2],f:[r[3],r[4],r[5],r[6]],uk:r[7],en:r[8]}; });
+  var TEST=['gapple','banana','cherry','kiwi','watermelon','pineapple','corn','tomato','potato','pumpkin','cucumber','garlic'];
+  var POOL=RAW.map(function(r){ return r[0]; }).filter(function(id){ return TEST.indexOf(id)<0; });
+  var TRAP4=['apple','strawberry','broccoli','cabbage'];
+  var BAD={'4':{set:[['apple',F],['orange',F],['melon',F],['lemon',F],['carrot',F],['onion',V],['cabbage',V],['eggplant',V]],wrong:['carrot']},
+           '6':{set:[['apple',F],['grapes',F],['peach',F],['mango',F],['carrot',F],['onion',V],['sweetpotato',F],['broccoli',V],['chili',V]],wrong:['carrot','sweetpotato']}};
+
+  var FV={
+    uk:{feat:['Колір','Форма','Де росте','Смак'],
+      red:'червоний',green:'зелений',yellow:'жовтий',orange:'помаранчевий',purple:'фіолетовий',brown:'коричневий',white:'білий',
+      round:'круглий',long:'довгий',other:'іншої форми',tree:'на дереві',bush:'на кущі',bed:'на грядці',under:'під землею',sweet:'солодкий',sour:'кислий',plain:'несолодкий'},
+    en:{feat:['Colour','Shape','Where it grows','Taste'],
+      red:'red',green:'green',yellow:'yellow',orange:'orange',purple:'purple',brown:'brown',white:'white',
+      round:'round',long:'long',other:'other shape',tree:'on a tree',bush:'on a bush',bed:'in a garden bed',under:'underground',sweet:'sweet',sour:'sour',plain:'not sweet'}
+  };
+  var S={
+    uk:{doc:'Практична: навчи й перевір ШІ',kicker:'Інформатика · практична робота · штучний інтелект',title:'Навчи й перевір ШІ',startH:'Початок',nameL:'Твоє ім\'я та прізвище',codeL:'Код від учителя',startGo:'Почати',
+      startNote:'Машина вчиться відрізняти фрукти від овочів. Вона бачить лише чотири ознаки: колір, форму, де росте і смак. Ти обираєш, на яких прикладах її вчити, а потім перевіряєш на продуктах, яких вона ніколи не бачила.',
+      errName:'Напиши ім\'я та прізвище.',errCode:'Такого коду немає. Перепитай учителя.',
+      poolH:'Продукти для навчання',poolNote:'Натисни на продукт, щоб додати його в навчальні приклади або прибрати. Під назвою — те, що бачить машина.',
+      trainH:'Навчальні приклади',clear:'Прибрати все',testH:'Перевірка',testBtn:'Перевірити на нових продуктах',trainTestBtn:'Перевірити на навчальних',
+      restart:'Почати заново',restartQ:'Усі бали зітруться. Точно?',yes:'Так',no:'Ні',
+      fruit:'Фрукт',veg:'Овоч',unknown:'Не знаю',grade:'клас',pts:'бали',of:'з',task:'Завдання',result:'Результат',check:'Перевірити завдання',
+      nItems:function(n){ var a=n%10,b=n%100; return '· '+n+' '+(a===1&&b!==11?'продукт':(a>=2&&a<=4&&(b<12||b>14)?'продукти':'продуктів')); },
+      ruleNone:'Додай хоча б один фрукт і один овоч — тоді машина зможе знайти правило.',
+      ruleH:function(f,e){ return 'Машина дивиться лише на ознаку <b>«'+f+'»</b>. Помилок на навчальних прикладах: '+e+'.'; },
+      ruleIf:function(v,a){ return 'якщо '+v+' → '+a; },ruleUnseen:'Усе, чого машина не бачила в навчанні, — «не знаю».',
+      newH:'Нові продукти (машина їх не бачила)',trainTH:'Навчальні продукти',accT:function(c,n){ return 'Машина вгадала '+c+' з '+n+' ('+Math.round(c/n*100)+'%)'; },
+      fv:function(n){ return 'Фруктів назвала овочами: '+n; },vf:function(n){ return 'Овочів назвала фруктами: '+n; },
+      flipNote:'У цих даних є помилки розмітки. Натисни на позначку «Фрукт / Овоч», щоб її виправити.',
+      fbOk:'Готово! Повний бал.',fbPart:'Бали за завдання: ',fbNone:'Поки 0 балів. Що не так:',
+      needTest:'Спершу натисни «Перевірити на нових продуктах» для цього набору.',
+      resH:'Результат практичної роботи',resShow:'Покажи цей екран учителю.',resTime:'Час роботи',resMin:' хв',resBack:'Повернутися до завдань',resRec:'Найменше продуктів для 10 з 12',
+      finish:'Завершити й показати результат',chH:'Для чемпіонів (без балів)',ch_rec:'10 з 12 на 4 продуктах або менше',ch_shape:'Набір, з яким машина обирає ознаку «Форма»',ch_grow:'Машина обирає «Де росте» і вгадує 10 з 12 на 4 продуктах',ch_zero:'Найгірший учитель: машина вгадує 0 з 12'},
+    en:{doc:'Practical work: train and test an AI',kicker:'Computer science · practical work · AI',title:'Train and Test an AI',startH:'Start',nameL:'Your first and last name',codeL:'Code from your teacher',startGo:'Start',
+      startNote:'The machine is learning to tell fruit from vegetables. It sees only four features: colour, shape, where it grows and taste. You choose which examples to teach it with, then test it on products it has never seen.',
+      errName:'Write your first and last name.',errCode:'There is no such code. Ask your teacher again.',
+      poolH:'Products for training',poolNote:'Click a product to add it to the training examples or remove it. Under the name is what the machine sees.',
+      trainH:'Training examples',clear:'Remove all',testH:'Testing',testBtn:'Test on new products',trainTestBtn:'Test on training products',
+      restart:'Start over',restartQ:'All points will be erased. Sure?',yes:'Yes',no:'No',
+      fruit:'Fruit',veg:'Vegetable',unknown:'Don’t know',grade:'grade',pts:'points',of:'of',task:'Task',result:'Result',check:'Check the task',
+      nItems:function(n){ return '· '+n+(n===1?' product':' products'); },
+      ruleNone:'Add at least one fruit and one vegetable — then the machine can find a rule.',
+      ruleH:function(f,e){ return 'The machine looks only at the feature <b>“'+f+'”</b>. Mistakes on the training examples: '+e+'.'; },
+      ruleIf:function(v,a){ return 'if '+v+' → '+a; },ruleUnseen:'Anything the machine did not see in training is “don’t know”.',
+      newH:'New products (the machine has not seen them)',trainTH:'Training products',accT:function(c,n){ return 'The machine got '+c+' of '+n+' right ('+Math.round(c/n*100)+'%)'; },
+      fv:function(n){ return 'Fruit called vegetables: '+n; },vf:function(n){ return 'Vegetables called fruit: '+n; },
+      flipNote:'This data has labelling mistakes. Click a “Fruit / Vegetable” label to fix it.',
+      fbOk:'Done! Full marks.',fbPart:'Points for this task: ',fbNone:'0 points so far. What’s wrong:',
+      needTest:'First press “Test on new products” for this set.',
+      resH:'Practical work result',resShow:'Show this screen to your teacher.',resTime:'Time spent',resMin:' min',resBack:'Back to the tasks',resRec:'Fewest products for 10 of 12',
+      finish:'Finish and show the result',chH:'For champions (no points)',ch_rec:'10 of 12 with 4 products or fewer',ch_shape:'A set that makes the machine choose “Shape”',ch_grow:'The machine chooses “Where it grows” and gets 10 of 12 with 4 products',ch_zero:'Worst teacher: the machine gets 0 of 12'}
+  };
+  var lang='uk';
+  try{ var sl=localStorage.getItem(LANGKEY); if(sl&&S[sl]) lang=sl; }catch(e){}
+  try{ var qp=new URLSearchParams(location.search).get('lang'); if(qp&&S[qp]) lang=qp; }catch(e){}
+  function t(k){ return S[lang][k]; }
+  function nm(id){ return IT[id][lang]; }
+  function fv(v){ return FV[lang][v]; }
+  function cls(c){ return c===F?t('fruit'):c===V?t('veg'):t('unknown'); }
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ var d=document.createElement('div'); d.textContent=x; return d.innerHTML; }
+
+  function fresh(){ return {name:'',grade:null,train:[],flip:false,preset:null,test:null,ttest:null,pts:{},ans:{},task:1,start:0,end:0,rec:null,view:'work'}; }
+  var st=fresh();
+  try{ var raw=JSON.parse(localStorage.getItem(KEY)||'null'); if(raw&&raw.train) st=raw; }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+
+  /* ---------- the machine: OneR. For each feature: every value → the majority label; pick the feature with the fewest training mistakes (ties → the first feature). ---------- */
+  function learn(rows){
+    if(!rows.some(function(r){ return r[1]===F; })||!rows.some(function(r){ return r[1]===V; })) return null;
+    var best=null;
+    for(var f=0;f<4;f++){
+      var g={};
+      rows.forEach(function(r){ var v=IT[r[0]].f[f]; if(!g[v]) g[v]=[0,0]; g[v][r[1]]++; });
+      var rule={}, err=0;
+      Object.keys(g).forEach(function(v){ var c=g[v]; rule[v]=c[1]>c[0]?F:c[0]>c[1]?V:null; });
+      rows.forEach(function(r){ if(rule[IT[r[0]].f[f]]!==r[1]) err++; });
+      if(!best||err<best.err) best={f:f,rule:rule,err:err};
+    }
+    return best;
+  }
+  function predict(m,id){ if(!m) return null; var v=IT[id].f[m.f]; return v in m.rule?m.rule[v]:null; }
+  function rows(){ return st.train.map(function(e){ return [e.id,e.l]; }); }
+  function sig(){ return st.train.map(function(e){ return e.id+':'+e.l; }).sort().join(','); }
+  function evalOn(ids,m){ var c=0,fvn=0,vfn=0,res=ids.map(function(id){ var p=predict(m,id), ok=p===IT[id].c; if(ok) c++; else if(IT[id].c===F&&p===V) fvn++; else if(IT[id].c===V&&p===F) vfn++; return [id,p,ok]; }); return {c:c,n:ids.length,fv:fvn,vf:vfn,res:res}; }
+
+  /* ---------- tasks ---------- */
+  function q(id,text,opts){ return {type:'mc',id:id,text:text,opts:opts}; }
+  function num(id,text){ return {type:'num',id:id,text:text}; }
+  var TASKS={
+    '4':[
+      {max:2,uk:{t:'Перший учень',x:['Обери 4 продукти: 2 фрукти й 2 овочі.','Натисни «Перевірити на нових продуктах».','Запиши, скільки машина вгадала.']},en:{t:'First lesson',x:['Pick 4 products: 2 fruits and 2 vegetables.','Press “Test on new products”.','Write down how many the machine got right.']},
+        qs:[num('c',{uk:'Скільки з 12 вгадала машина?',en:'How many of the 12 did the machine get right?'})],
+        check:function(){ var r=[],p=0,m=countCls(); if(st.train.length===4&&m[F]===2&&m[V]===2&&tested()){ p++; if(+st.ans['1c']===st.test.c) p++; else r.push(L('Число не збігається з результатом перевірки.','The number doesn’t match the test result.')); } else r.push(L('Потрібно рівно 2 фрукти й 2 овочі — і перевірка саме цього набору.','You need exactly 2 fruits and 2 vegetables — and a test of exactly this set.')); return [p,r]; }},
+      {max:3,uk:{t:'Пастка кольору',x:['Натисни «Поставити пастку» — машина вчитиметься на 🍎 🍓 🥦 🥬.','Подивись, яке правило вона знайшла, і перевір її на нових продуктах.','Дай відповіді на питання.']},en:{t:'Colour trap',x:['Press “Set the trap” — the machine will learn from 🍎 🍓 🥦 🥬.','See which rule it found and test it on new products.','Answer the questions.']},
+        btn:{uk:'Поставити пастку',en:'Set the trap',run:function(){ setTrain(TRAP4.map(function(id){ return [id,IT[id].c]; }),false,null); }},
+        qs:[q('f',{uk:'На яку ознаку дивиться машина?',en:'Which feature does the machine look at?'},[{uk:'Колір',en:'Colour',ok:1},{uk:'Форма',en:'Shape'},{uk:'Де росте',en:'Where it grows'},{uk:'Смак',en:'Taste'}]),
+            q('w',{uk:'Чому машина назвала 🍏 зелене яблуко овочем?',en:'Why did the machine call the 🍏 green apple a vegetable?'},[{uk:'Бо всі фрукти, на яких її вчили, були червоні, а овочі — зелені',en:'Because all the fruit it learned from were red and the vegetables were green',ok:1},{uk:'Бо зелене яблуко насправді овоч',en:'Because a green apple really is a vegetable'},{uk:'Бо машина зламалася',en:'Because the machine broke'}])],
+        check:function(){ var r=[],p=0; if(sameSet(TRAP4)&&tested()) p++; else r.push(L('Постав пастку й перевір машину на нових продуктах.','Set the trap and test the machine on new products.')); if(okMC(2,'f')) p++; else r.push(L('Питання 1: подивись на жовту рамку з правилом.','Question 1: look at the yellow rule box.')); if(okMC(2,'w')) p++; else r.push(L('Питання 2: на яких прикладах вчилася машина?','Question 2: which examples did the machine learn from?')); return [p,r]; }},
+      {max:3,uk:{t:'Найкращий учитель',x:['Добери не більше 8 продуктів так, щоб машина вгадала якнайбільше нових.','9 з 12 — 2 бали, 10 з 12 — 3 бали.','Підказка: вчи машину на різних і незвичних прикладах.']},en:{t:'Best teacher',x:['Choose no more than 8 products so that the machine gets as many new ones right as possible.','9 of 12 — 2 points, 10 of 12 — 3 points.','Hint: teach the machine with varied and unusual examples.']},
+        check:function(){ var r=[],p=0; if(st.train.length>8) r.push(L('Забагато продуктів — можна не більше 8.','Too many products — 8 at most.')); else if(!tested()) r.push(t('needTest')); else { p=st.test.c>=10?3:st.test.c>=9?2:0; if(p<3) r.push(L('Зараз '+st.test.c+' з 12. Спробуй інші приклади.','Now '+st.test.c+' of 12. Try other examples.')); } return [p,r]; }},
+      {max:2,uk:{t:'Зіпсовані дані',x:['Натисни «Завантажити дані». Хтось розмітив їх з помилкою.','Знайди продукт, позначений неправильно, і натисни на його позначку, щоб виправити.','Перевір машину ще раз: стало краще?']},en:{t:'Broken data',x:['Press “Load the data”. Someone labelled it with a mistake.','Find the product with the wrong label and click its label to fix it.','Test the machine again: did it get better?']},
+        btn:{uk:'Завантажити дані',en:'Load the data',run:function(){ setTrain(BAD['4'].set,true,'4'); }},
+        bad:1,check:function(){ return checkBad('4',2); }},
+      {max:2,uk:{t:'Питання',x:['Дай відповіді на два питання.']},en:{t:'Questions',x:['Answer two questions.']},
+        qs:[q('a',{uk:'Навіщо перевіряти машину на продуктах, яких не було в навчанні?',en:'Why test the machine on products that were not in training?'},[{uk:'Щоб дізнатися, чи вона навчилася, а не просто запам\'ятала',en:'To find out whether it learned, not just memorised',ok:1},{uk:'Щоб перевірка пройшла швидше',en:'To make the test faster'},{uk:'Не треба, можна перевіряти на тих самих',en:'No need, you can test on the same ones'}]),
+            q('b',{uk:'У цих даних помідор позначено як овоч, хоча ботаніки називають його ягодою. Хто вирішує, яка відповідь «правильна» для машини?',en:'In this data the tomato is labelled a vegetable, although botanists call it a berry. Who decides which answer is “right” for the machine?'},[{uk:'Люди, які готували дані для навчання',en:'The people who prepared the training data',ok:1},{uk:'Сама машина',en:'The machine itself'},{uk:'Ніхто — машина завжди знає правду',en:'Nobody — the machine always knows the truth'}])],
+        check:function(){ var p=0,r=[]; if(okMC(5,'a')) p++; else r.push(L('Питання 1.','Question 1.')); if(okMC(5,'b')) p++; else r.push(L('Питання 2.','Question 2.')); return [p,r]; }}
+    ],
+    '6':[
+      {max:2,uk:{t:'Перший учень',x:['Обери 6 продуктів: 3 фрукти й 3 овочі.','Перевір машину на нових продуктах.','Порахуй помилки за картками й запиши.']},en:{t:'First lesson',x:['Pick 6 products: 3 fruits and 3 vegetables.','Test the machine on new products.','Count the mistakes from the cards and write them down.']},
+        qs:[num('c',{uk:'Скільки з 12 вгадала машина?',en:'How many of the 12 did the machine get right?'}),num('fv',{uk:'Скільки фруктів машина назвала овочами?',en:'How many fruits did the machine call vegetables?'})],
+        check:function(){ var r=[],p=0,m=countCls(); if(st.train.length===6&&m[F]===3&&m[V]===3&&tested()){ if(+st.ans['1c']===st.test.c) p++; else r.push(L('Кількість вгаданих не збігається.','The number right doesn’t match.')); if(st.ans['1fv']!==undefined&&st.ans['1fv']!==''&&+st.ans['1fv']===st.test.fv) p++; else r.push(L('Порахуй ще раз фрукти, які машина назвала овочами.','Count again the fruits the machine called vegetables.')); } else r.push(L('Потрібно рівно 3 фрукти й 3 овочі — і перевірка саме цього набору.','You need exactly 3 fruits and 3 vegetables — and a test of exactly this set.')); return [p,r]; }},
+      {max:2,uk:{t:'Збудуй пастку',x:['Сам придумай пастку: не більше 4 продуктів, обидва види.','Машина має обрати ознаку «Колір»…','…і вгадати не більше 3 нових продуктів з 12.']},en:{t:'Build a trap',x:['Design a trap yourself: no more than 4 products, both kinds.','The machine must choose the feature “Colour”…','…and get no more than 3 of the 12 new products right.']},
+        check:function(){ var r=[],p=0,m=countCls(), mm=learn(rows()); if(st.train.length>4||!m[F]||!m[V]){ r.push(L('Не більше 4 продуктів і хоча б один фрукт та один овоч.','No more than 4 products and at least one fruit and one vegetable.')); return [0,r]; } if(!tested()){ r.push(t('needTest')); return [0,r]; } if(mm&&mm.f===0) p++; else r.push(L('Машина обрала не «Колір».','The machine did not choose “Colour”.')); if(st.test.c<=3) p++; else r.push(L('Машина вгадала '+st.test.c+' — це забагато для пастки.','The machine got '+st.test.c+' right — too many for a trap.')); return [p,r]; }},
+      {max:3,uk:{t:'Найкращий учитель',x:['Не більше 6 продуктів!','9 з 12 — 2 бали, 10 з 12 — 3 бали.']},en:{t:'Best teacher',x:['No more than 6 products!','9 of 12 — 2 points, 10 of 12 — 3 points.']},
+        check:function(){ var r=[],p=0; if(st.train.length>6) r.push(L('Забагато продуктів — можна не більше 6.','Too many products — 6 at most.')); else if(!tested()) r.push(t('needTest')); else { p=st.test.c>=10?3:st.test.c>=9?2:0; if(p<3) r.push(L('Зараз '+st.test.c+' з 12.','Now '+st.test.c+' of 12.')); } return [p,r]; }},
+      {max:2,uk:{t:'Чесна перевірка',x:['Не змінюючи набору, натисни обидві кнопки перевірки: на нових і на навчальних продуктах.','Порівняй відсотки й дай відповідь.']},en:{t:'Honest test',x:['Without changing the set, press both test buttons: on new and on training products.','Compare the percentages and answer.']},
+        qs:[q('h',{uk:'На навчальних продуктах машина зазвичай вгадує краще, ніж на нових. Якій перевірці вірити?',en:'On training products the machine usually does better than on new ones. Which test should you trust?'},[{uk:'Перевірці на нових — так машина працюватиме в житті',en:'The test on new ones — that’s how the machine will work in real life',ok:1},{uk:'Перевірці на навчальних — там більше відсотків',en:'The test on training ones — the percentage is higher'},{uk:'Обом однаково',en:'Both equally'}])],
+        check:function(){ var r=[],p=0; if(tested()&&st.ttest&&st.ttest.sig===sig()) p++; else r.push(L('Натисни обидві кнопки перевірки для одного й того самого набору.','Press both test buttons for the same set.')); if(okMC(4,'h')) p++; else r.push(L('Подумай: на чому машина працюватиме насправді?','Think: what will the machine work on in reality?')); return [p,r]; }},
+      {max:2,uk:{t:'Зіпсовані дані',x:['Натисни «Завантажити дані». У них дві помилки розмітки.','Знайди обидві й виправ, натискаючи на позначки.','Перевір машину ще раз.']},en:{t:'Broken data',x:['Press “Load the data”. There are two labelling mistakes.','Find both and fix them by clicking the labels.','Test the machine again.']},
+        btn:{uk:'Завантажити дані',en:'Load the data',run:function(){ setTrain(BAD['6'].set,true,'6'); }},
+        bad:1,check:function(){ return checkBad('6',2); }},
+      {max:1,uk:{t:'Головне питання',x:['Дай відповідь.']},en:{t:'The main question',x:['Answer.']},
+        qs:[q('m',{uk:'Що найважливіше, щоб машина навчилася добре?',en:'What matters most for the machine to learn well?'},[{uk:'Багато однакових прикладів',en:'Lots of identical examples'},{uk:'Різноманітні приклади, зокрема незвичні',en:'Varied examples, including unusual ones',ok:1},{uk:'Швидкий комп\'ютер',en:'A fast computer'}])],
+        check:function(){ return okMC(6,'m')?[1,[]]:[0,[L('Згадай завдання «Найкращий учитель».','Remember the “Best teacher” task.')]]; }}
+    ]
+  };
+  function L(uk,en){ return lang==='uk'?uk:en; }
+  function countCls(){ var m={}; m[F]=0; m[V]=0; st.train.forEach(function(e){ m[e.l]++; }); return m; }
+  function tested(){ return st.test&&st.test.sig===sig(); }
+  function sameSet(ids){ return st.train.length===ids.length&&ids.every(function(id){ return st.train.some(function(e){ return e.id===id&&e.l===IT[id].c; }); }); }
+  function okMC(n,id){ var tk=TASKS[st.grade][n-1], qq=tk.qs.filter(function(x){ return x.id===id; })[0], a=st.ans[n+id]; return a!==undefined&&qq.opts[+a]&&qq.opts[+a].ok===1; }
+  function checkBad(g,max){
+    var b=BAD[g], r=[], p=0;
+    if(st.preset!==g){ return [0,[L('Спершу натисни «Завантажити дані».','First press “Load the data”.')]]; }
+    var allIn=b.set.every(function(x){ return st.train.some(function(e){ return e.id===x[0]; }); });
+    if(!allIn) return [0,[L('Не прибирай продукти — лише виправ позначки.','Don’t remove products — only fix the labels.')]];
+    var extraWrong=st.train.some(function(e){ return e.l!==IT[e.id].c&&b.wrong.indexOf(e.id)<0; });
+    b.wrong.forEach(function(id){ var e=st.train.filter(function(x){ return x.id===id; })[0]; if(e&&e.l===IT[id].c) p++; });
+    if(extraWrong){ r.push(L('Одну правильну позначку зіпсовано.','A correct label got broken.')); p=Math.max(0,p-1); }
+    if(p<b.wrong.length) r.push(L('Ще не всі помилки виправлено.','Not all mistakes are fixed yet.'));
+    if(!tested()){ r.push(t('needTest')); p=0; }
+    return [Math.min(p*(max/b.wrong.length),max),r];
+  }
+
+  /* ---------- training set ---------- */
+  function setTrain(list,flip,preset){ st.train=list.map(function(x){ return {id:x[0],l:x[1]}; }); st.flip=flip; st.preset=preset; st.test=null; save(); renderLab(); }
+  function toggle(id){
+    var i=-1; st.train.forEach(function(e,k){ if(e.id===id) i=k; });
+    if(i>=0) st.train.splice(i,1); else st.train.push({id:id,l:IT[id].c});
+    save(); renderLab();
+  }
+  function itemCard(id){ var it=IT[id]; return '<span class="em">'+it.e+'</span><span class="nm">'+esc(nm(id))+'</span><span class="ft">'+esc(it.f.map(fv).join(' · '))+'</span>'; }
+  function renderLab(){
+    $('pool').innerHTML=POOL.map(function(id){ var on=st.train.some(function(e){ return e.id===id; }); return '<button type="button" class="item '+(IT[id].c===F?'F':'V')+(on?' in':'')+'" data-id="'+id+'" aria-pressed="'+on+'">'+itemCard(id)+'</button>'; }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#pool .item'),function(b){ b.addEventListener('click',function(){ toggle(b.getAttribute('data-id')); }); });
+    $('trainN').textContent=t('nItems')(st.train.length);
+    $('train').innerHTML=(st.flip?'<p class="note" style="width:100%;margin:0 0 4px">'+esc(t('flipNote'))+'</p>':'')+st.train.map(function(e,k){ return '<span class="chip">'+IT[e.id].e+' '+esc(nm(e.id))+' <button type="button" class="lab '+(e.l===F?'F':'V')+(st.flip?' flip':'')+'" data-k="'+k+'"'+(st.flip?'':' tabindex="-1"')+'>'+esc(cls(e.l))+'</button><button type="button" class="x" data-k="'+k+'" aria-label="×">×</button></span>'; }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#train .x'),function(b){ b.addEventListener('click',function(){ st.train.splice(+b.getAttribute('data-k'),1); save(); renderLab(); }); });
+    Array.prototype.forEach.call(document.querySelectorAll('#train .lab.flip'),function(b){ b.addEventListener('click',function(){ var e=st.train[+b.getAttribute('data-k')]; e.l=e.l===F?V:F; save(); renderLab(); }); });
+    var m=learn(rows());
+    if(!m) $('rule').innerHTML=esc(t('ruleNone'));
+    else{
+      var li=Object.keys(m.rule).map(function(v){ return '<li>'+esc(t('ruleIf')(fv(v),cls(m.rule[v])))+'</li>'; }).join('');
+      $('rule').innerHTML=t('ruleH')(esc(FV[lang].feat[m.f]),m.err)+'<ul>'+li+'</ul><div class="note" style="margin-top:4px">'+esc(t('ruleUnseen'))+'</div>';
+    }
+    renderTest();
+  }
+  function renderTest(){
+    var h='';
+    [['test',t('newH')],['ttest',t('trainTH')]].forEach(function(p){
+      var r=st[p[0]]; if(!r||r.sig!==sig()) return;
+      h+='<h3 style="margin-top:12px">'+esc(p[1])+'</h3><div class="tests">'+r.res.map(function(x){ return '<div class="t '+(x[2]?'good':'bad')+'"><span class="em">'+IT[x[0]].e+'</span><span>'+esc(nm(x[0]))+'<br><b>'+esc(cls(x[1]))+'</b></span><span class="mk">'+(x[2]?'✓':'✗')+'</span></div>'; }).join('')+'</div><div class="acc">'+esc(t('accT')(r.c,r.n))+'</div>';
+    });
+    $('testOut').innerHTML=h;
+  }
+  $('testBtn').addEventListener('click',function(){
+    var m=learn(rows()), r=evalOn(TEST,m); r.sig=sig(); st.test=r;
+    if(r.c>=10&&(!st.rec||st.train.length<st.rec)) st.rec=st.train.length;
+    if(!st.ch) st.ch={}; if(m&&m.f===1) st.ch.shape=1; if(m&&m.f===2&&st.train.length<=4&&r.c>=10) st.ch.grow=1; if(m&&r.c===0) st.ch.zero=1;
+    save(); renderTest(); renderTask();
+  });
+  $('trainTestBtn').addEventListener('click',function(){ var m=learn(rows()), r=evalOn(st.train.map(function(e){ return e.id; }),m); r.sig=sig(); st.ttest=r; save(); renderTest(); });
+  $('clearBtn').addEventListener('click',function(){ setTrain([],false,null); });
+
+  /* ---------- task screen ---------- */
+  function total(){ var s=0; Object.keys(st.pts).forEach(function(k){ s+=st.pts[k]; }); return s; }
+  function renderTabs(){
+    var T=TASKS[st.grade];
+    $('tabs').innerHTML=T.map(function(tk,i){ var n=i+1, p=st.pts[n]||0; return '<button type="button" role="tab" class="tab'+(p>=tk.max?' full':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(tk[lang].t)+' <span class="pt">'+p+'/'+tk.max+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">'+esc(t('result'))+' <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call(document.querySelectorAll('#tabs .tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; if(st.flip&&!TASKS[st.grade][st.task-1].bad){ st.flip=false; st.preset=null; st.train.forEach(function(e){ e.l=IT[e.id].c; }); st.test=null; } save(); renderAll(); } }); });
+  }
+  function renderTask(){
+    var tk=TASKS[st.grade][st.task-1], L2=tk[lang], n=st.task, h='';
+    h+='<h2>'+esc(t('task'))+' '+n+' · '+esc(L2.t)+' <span class="note">('+tk.max+' '+esc(t('pts'))+')</span></h2><ol>'+L2.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ol>';
+    if(tk.btn) h+='<div class="row" style="margin-bottom:8px"><button class="btn ghost" type="button" id="tBtn">'+esc(tk.btn[lang])+'</button></div>';
+    (tk.qs||[]).forEach(function(qq){
+      var key=n+qq.id, a=st.ans[key];
+      if(qq.type==='num') h+='<div class="q"><p>'+esc(qq.text[lang])+'</p><input type="text" inputmode="numeric" maxlength="2" data-key="'+key+'" value="'+(a!==undefined?esc(String(a)):'')+'"></div>';
+      else h+='<div class="q"><p>'+esc(qq.text[lang])+'</p>'+qq.opts.map(function(o,i){ return '<label><input type="radio" name="'+key+'" value="'+i+'"'+(+a===i&&a!==undefined?' checked':'')+'> <span>'+esc(o[lang])+'</span></label>'; }).join('')+'</div>';
+    });
+    h+='<div class="row"><button class="btn" type="button" id="chk">'+esc(t('check'))+'</button>'+(n===TASKS[st.grade].length?'<button class="btn ghost" type="button" id="fin">'+esc(t('finish'))+'</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    if(tk.btn) $('tBtn').addEventListener('click',tk.btn.run);
+    Array.prototype.forEach.call(document.querySelectorAll('#task input[type=text]'),function(i){ i.addEventListener('input',function(){ st.ans[i.getAttribute('data-key')]=i.value.replace(/\D/g,''); save(); }); });
+    Array.prototype.forEach.call(document.querySelectorAll('#task input[type=radio]'),function(i){ i.addEventListener('change',function(){ st.ans[i.name]=+i.value; save(); }); });
+    $('chk').addEventListener('click',function(){
+      var res=tk.check(), p=res[0];
+      if(p>(st.pts[n]||0)) st.pts[n]=p;   /* the best attempt counts */
+      save(); renderTabs(); renderWho();
+      var fb=$('fb');
+      if(p>=tk.max){ fb.className='feedback ok'; fb.textContent=t('fbOk'); }
+      else { fb.className='feedback part'; fb.innerHTML=esc(p>0?t('fbPart')+p+'/'+tk.max:t('fbNone'))+(res[1].length?'<ul>'+res[1].map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>':''); }
+    });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){
+    if(!st.end) st.end=Date.now();
+    st.view='result'; save(); renderAll();
+  }
+  function renderResult(){
+    var T=TASKS[st.grade], mins=Math.max(1,Math.round(((st.end||Date.now())-st.start)/60000));
+    var h='<h2>'+esc(t('resH'))+'</h2><p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+esc(gradeTxt())+'</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">'+esc(t('of'))+' 12</span></div>';
+    h+='<table class="res">'+T.map(function(tk,i){ return '<tr><td>'+(i+1)+'. '+esc(tk[lang].t)+'</td><td>'+(st.pts[i+1]||0)+' / '+tk.max+'</td></tr>'; }).join('')+'<tr><td>'+esc(t('resTime'))+'</td><td>'+mins+esc(t('resMin'))+'</td></tr>'+(st.rec?'<tr><td>'+esc(t('resRec'))+'</td><td>'+st.rec+'</td></tr>':'')+'</table>';
+    var ch=st.ch||{};
+    h+='<h3 style="margin-top:16px">'+esc(t('chH'))+'</h3><ul style="margin:4px 0 12px;padding-left:20px">'+[['rec',st.rec&&st.rec<=4],['shape',ch.shape],['grow',ch.grow],['zero',ch.zero]].map(function(x){ return '<li>'+(x[1]?'✅ ':'⬜ ')+esc(t('ch_'+x[0]))+'</li>'; }).join('')+'</ul>';
+    h+='<p class="note">'+esc(t('resShow'))+'</p><button class="btn ghost" type="button" id="back">'+esc(t('resBack'))+'</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; st.end=0; save(); renderAll(); });
+  }
+
+  /* ---------- start ---------- */
+  var CODES={'41':'4','61':'6'};
+  $('startGo').addEventListener('click',go);
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<2){ $('startErr').textContent=t('errName'); return; }
+    if(!CODES[c]){ $('startErr').textContent=t('errCode'); return; }
+    st=fresh(); st.name=n; st.grade=CODES[c]; st.start=Date.now(); save(); renderAll();
+  }
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ st=fresh(); save(); $('ask').hidden=true; $('nameIn').value=''; $('codeIn').value=''; renderAll(); });
+
+  function gradeTxt(){ return lang==='uk'?st.grade+' клас':'Grade '+st.grade; }
+  function renderWho(){ var started=!!st.grade; $('who').hidden=!started; if(started) $('who').innerHTML=esc(st.name)+' · '+esc(gradeTxt())+'<br><b>'+total()+'</b> / 12'; }
+  function renderAll(){
+    var started=!!st.grade;
+    $('startBox').hidden=started; $('work').hidden=!started||st.view==='result'; $('resultBox').hidden=!started||st.view!=='result'; $('restart').hidden=!started;
+    renderWho();
+    if(!started) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask(); renderLab();
+  }
+  function applyLang(){
+    document.documentElement.lang=lang; document.title=t('doc');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-i18n]'),function(el){ el.textContent=t(el.getAttribute('data-i18n')); });
+    Array.prototype.forEach.call(document.querySelectorAll('.lang button'),function(b){ b.setAttribute('aria-pressed',b.getAttribute('data-lang')===lang?'true':'false'); });
+    $('startErr').textContent='';
+    renderAll();
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.lang button'),function(b){ b.addEventListener('click',function(){ var nl=b.getAttribute('data-lang'); if(nl===lang) return; lang=nl; try{ localStorage.setItem(LANGKEY,lang); }catch(e){} applyLang(); }); });
+  applyLang();
+})();
+</script>
+</body>
+</html>
