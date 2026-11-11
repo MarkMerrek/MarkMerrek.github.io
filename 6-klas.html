@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Інформатика · 6 клас</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Literata:opsz,wght@7..72,400;7..72,600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EBEFF5;
+  --ink:#161A22; --ink-2:#3E4757; --muted:#6B7488;
+  --line:#DBE1EA; --line-strong:#C3CCD9;
+  --accent:#2E4A7D; --accent-ink:#2E4A7D; --accent-soft:#E3EAF5;
+  --ok:#146B66; --ok-soft:#DDF0EE; --warm:#8A570F; --warm-soft:#F5E9D7;
+  --bad:#8C2F2F; --bad-soft:#F6E3E3;
+  --shadow:0 1px 2px rgba(22,26,34,.05), 0 8px 24px -16px rgba(22,26,34,.35);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11141A; --surface:#181C25; --surface-2:#212734;
+    --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --line-strong:#3A4354;
+    --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637;
+    --ok:#6ACFC5; --ok-soft:#16302D; --warm:#DCA76A; --warm-soft:#2C2318;
+    --bad:#E89494; --bad-soft:#2E1C1C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.9);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11141A; --surface:#181C25; --surface-2:#212734;
+  --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+  --line:#2A3140; --line-strong:#3A4354;
+  --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637;
+  --ok:#6ACFC5; --ok-soft:#16302D; --warm:#DCA76A; --warm-soft:#2C2318;
+  --bad:#E89494; --bad-soft:#2E1C1C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.9);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Literata",Georgia,serif;font-size:16.5px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px 80px}
+header.top{padding:36px 0 16px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:"Archivo",Arial,sans-serif;font-size:clamp(28px,5vw,40px);line-height:1.08;margin:6px 0 10px;letter-spacing:-.015em}
+h2{font-family:"Archivo",Arial,sans-serif;font-size:clamp(22px,3.6vw,29px);line-height:1.15;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
+h3{font-family:"Archivo",Arial,sans-serif;font-size:17px;margin:0 0 8px;line-height:1.3}
+p{margin:0 0 10px}
+ul,ol{margin:0 0 10px;padding-left:1.25em}
+li{margin-bottom:4px}
+a{color:var(--accent-ink)}
+strong{font-weight:600}
+.lead{color:var(--ink-2);max-width:62ch}
+.me{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 0}
+.me label{font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:14px}
+.me input{flex:1 1 220px;max-width:340px}
+input[type=text],textarea,select{font:inherit;font-size:15.5px;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:4px;padding:8px 10px;width:100%}
+textarea{min-height:64px;resize:vertical;line-height:1.5}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:1px}
+nav.lessons{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding:8px 0;margin-top:14px;scrollbar-width:thin}
+nav.lessons button{flex:0 0 auto;appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:4px;padding:6px 10px;cursor:pointer;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:13.5px;display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:62px}
+nav.lessons button small{font-family:"IBM Plex Mono",monospace;font-weight:500;font-size:10.5px;color:var(--muted)}
+nav.lessons button[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+nav.lessons button.full small{color:var(--ok)}
+.view{padding-top:26px}
+.lhead{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:3px 8px;border-radius:3px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.chip.warm{background:var(--warm-soft);color:var(--warm);border-color:transparent}
+.block{margin-top:26px}
+.brief{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 4px 4px 0;padding:14px 16px;box-shadow:var(--shadow)}
+.brief p:last-child,.brief ul:last-child{margin-bottom:0}
+.task{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:16px;box-shadow:var(--shadow);margin-top:14px}
+.task>h3 .n{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--accent-ink);margin-right:8px}
+.task p:last-child{margin-bottom:0}
+.ask{display:block;margin:10px 0 0}
+.ask>span{display:block;font-size:14.5px;color:var(--ink-2);margin-bottom:4px}
+.done{display:flex;gap:9px;align-items:flex-start;margin:8px 0 0;font-size:15px;cursor:pointer}
+.done input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:0 0 auto}
+.go{display:inline-flex;align-items:center;gap:6px;font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;background:var(--accent);color:var(--surface);text-decoration:none;padding:7px 12px;border-radius:4px;margin:4px 6px 4px 0;word-break:break-all}
+.go:hover{filter:brightness(1.1)}
+.code{font-family:"IBM Plex Mono",monospace;font-weight:600;background:var(--accent);color:var(--surface);padding:0 6px;border-radius:3px;white-space:nowrap}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:14px}
+details.key{margin-top:10px;border:1px dashed var(--line-strong);border-radius:4px;padding:8px 12px;background:var(--surface-2)}
+details.key summary{cursor:pointer;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:14px;color:var(--accent-ink)}
+details.key[open] summary{margin-bottom:8px}
+details.key p:last-child,details.key ul:last-child,details.key ol:last-child{margin-bottom:0}
+.note{background:var(--warm-soft);color:var(--ink);border-radius:4px;padding:10px 13px;font-size:15px;margin-top:12px}
+.note b{color:var(--warm)}
+.quote{background:var(--surface-2);border-radius:4px;padding:12px 14px;font-size:15.5px;margin:8px 0}
+.send{border:2px solid var(--ok);background:var(--ok-soft);border-radius:4px;padding:12px 15px;margin-top:22px}
+.send h3{color:var(--ok);font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.send ul{margin:0}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:middle}
+th{font-family:"Archivo",Arial,sans-serif;font-size:12.5px;color:var(--muted);font-weight:600}
+.tbl{overflow-x:auto}
+.cls select{padding:5px 6px;font-size:14px;min-width:64px}
+.cls td.dev{min-width:130px}
+.cls select.ok{border-color:var(--ok);background:var(--ok-soft)}
+.cls select.bad{border-color:var(--bad);background:var(--bad-soft)}
+.cls .ref{font-size:13px;color:var(--muted)}
+.btn{appearance:none;font-family:"Archivo",Arial,sans-serif;font-weight:600;font-size:14.5px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:4px;padding:9px 14px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent-ink)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.score{font-family:"IBM Plex Mono",monospace;font-weight:600}
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:30px;border-top:1px solid var(--line);padding-top:16px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.mini{background:var(--surface-2);border-radius:4px;padding:10px 12px;font-size:15px}
+.mini b{font-family:"Archivo",Arial,sans-serif;display:block;margin-bottom:2px}
+.status{font-size:14px;color:var(--muted);margin-top:8px}
+.prog{display:grid;gap:6px;margin:10px 0}
+.prog div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:5px 0;font-size:15px}
+.prog span.c{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);white-space:nowrap}
+.prog span.c.full{color:var(--ok)}
+@media (max-width:520px){body{font-size:16px}.task{padding:13px}.brief{padding:12px 13px}}
+@media print{nav.lessons,.pager,.row{display:none}.view{display:block!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="kicker">Інформатика · 6 клас · дистанційно</div>
+  <h1>Уроки, які пройшов клас</h1>
+  <p class="lead">Тут усі вісім уроків з вересня й дотепер. Проходь їх по черзі: спершу коротке пояснення, потім завдання. Відповіді пиши просто в поля на цій сторінці — вони зберігаються в цьому браузері. Наприкінці відкрий вкладку <strong>«Надіслати»</strong>, завантаж файл з відповідями й надішли вчителю разом з іншими файлами.</p>
+  <div class="me"><label for="who">Прізвище та ім'я</label><input id="who" type="text" data-k="who" autocomplete="name" placeholder="Наприклад: Коваленко Марія"></div>
+</header>
+
+<nav class="lessons" id="nav" aria-label="Уроки"></nav>
+
+<!-- ============ УРОК 1 ============ -->
+<section class="view" data-v="1" data-t="Урок 1. Цифрові пристрої">
+  <div class="lhead">
+    <div class="kicker">Урок 1</div>
+    <h2>Цифрові пристрої</h2>
+    <div class="chips"><span class="chip">≈ 40 хв</span><span class="chip">інтернет не потрібен</span></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Коротко</h3>
+    <p>З інформацією ми робимо шість речей: <strong>збираємо, зберігаємо, опрацьовуємо, передаємо, подаємо й захищаємо</strong>. Приклад: сфотографував розклад (збирання) → фото лежить у телефоні (зберігання) → обрізав його (опрацювання) → надіслав другові (передавання) → друг відкрив на екрані (подання) → на телефоні стоїть пароль (захист). Один пристрій — шість процесів.</p>
+    <p><strong>Цифровий пристрій</strong> — це пристрій, який працює з даними, поданими у вигляді чисел. Аналоговий показує величину «як є», плавно (стрілки годинника, стовпчик термометра). Цифровий перетворює все на числа — тому дані можна точно копіювати, зберігати, передавати мережею й опрацьовувати програмою.</p>
+    <p>Пристрої ділять трьома способами одночасно:</p>
+    <ul>
+      <li><strong>за призначенням:</strong> універсальні (комп'ютер, смартфон — роблять різне залежно від програм) і спеціалізовані (калькулятор, банкомат, фотоапарат);</li>
+      <li><strong>за мобільністю:</strong> стаціонарні · портативні · носимі (на тілі) · вбудовані (усередині пральної машини, авто, ліфта);</li>
+      <li><strong>за роллю:</strong> введення (клавіатура, камера, датчики) · опрацювання (процесор) · зберігання (SSD, флешка, хмара) · виведення (монітор, принтер, навушники) · передавання (роутер, Bluetooth).</li>
+    </ul>
+    <p>Один пристрій потрапляє в усі три поділи: смартфон — універсальний, портативний і водночас вводить, зберігає, виводить і передає.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">1.1</span>Аналогове чи цифрове</h3>
+    <p>Три пари: стрілковий годинник / електронний; рідинний термометр / цифровий; вінілова платівка чи касета / аудіофайл у телефоні.</p>
+    <div class="ask" data-k="1.1" data-q="1.1 У чому різниця між пристроями в кожній парі? Одне-два речення"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">1.2</span>Класифікація: 12 пристроїв</h3>
+    <p>Для кожного пристрою обери призначення (У — універсальний, С — спеціалізований), мобільність і головну роль. Потім натисни «Перевірити». Три пристрої тут навмисно спірні.</p>
+    <div class="tbl"><table class="cls" id="cls"><thead><tr><th>Пристрій</th><th>Призначення</th><th>Мобільність</th><th>Головна роль</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="btn" id="clsCheck" type="button">Перевірити</button><span class="score" id="clsScore"></span></div>
+    <div id="clsNotes" class="note" hidden><b>Спірні.</b> Банкомат — стаціонарний і спеціалізований, але виконує всі процеси. Смарт-годинник — носимий і майже універсальний (у нього ставлять програми), тому приймається і «С», і «У». Пральна машина — цифровий пристрій, який ніхто не назве комп'ютером: у ній вбудований пристрій, що керує програмою прання. Навігатор буває вбудованим в авто або окремим портативним — правильні обидва.</div>
+    <div class="ask" data-k="1.2" data-q="1.2 Обери один спірний пристрій (банкомат, смарт-годинник чи пральна машина) і поясни, чому його складно віднести до однієї групи"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">1.3</span>Перевір своє робоче місце</h3>
+    <p>Спершу зроби, потім читай. Сядь за комп'ютер як завжди й перевір по пунктах. Те, що не так, — виправ одразу.</p>
+    <div class="grid2">
+      <div class="mini"><b>Екран</b>відстань 50–70 см (витягнута рука); верхній край на рівні очей або трохи нижче; без відблисків; світло збоку, а не за спиною чи навпроти.</div>
+      <div class="mini"><b>Посадка</b>спина на спинці стільця, плечі опущені; ноги на підлозі, у колінах близько 90°; передпліччя на столі; клавіатура на 5–10 см від краю.</div>
+      <div class="mini"><b>Режим</b>без перерви — до 20–25 хв; правило 20–20–20: кожні 20 хв дивитися 20 секунд удалину (≈ 6 м); навушники не гучніше ≈ 60 %; біля клавіатури не їдять і не п'ють.</div>
+    </div>
+    <div class="ask" data-k="1.3" data-q="1.3 Що ти виправив на своєму місці? Щонайменше два конкретні пункти (наприклад: «підняв ноутбук на книжки, щоб верх екрана був на рівні очей»)"></div>
+    <div class="done" data-k="1.3g" data-q="Зробив гімнастику для очей"></div>
+    <details class="key"><summary>Гімнастика для очей — 1 хвилина</summary>
+      <ol><li>Міцно заплющ очі на 3–5 с, широко розплющ. 5 разів.</li><li>Швидко кліпай 10–15 с.</li><li>Не рухаючи головою: погляд угору — вниз — ліворуч — праворуч, потім по колу в обидва боки. По 4 рази.</li><li>Подивись на кінчик пальця за 25–30 см, потім на найдальший предмет у кімнаті. 5 разів.</li></ol>
+    </details>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">1.4</span>Шість пристроїв удома</h3>
+    <p>Знайди вдома шість цифрових пристроїв. Для кожного: назва — призначення — який інформаційний процес виконує — група за мобільністю. Пиши саме <em>процес</em> («подання інформації»), а не дію («щоб дивитися мультики»).</p>
+    <div class="ask" data-k="1.4" data-rows="7" data-q="1.4 Таблиця шести домашніх пристроїв" data-ph="Смартфон — зв'язок і навчання — усі шість процесів — портативний&#10;2.&#10;3.&#10;4.&#10;5.&#10;6."></div>
+    <div class="ask" data-k="1.4b" data-q="1.4 Бонус: знайди вбудований цифровий пристрій, який зазвичай не називають комп'ютером, і поясни, чому він усе-таки цифровий"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">1.5</span>Перевір себе</h3>
+    <p>Відповідай подумки, потім відкривай. Це не треба надсилати.</p>
+    <details class="key"><summary>Чому електронний годинник цифровий, а стрілковий — ні?</summary><p>Електронний подає час числами, стрілковий — плавним рухом стрілок.</p></details>
+    <details class="key"><summary>Смартфон — універсальний чи спеціалізований?</summary><p>Універсальний: що він робить, залежить від встановлених програм.</p></details>
+    <details class="key"><summary>Назви пристрій, який і вводить, і виводить дані.</summary><p>Сенсорний екран; також принтер-сканер (багатофункціональний пристрій).</p></details>
+    <details class="key"><summary>Чи цифровий пристрій сучасна пральна машина?</summary><p>Так: у неї вбудований цифровий пристрій, що керує програмою прання.</p></details>
+    <details class="key"><summary>Що означає правило 20–20–20?</summary><p>Кожні 20 хвилин — 20 секунд дивитися на щось віддалене (≈ 6 м).</p></details>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Відповіді 1.1–1.4 і таблиця з 1.2 — потраплять у файл відповідей автоматично.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 2 ============ -->
+<section class="view" data-v="2" data-t="Урок 2. Scratch: кіт, який танцює" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 2</div>
+    <h2>Перша програма у Scratch: кіт, який танцює</h2>
+    <div class="chips"><span class="chip">≈ 40 хв</span><span class="chip">інтернет або застосунок Scratch</span></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">2.1</span>Розминка: «Зроби чай»</h3>
+    <p>Уяви робота, який розуміє лише прості команди й робить рівно те, що сказано, у тому порядку, як сказано. Команду «Зроби чай» він не виконає. Розпиши її на 8–12 простих кроків. Перевір: чи не забув ти взяти чайник, перш ніж наливати в нього воду?</p>
+    <div class="ask" data-k="2.1" data-rows="6" data-q="2.1 Алгоритм «Зроби чай»" data-ph="1. Підійти до чайника&#10;2. ..."></div>
+    <details class="key"><summary>Висновок</summary><p>Виконавець розуміє лише прості команди зі свого списку й виконує їх у тому порядку, у якому сказано. Пропустив крок — він зупиняється або робить дурницю. Такий виконавець і кіт у Scratch.</p></details>
+  </div>
+
+  <div class="block brief">
+    <h3>Чотири слова про Scratch</h3>
+    <p>Відкрий <a class="go" href="https://scratch.mit.edu/projects/editor/" target="_blank" rel="noopener">scratch.mit.edu → Створити</a> (або застосунок Scratch, якщо він є). Мова — глобус угорі ліворуч → Українська.</p>
+    <ul>
+      <li><strong>Сцена</strong> — біле поле праворуч, де все відбувається.</li>
+      <li><strong>Спрайт</strong> — кіт, об'єкт, яким керує програма.</li>
+      <li><strong>Палітра блоків</strong> — кольорові категорії ліворуч: Рух, Вигляд, Керування, Події.</li>
+      <li><strong>Область скриптів</strong> — поле посередині, куди перетягуємо блоки.</li>
+    </ul>
+    <p>Правило: працюємо тільки з котом. Нові спрайти й фони — лише після п'ятої точки.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">2.2</span>П'ять контрольних точок</h3>
+    <div class="done" data-k="2.2a" data-q="Точка 1. Кіт рухається: «Події → коли ⚑ натиснуто», під нього «Рух → рухатися 10 кроків». Натисни прапорець."></div>
+    <div class="done" data-k="2.2b" data-q="Точка 2. Кіт говорить: «Вигляд → говорити Привіт! 2 секунди», заміни текст на своє ім'я."></div>
+    <div class="done" data-k="2.2c" data-q="Точка 3. Кіт повертається: додай ще «рухатися», впиши −10. Запусти."></div>
+    <div class="ask" data-k="2.2q" data-q="Точка 3. Кіт ніби не рухався назад. Чому? Напиши свою думку, потім відкрий підказку"></div>
+    <details class="key"><summary>Підказка до точки 3</summary><p>Комп'ютер виконує обидві команди миттєво, одну за одною — оком не встигнеш помітити. Рішення: «Керування → чекати 1 секунд» між двома рухами.</p></details>
+    <div class="done" data-k="2.2d" data-q="Точка 4. Танець: «Керування → повторити 10», вклади в нього обидва рухи з паузою. Спробуй поставити 100."></div>
+    <div class="done" data-k="2.2e" data-q="Точка 5. Колір: усередину циклу «Вигляд → змінити ефект колір на 25»."></div>
+    <div class="note"><b>Не працює?</b> Перевір, що блоки зчеплені, а не лежать поруч: відпускай блок, коли під ним з'явилася сіра тінь. Працює тільки те, що висить під «капелюшком» з прапорцем. Кіт утік за край — перетягни його мишкою назад.</div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">2.3</span>Складніше</h3>
+    <div class="done" data-k="2.3a" data-q="Додай у цикл «наступний костюм» — кіт переставляє лапи."></div>
+    <div class="done" data-k="2.3b" data-q="Перед циклом постав «перейти в x: 0 y: 0» — кіт щоразу стартує з центру."></div>
+    <div class="done" data-k="2.3c" data-q="Кіт обходить квадрат: усередині «повторити 4» — «рухатися 100», «чекати 0.5», «поворот на 90 градусів»."></div>
+    <div class="done" data-k="2.3d" data-q="Додай другий спрайт зі своїм танцем (тільки після всього іншого)."></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">2.4</span>Збережи файл</h3>
+    <p><strong>Файл → Зберегти на комп'ютер.</strong> Назва файлу — твоє прізвище, наприклад <span class="mono">Коваленко.sb3</span>. Без облікового запису проєкт сам нікуди не зберігається.</p>
+    <div class="done" data-k="2.4" data-q="Файл .sb3 збережено"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">2.5</span>Питання</h3>
+    <div class="ask" data-k="2.5a" data-q="2.5 Що таке спрайт?" data-rows="2"></div>
+    <div class="ask" data-k="2.5b" data-q="2.5 Навіщо потрібен блок «чекати»?" data-rows="2"></div>
+    <div class="ask" data-k="2.5c" data-q="2.5 Чим «повторити 10» краще за десять однакових блоків?" data-rows="2"></div>
+    <div class="ask" data-k="2.5d" data-q="2.5 Скільки блоків у твоїй програмі і що робить кожен?" data-rows="4"></div>
+    <div class="ask" data-k="2.5e" data-q="2.5 Придумай три дії, які ще міг би виконувати кіт" data-rows="3"></div>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Файл <span class="mono">Прізвище.sb3</span>.</li><li>Відповіді 2.1, 2.2, 2.5 — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 3 ============ -->
+<section class="view" data-v="3" data-t="Урок 3. Мовні моделі й промпти" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 3</div>
+    <h2>Мовна модель, промпт і перевірка фактів</h2>
+    <div class="chips"><span class="chip">≈ 45 хв</span><span class="chip">інтернет для пошуку</span><span class="chip warm">чат-боти — лише з 18 років</span></div>
+  </div>
+  <div class="note"><b>Важливо.</b> ChatGPT, Claude, Gemini та подібні сервіси за умовами користування розраховані на дорослих. Тому сам ти в них нічого не пишеш — на уроці запити вводив учитель зі свого акаунта. Усе нижче робиться без чат-бота.</div>
+
+  <div class="task">
+    <h3><span class="n">3.1</span>Експеримент — до того, як читати далі</h3>
+    <p>Допиши речення одним словом, не думаючи довго: <strong>«На небі яскраво світило ___»</strong>.</p>
+    <div class="ask" data-k="3.1a" data-q="3.1 Моє слово" data-type="line"></div>
+    <p style="margin-top:10px">Тепер спитай те саме в щонайменше п'ятьох людей (удома, у месенджері). Не підказуй.</p>
+    <div class="ask" data-k="3.1b" data-q="3.1 Що відповіли (слово — скільки разів)" data-rows="3" data-ph="сонце — 4&#10;місяць — 1"></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Як працює мовна модель</h3>
+    <p>Ти щойно зробив те, що всередині мовної моделі: зібрав статистику, яке слово найчастіше йде далі. Тільки модель зібрала її не з п'яти людей, а з мільярдів текстів.</p>
+    <ul>
+      <li>Модель <strong>передбачає наступний шматочок тексту</strong> — потім ще один, і ще. Так по слову народжується відповідь.</li>
+      <li>Її навчили на величезній кількості текстів — звідти вона «знає», що після «на небі світило» найчастіше йде «сонце».</li>
+      <li>У неї <strong>немає бази фактів</strong>, куди можна зазирнути. Вона добирає правдоподібне.</li>
+    </ul>
+    <p><strong>Правдоподібне — не те саме, що правдиве.</strong> Тому модель може впевнено назвати книжку, якої не існує: назва складена з тих самих деталей, що й справжні.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">3.2</span>Лабораторія промптів</h3>
+    <p>Промпт — це запит до ШІ. Ось як пишуть за звичкою:</p>
+    <div class="quote mono">Розкажи про Одесу</div>
+    <p>Відповідь буде правильною й нікому не потрібною: всього потроху, ні для кого. Покращуй запит крок за кроком — кожна версія повністю, з усім попереднім.</p>
+    <div class="ask" data-k="3.2a" data-q="Версія 1 — покращ як вважаєш за потрібне" data-rows="2"></div>
+    <div class="ask" data-k="3.2b" data-q="Версія 2 — додай, для кого відповідь (хто її читатиме)" data-rows="2"></div>
+    <div class="ask" data-k="3.2c" data-q="Версія 3 — додай деталі: що саме тебе цікавить і скільки" data-rows="2"></div>
+    <div class="ask" data-k="3.2d" data-q="Версія 4 — додай формат: у якому вигляді має бути відповідь" data-rows="3"></div>
+    <details class="key"><summary>Формула й зразок</summary>
+      <p><strong>для кого + що зробити + деталі + у якому вигляді</strong></p>
+      <ul><li>для кого — «поясни шестикласнику» (задає складність мови);</li><li>що зробити — «поясни», «назви», «порівняй»: дієслово вирішує все;</li><li>деталі — «три факти про заснування» (звужує тему);</li><li>вигляд — «списком», «таблицею», «одним реченням».</li></ul>
+      <p class="mono" style="font-size:13.5px">Поясни шестикласнику, як з'явилася Одеса. Назви три найцікавіші факти про заснування міста. Оформи списком, кожен факт — одним реченням.</p>
+      <p>Чарівних слів немає. Ми просто перестаємо змушувати машину здогадуватися. Промпт — це алгоритм, записаний звичайною мовою.</p>
+    </details>
+    <p style="margin-top:12px"><strong>Тепер сам:</strong> три промпти за формулою на різні теми.</p>
+    <div class="ask" data-k="3.2e" data-q="Промпт для навчання" data-rows="2"></div>
+    <div class="ask" data-k="3.2f" data-q="Промпт для творчості" data-rows="2"></div>
+    <div class="ask" data-k="3.2g" data-q="Промпт для побуту" data-rows="2"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">3.3</span>Фактчекінг</h3>
+    <p>Ось відповідь, яку чат-бот міг дати на питання про Одесу. Звучить упевнено. Але <strong>одне твердження тут неправдиве</strong>.</p>
+    <div class="quote">① Одесу заснували 1794 року. ② Раніше на цьому місці було поселення Хаджибей з фортецею. ③ Будівництво міста очолював Хосе де Рибас — на його честь названо Дерибасівську вулицю. ④ План міста склав інженер Франц де Воллан. ⑤ Тоді ж, 1794 року, звели й Потьомкінські сходи, які стали символом нового міста.</div>
+    <p>Перевір <strong>усі п'ять</strong> фактів пошуком. Кожен — щонайменше у двох незалежних джерелах (енциклопедія, офіційний сайт, кілька різних видань). «Перше посилання в пошуку» — не аргумент.</p>
+    <div class="ask" data-k="3.3a" data-rows="6" data-q="3.3 Факт — підтвердився чи ні — де перевірив (два джерела)" data-ph="① так — ... і ...&#10;②&#10;③&#10;④&#10;⑤"></div>
+    <div class="ask" data-k="3.3b" data-q="3.3 Яке твердження неправдиве і як насправді?" data-rows="2"></div>
+    <div class="ask" data-k="3.3c" data-q="3.3 Чому ти повірив саме цим джерелам?" data-rows="2"></div>
+    <div class="note"><b>Правило.</b> Факт, дата, ім'я, число — перевіряй у джерелі. Модель часто буває права — саме тому перевіряти треба щоразу, а не «коли підозріло».</div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">3.4</span>Чесно чи нечесно?</h3>
+    <p>Для кожної ситуації: чесно чи нечесно — і чому, одним реченням.</p>
+    <div class="ask" data-k="3.4a" data-rows="2" data-q="А. Не зрозумів тему на уроці й попросив ШІ пояснити її іншими словами"></div>
+    <div class="ask" data-k="3.4b" data-rows="2" data-q="Б. Попросив написати твір і здав його як свій"></div>
+    <div class="ask" data-k="3.4c" data-rows="2" data-q="В. Написав твір сам і попросив ШІ знайти помилки"></div>
+    <div class="ask" data-k="3.4d" data-rows="2" data-q="Г. Попросив розв'язок задачі й переписав, не розібравшись"></div>
+    <details class="key"><summary>Що вирішив клас</summary>
+      <p>А — чесно, як спитати репетитора. Б — нечесно: оцінюють твоє вміння писати, а його не з'явилося. В — чесно, якщо текст твій. Г — нечесно й безглуздо: на контрольній ШІ поруч не буде.</p>
+      <p>Межа: не «користувався чи ні», а <strong>чи стало тобі зрозуміліше</strong>. Можеш пояснити тему іншому — усе чесно.</p>
+    </details>
+    <div class="ask" data-k="3.4e" data-rows="2" data-q="3.4 Твоє правило одним реченням: коли допомога ШІ — це чесно"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">3.5</span>Наостанок</h3>
+    <div class="ask" data-k="3.5a" data-rows="3" data-q="3.5 Поясни 2–3 реченнями, чому ШІ може впевнено назвати факт, якого не існує"></div>
+    <div class="ask" data-k="3.5b" data-rows="3" data-q="3.5 Візьми будь-яке твердження, почуте цього тижня. Як саме його перевірити: у яких джерелах і чому саме там?"></div>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Усі відповіді уроку — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 4 ============ -->
+<section class="view" data-v="4" data-t="Урок 4. Дані: чому машина думає, що будинок має трикутний дах" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 4 · Штучний інтелект</div>
+    <h2>Дані: чому машина думає, що будинок має трикутний дах</h2>
+    <div class="chips"><span class="chip">≈ 40 хв</span><span class="chip">інтернет</span><span class="chip">Paint</span></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">4.1</span>Гра на дві хвилини</h3>
+    <p><a class="go" href="https://quickdraw.withgoogle.com" target="_blank" rel="noopener">quickdraw.withgoogle.com</a> — один підхід, шість слів. Машина намагається вгадати, що ти малюєш.</p>
+    <div class="ask" data-k="4.1" data-type="line" data-q="4.1 Скільки з шести малюнків вона вгадала?"></div>
+    <div class="ask" data-k="4.1b" data-rows="2" data-q="4.1 Вона ніколи не бачила саме твого малюнка. Звідки тоді знає, що на ньому?"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">4.2</span>Намалюй — і не читай далі, поки не намалюєш</h3>
+    <p>Відкрий Paint і за <strong>2 хвилини</strong> намалюй <strong>будинок</strong>. Як захочеш. Збережи як <span class="mono">Будинок_Прізвище.png</span>.</p>
+    <div class="done" data-k="4.2" data-q="Будинок намальовано й збережено"></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Дані</h3>
+    <p>Машину вчили на мільйонах чужих малюнків — це <strong>навчальні дані</strong>. Вона знає лише те, що в них було.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">4.3</span>Ти — дослідник даних</h3>
+    <p>Відкрий малюнки, на яких учили машину: <a class="go" href="https://quickdraw.withgoogle.com/data/house" target="_blank" rel="noopener">quickdraw.withgoogle.com/data/house</a></p>
+    <p>Порахуй серед <strong>перших 30 малюнків</strong>, скільки мають кожну ознаку. Біля кожного числа — що в тебе на власному малюнку (так / ні).</p>
+    <div class="ask" data-k="4.3" data-rows="6" data-q="4.3 Ознака — скільки з 30 — у мене" data-ph="трикутний дах — __ з 30 — у мене: &#10;вікна — &#10;димар — &#10;вищий за два поверхи — &#10;балкон — "></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">4.4</span>Головне питання уроку</h3>
+    <p>У класі майже всі намалювали те саме: трикутний дах, вікна, димар. Балкон — майже ніхто, хоча більшість живе в багатоповерхівках з балконами.</p>
+    <div class="ask" data-k="4.4" data-rows="3" data-q="4.4 Якщо машину навчити тільки на цих малюнках — чи впізнає вона будинок, у якому живеш ти? Чому?"></div>
+    <details class="key"><summary>Висновок</summary><p>Дані описують не те, як виглядають будинки, а те, як їх <em>прийнято малювати</em>. Машина переймає з даних не лише корисне, а й випадкові звички людей.</p></details>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">4.5</span>Де це ламається по-справжньому</h3>
+    <p>Розпізнавання мови, навчене на дорослих голосах, гірше розуміє дітей. Пошук картинок «школяр» показує те, що найчастіше трапляється в мережі. А ось перекладач перевір сам.</p>
+    <p>Відкрий <a class="go" href="https://translate.google.com/?sl=en&tl=uk" target="_blank" rel="noopener">Google Перекладач</a> і переклади з англійської (в англійській у цих словах немає роду):</p>
+    <div class="quote mono">The doctor is tired. The nurse is tired. The engineer is tired. The cleaner is tired. The programmer is tired.</div>
+    <div class="ask" data-k="4.5a" data-rows="3" data-q="4.5 Якого роду вийшло кожне слово? Якщо перекладач запропонував обидва варіанти — запиши й це"></div>
+    <div class="ask" data-k="4.5b" data-rows="2" data-q="4.5 Чому перекладач обрав саме такий рід?"></div>
+    <div class="ask" data-k="4.5c" data-rows="3" data-q="4.5 Хто винен: машина, люди, які її зробили, чи люди, які написали всі ті тексти? Твоя думка з аргументом"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">4.6</span>Три правила</h3>
+    <div class="ask" data-k="4.6" data-rows="3" data-q="4.6 Сформулюй своїми словами три правила про ШІ й дані"></div>
+    <details class="key"><summary>Що вийшло в класу</summary><ol><li>Машина знає те, що було в її даних. Чого там не було — не знає, навіть якщо говорить упевнено.</li><li>Дані збирали люди, тому туди потрапляють і випадкові звички — як трикутний дах.</li><li>Конкретні факти — числа, дати, імена — перевіряй.</li></ol></details>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Малюнок <span class="mono">Будинок_Прізвище.png</span>.</li><li>Відповіді — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 5 ============ -->
+<section class="view" data-v="5" data-t="Урок 5. Справжнє чи згенероване" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 5 · Штучний інтелект</div>
+    <h2>Справжнє чи згенероване</h2>
+    <div class="chips"><span class="chip">≈ 40 хв</span><span class="chip">інтернет</span></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">5.1</span>Розминка: навчи машину</h3>
+    <p><a class="go" href="https://code.org/oceans" target="_blank" rel="noopener">code.org/oceans</a> → «Почати». Рівні можна обирати вгорі.</p>
+    <ul><li><strong>Рівень 2:</strong> навчи машину розрізняти рибу й сміття (30+ прикладів) і запусти.</li><li><strong>Рівень 8:</strong> обери слово-оцінку (наприклад, «веселий» або «сердитий») і навчи машину <em>своєму</em> розумінню цього слова.</li></ul>
+    <div class="ask" data-k="5.1" data-rows="3" data-q="5.1 Яке слово ти обрав на рівні 8? Чи погодилася б з твоєю машиною інша людина? Що це каже про машину?"></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Як машина малює</h3>
+    <p>Генератор зображень вчили на мільйонах картинок з підписами. Він запам'ятав, як зазвичай виглядає «кіт», «пляж», «обличчя». За описом він не шукає готову картинку, а складає нову, якої ніколи не було.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">5.2</span>Яке обличчя справжнє?</h3>
+    <p><a class="go" href="https://www.whichfaceisreal.com" target="_blank" rel="noopener">whichfaceisreal.com</a> — у кожній парі одне фото справжнє, друге згенероване. Пройди <strong>10 пар</strong> і рахуй, скільки вгадав.</p>
+    <div class="ask" data-k="5.2a" data-type="line" data-q="5.2 Вгадав із 10"></div>
+    <div class="ask" data-k="5.2b" data-rows="2" data-q="5.2 За якими ознаками ти вгадував?"></div>
+    <details class="key"><summary>Поворот</summary><p>Зазвичай вгадують за дивним фоном, різними сережками, волоссям, що «зливається». Але ці обличчя зробив генератор ще 2019 року. Сьогоднішні роблять без таких помилок. Тобто підказки майже не працюють. Як тоді перевіряти?</p></details>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">5.3</span>Перевіряй не картинку, а джерело</h3>
+    <p>Три питання, які працюють, хоч би яким добрим був генератор:</p>
+    <ol><li><strong>Хто це опублікував?</strong> Відомий сайт новин чи невідомий акаунт без історії?</li><li><strong>Де ще про це пишуть?</strong> Справжню важливу подію описують кілька незалежних джерел.</li><li><strong>Чи можна знайти оригінал?</strong> Пошук за зображенням (Google Lens: значок камери в пошуку Google) показує, де картинка з'являлася раніше.</li></ol>
+    <p>Ситуація: у чат класу скинули фото з підписом «Над Одесою вчора бачили величезний повітряний корабель».</p>
+    <div class="ask" data-k="5.3a" data-rows="4" data-q="5.3 Як ти це перевіриш? Пройди по трьох питаннях"></div>
+    <p style="margin-top:10px"><strong>Спробуй сам:</strong> візьми будь-яке фото з новин цього тижня, завантаж його в пошук за зображенням.</p>
+    <div class="ask" data-k="5.3b" data-rows="2" data-q="5.3 Що знайшов: де ще й коли це фото з'являлося?"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">5.4</span>Що можна, а що ні</h3>
+    <p>Для кожної ситуації: можна чи ні — і аргумент.</p>
+    <div class="ask" data-k="5.4a" data-rows="2" data-q="А. Згенерувати смішну картинку з другом, якщо він не проти"></div>
+    <div class="ask" data-k="5.4b" data-rows="2" data-q="Б. Згенерувати картинку з однокласником без його згоди й скинути в чат класу"></div>
+    <div class="ask" data-k="5.4c" data-rows="2" data-q="В. Переслати далі вражаючу картинку, не перевіривши"></div>
+    <details class="key"><summary>Три правила</summary><ol><li>Очам не вір — перевір джерело.</li><li>Не пересилай, поки не перевірив.</li><li>Не створюй картинок з реальними людьми без їхньої згоди. Картинка з однокласником без згоди в чаті — це вже цькування, навіть «просто жарт».</li></ol></details>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Відповіді — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 6 ============ -->
+<section class="view" data-v="6" data-t="Урок 6. Шість пішаків" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 6 · Штучний інтелект</div>
+    <h2>Шість пішаків: машина, що вчиться на поразках</h2>
+    <div class="chips"><span class="chip">≈ 40 хв</span><span class="chip">інтернет або файл від учителя</span></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Гра</h3>
+    <p><a class="go" href="https://markmerrek.github.io/pishaky.html" target="_blank" rel="noopener">markmerrek.github.io/pishaky.html</a></p>
+    <p>Шахи на дошці 3×3: у тебе три білі пішаки, у машини три чорні. Пішак іде на клітинку вперед, б'є навскіс. Перемога — дійти до протилежного краю, з'їсти всіх або залишити суперника без ходу.</p>
+    <p>Машина знає лише правила й ходить навмання. Але <strong>після кожної поразки вона забороняє собі хід, який до неї привів</strong>. Поки вона «дурна» — вигравай якомога більше.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">6.1</span>Встигни перемогти</h3>
+    <p>Натисни «Машина забуває все» і зіграй <strong>20 ігор</strong>. Під дошкою — стрічка квадратиків: зелений — переміг ти, червоний — машина.</p>
+    <div class="ask" data-k="6.1a" data-type="line" data-q="6.1 Скільки перемог у тебе в перших 5 іграх"></div>
+    <div class="ask" data-k="6.1b" data-type="line" data-q="6.1 Скільки перемог у тебе в останніх 5 іграх"></div>
+    <div class="ask" data-k="6.1c" data-rows="2" data-q="6.1 Хто навчив машину грати?"></div>
+    <p style="margin-top:10px"><strong>Секретне — «Пастка»:</strong> знайди хід, на який машина ще ні разу не відповіла правильно, і виграй ним тричі. Чи вийде вчетверте?</p>
+    <div class="ask" data-k="6.1d" data-rows="2" data-q="6.1 Пастка: який хід і що сталося на четвертий раз"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">6.2</span>Зазирни в мізки</h3>
+    <p>Праворуч (на телефоні — нижче) — «Мізки машини»: кожна картка — позиція, яку вона бачила. Стрілки — ходи, які вона собі ще дозволяє; червоні хрестики — заборонені після поразок; синя рамка — позиція, що зараз на дошці.</p>
+    <div class="ask" data-k="6.2" data-rows="2" data-q="6.2 Хтось пояснював машині, як грати добре? Як вона тоді навчилася?"></div>
+    <details class="key"><summary>Як це називається</summary><p><strong>Навчання з підкріпленням:</strong> машина пробує, отримує «покарання» чи «нагороду» й змінює поведінку. Так вчилися програми для шахів і го — граючи самі з собою мільйони партій. Цю гру придумали ще в 1960-х, і «машиною» були сірникові коробки з намистинками — по коробці на кожну позицію.</p></details>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">6.3</span>Добрий і поганий учитель</h3>
+    <ol>
+      <li>«Машина забуває все». Зіграй <strong>10 ігор навмисно погано</strong> — підставляйся, давай машині вигравати. Потім зіграй <strong>5 ігор щосили</strong>.</li>
+      <li>Знову «Машина забуває все». Зіграй <strong>10 ігор щосили</strong> й двічі запусти «Тренувальний матч». Потім знову <strong>5 ігор щосили</strong>.</li>
+    </ol>
+    <div class="ask" data-k="6.3a" data-type="line" data-q="6.3 Машина «поганого вчителя» виграла з 5"></div>
+    <div class="ask" data-k="6.3b" data-type="line" data-q="6.3 Машина «доброго вчителя» виграла з 5"></div>
+    <div class="ask" data-k="6.3c" data-rows="2" data-q="6.3 Чому машина поганого вчителя слабша?"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">6.4</span>Машина проти машини</h3>
+    <p>Натисни «Машина проти машини: 50 ігор» 2–3 рази поспіль.</p>
+    <div class="ask" data-k="6.4" data-rows="2" data-q="6.4 Хто почав вигравати майже завжди? Хто навчив цих машин?"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">6.5</span>Де ще машини вчаться на нагородах</h3>
+    <p>Ігри (програми, що грають краще за чемпіонів), роботи (вчаться ходити, падаючи тисячі разів у симуляції), стрічка відео (нагорода — твій перегляд і лайк).</p>
+    <div class="ask" data-k="6.5" data-rows="3" data-q="6.5 За що нагороджують стрічку відео — за те, щоб тобі було добре, чи за те, щоб ти дивився якомога довше? Чим це відрізняється?"></div>
+    <p style="margin-top:10px"><strong>Бонус:</strong> «Машина забуває все» — після якої гри машина вперше виграла тричі поспіль?</p>
+    <div class="ask" data-k="6.5b" data-type="line" data-q="6.5 Бонус: номер гри"></div>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Відповіді — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 7 ============ -->
+<section class="view" data-v="7" data-t="Урок 7. Моя стрічка" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 7 · Штучний інтелект</div>
+    <h2>Моя стрічка: хто вирішує, що ти дивишся</h2>
+    <div class="chips"><span class="chip">≈ 45 хв</span><span class="chip">інтернет або файл від учителя</span></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">7.0</span>Перш ніж почати</h3>
+    <div class="ask" data-k="7.0" data-rows="2" data-q="7.0 Хто вирішує, яке відео в стрічці буде наступним: ти, стрічка чи ніхто?"></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Як працювати</h3>
+    <p><a class="go" href="https://markmerrek.github.io/strichka.html" target="_blank" rel="noopener">markmerrek.github.io/strichka.html</a></p>
+    <p>На уроці вчитель називав коди місій. Ти вводиш їх сам, по черзі: <span class="code">34</span> <span class="code">47</span> <span class="code">62</span> <span class="code">88</span> <span class="code">51</span> <span class="code">76</span>. Код відкриває завдання й таймер. Час вийшов — нічого страшного, доробляй. «Готово!» відкриває секретне завдання.</p>
+    <p><strong>Код 34 стирає стрічку</strong> — вводь його один раз, на самому початку.</p>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">7.1</span>Місія 1 · Твоя стрічка · <span class="code">34</span></h3>
+    <p>40 відео: ❤ — що подобається, «Далі» — що ні. Панель «Що стрічка думає про мене» поки не відкривай.</p>
+    <div class="ask" data-k="7.1" data-type="line" data-q="7.1 Які 3 теми, на твою думку, стрічка тепер вважає твоїми улюбленими?"></div>
+  </div>
+  <div class="task">
+    <h3><span class="n">7.2</span>Місія 2 · Що стрічка про тебе знає · <span class="code">47</span></h3>
+    <div class="ask" data-k="7.2" data-rows="2" data-q="7.2 Відкрий панель. Які 3 теми на першому місці? Чи збіглося з твоєю здогадкою?"></div>
+    <p style="margin-top:8px">Зроби скріншот панелі (<span class="mono">Win+Shift+S</span> або <span class="mono">PrtSc</span>).</p>
+  </div>
+  <div class="task">
+    <h3><span class="n">7.3</span>Місія 3 · Секрет стрічки · <span class="code">62</span></h3>
+    <div class="ask" data-k="7.3" data-rows="2" data-q="7.3 Жодного ❤ — лише довго дивишся одну тему. Що сталося і як стрічка дізналася?"></div>
+  </div>
+  <div class="task">
+    <h3><span class="n">7.4</span>Місія 4 · Втеча з бульбашки · <span class="code">88</span></h3>
+    <div class="ask" data-k="7.4" data-rows="2" data-q="7.4 Як ти повернув «Різноманітність: 8 з 10» і за скільки відео?"></div>
+  </div>
+  <div class="task">
+    <h3><span class="n">7.5</span>Місія 5 · Лайки проти часу · <span class="code">51</span></h3>
+    <div class="ask" data-k="7.5" data-rows="2" data-q="7.5 Як ти розв'язав головоломку (на першому місці тема без жодного лайка)?"></div>
+  </div>
+  <div class="task">
+    <h3><span class="n">7.6</span>Місія 6 · Інженер стрічки · <span class="code">76</span></h3>
+    <p>Повзунки змінюють правила стрічки, «Бот-глядач» гортає 50 відео як фанат котиків. Мета: котики найчастіші (8+ з 20), але «Різноманітність» 6+. Бот щоразу дає трохи інший результат — запускай кілька разів.</p>
+    <div class="ask" data-k="7.6a" data-rows="2" data-q="7.6 Які значення повзунків спрацювали? Який повзунок діє найсильніше?"></div>
+    <div class="ask" data-k="7.6b" data-rows="2" data-q="7.6 Чому справжні платформи не ставлять 40 % випадкових відео?"></div>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">7.7</span>Підсумок</h3>
+    <details class="key"><summary>Три думки уроку</summary>
+      <ul><li><strong>Нагорода.</strong> Як у «Шести пішаках»: машина вчиться того, за що її нагороджують. Стрічку нагороджують за твій час, а не за твою користь.</li><li><strong>Бульбашка.</strong> Бачиш лише котиків — здається, що весь світ котики. З новинами й думками так само.</li><li><strong>Стрічка вчиться не з того, що ти кажеш, а з того, що ти робиш:</strong> лайки й секунди.</li></ul>
+    </details>
+    <div class="ask" data-k="7.7a" data-rows="2" data-q="7.7 Тепер: хто вирішує, яке відео буде наступним?"></div>
+    <div class="ask" data-k="7.7b" data-rows="3" data-q="7.7 Порада молодшому школяреві: як вибратися з бульбашки (2–3 речення)"></div>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Скріншот панелі з місії 2.</li><li>Відповіді — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ УРОК 8 ============ -->
+<section class="view" data-v="8" data-t="Урок 8. Практична: навчи й перевір ШІ" hidden>
+  <div class="lhead">
+    <div class="kicker">Урок 8 · Практична робота</div>
+    <h2>Навчи й перевір ШІ</h2>
+    <div class="chips"><span class="chip">≈ 40 хв</span><span class="chip">оцінюється</span><span class="chip">інтернет або файл від учителя</span></div>
+  </div>
+
+  <div class="block brief">
+    <h3>Що робити</h3>
+    <p><a class="go" href="https://markmerrek.github.io/praktychna.html" target="_blank" rel="noopener">markmerrek.github.io/praktychna.html</a></p>
+    <ol>
+      <li>Введи код <span class="code">61</span> — відкриються завдання для 6 класу (їх 9).</li>
+      <li>Ти навчаєш машину розрізняти фрукти, овочі та ягоди на прикладах, а потім перевіряєш її на продуктах, яких вона не бачила. Кожне завдання пояснене на сторінці.</li>
+      <li>Завдання можна пробувати кілька разів — рахується найкраща спроба. У завданнях «передбач машину» не підглядай у відповідь: сторінка це помічає.</li>
+      <li>Пам'ятай з уроку 4: машина знає лише те, що було в її даних. З уроку 6: машина така, як її навчання.</li>
+      <li>Коли закінчиш — відкрий екран результату, впиши прізвище та клас і <strong>зроби скріншот</strong> (<span class="mono">Win+Shift+S</span> або <span class="mono">PrtSc</span>).</li>
+    </ol>
+  </div>
+
+  <div class="task">
+    <h3><span class="n">8.1</span>Після роботи</h3>
+    <div class="ask" data-k="8.1a" data-type="line" data-q="8.1 Скільки балів і скільки хвилин"></div>
+    <div class="ask" data-k="8.1b" data-rows="3" data-q="8.1 Яке завдання було найважчим і як ти його розв'язав?"></div>
+    <div class="ask" data-k="8.1c" data-rows="3" data-q="8.1 Чому одна й та сама машина в «кухаря» й «ботаніка» відповідає по-різному про той самий помідор?"></div>
+  </div>
+
+  <div class="send"><h3>Вчителю</h3><ul><li>Скріншот екрана результату.</li><li>Відповіді 8.1 — у файлі відповідей.</li></ul></div>
+</section>
+
+<!-- ============ НАДІСЛАТИ ============ -->
+<section class="view" data-v="9" data-t="Надіслати" hidden>
+  <div class="lhead">
+    <div class="kicker">Наостанок</div>
+    <h2>Надіслати вчителю</h2>
+  </div>
+
+  <div class="block">
+    <h3>Що вже зроблено</h3>
+    <div class="prog" id="prog"></div>
+  </div>
+
+  <div class="task">
+    <h3>1 · Файл з відповідями</h3>
+    <p>Усі відповіді з цієї сторінки збираються в один текстовий файл. Можна надіслати частину — потім доробити й надіслати ще раз.</p>
+    <div class="row"><button class="btn" id="dl" type="button">Завантажити відповіді (.txt)</button><button class="btn ghost" id="cp" type="button">Скопіювати текст</button></div>
+    <div class="status" id="st" aria-live="polite"></div>
+  </div>
+
+  <div class="task">
+    <h3>2 · Інші файли</h3>
+    <ul>
+      <li><span class="mono">Прізвище.sb3</span> — проєкт Scratch (урок 2);</li>
+      <li><span class="mono">Будинок_Прізвище.png</span> — малюнок (урок 4);</li>
+      <li>скріншот панелі стрічки (урок 7);</li>
+      <li>скріншот результату практичної (урок 8).</li>
+    </ul>
+  </div>
+
+  <div class="note"><b>Немає інтернету?</b> Попроси вчителя надіслати файли <span class="mono">pishaky.html</span>, <span class="mono">strichka.html</span> і <span class="mono">praktychna.html</span>: вони відкриваються подвійним клацанням і працюють без мережі. Відповіді на цій сторінці зберігаються в браузері цього комп'ютера — працюй з одного й того самого.</div>
+</section>
+
+<div class="pager" id="pager"><button class="btn ghost" id="prev" type="button">← Назад</button><button class="btn" id="next" type="button">Далі →</button></div>
+</div>
+
+<script>
+(function(){
+  var KEY='inf6-online-v1', data={};
+  try{data=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){data={}}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  // build fields
+  document.querySelectorAll('.ask').forEach(function(d){
+    var k=d.dataset.k,q=d.dataset.q,line=d.dataset.type==='line',id='f-'+k.replace(/\W/g,'_');
+    var el=line?'<input type="text" id="'+id+'">':'<textarea id="'+id+'" rows="'+(d.dataset.rows||3)+'"></textarea>';
+    d.innerHTML='<span><label for="'+id+'">'+esc(q)+'</label></span>'+el;
+    var f=d.querySelector('input,textarea');
+    f.dataset.k=k; f.dataset.l=q;
+    if(d.dataset.ph) f.placeholder=d.dataset.ph;
+    d.removeAttribute('data-k');
+  });
+  document.querySelectorAll('div.done').forEach(function(d){
+    var k=d.dataset.k,id='c-'+k.replace(/\W/g,'_');
+    var lab=document.createElement('label');lab.className='done';
+    lab.innerHTML='<input type="checkbox" id="'+id+'"><span>'+esc(d.dataset.q)+'</span>';
+    var f=lab.querySelector('input');f.dataset.k=k;f.dataset.l=d.dataset.q;
+    d.replaceWith(lab);
+  });
+
+  // classification
+  var DEV=[
+    ['смартфон',['У'],['П'],'кілька: усі шість процесів'],
+    ['банкомат',['С'],['Ст'],'кілька: вводить, опрацьовує, видає, передає'],
+    ['флешка',['С'],['П'],'зберігання'],
+    ['роутер',['С'],['Ст'],'передавання'],
+    ['смарт-годинник',['С','У'],['Н'],'кілька: збирає дані й показує'],
+    ['настільний комп’ютер',['У'],['Ст'],'кілька: усі процеси'],
+    ['електронна книжка',['С'],['П'],'виведення (подання)'],
+    ['пральна машина з електронним таймером',['С'],['В'],'опрацювання: керує програмою'],
+    ['принтер',['С'],['Ст'],'виведення'],
+    ['бездротові навушники',['С'],['Н'],'виведення'],
+    ['калькулятор',['С'],['П'],'опрацювання'],
+    ['автомобільний навігатор',['С'],['В','П'],'кілька: приймає сигнал, опрацьовує, показує']
+  ];
+  var O1=[['','—'],['У','У'],['С','С']],
+      O2=[['','—'],['Ст','стаціонарний'],['П','портативний'],['Н','носимий'],['В','вбудований']],
+      O3=[['','—'],['введення','введення'],['опрацювання','опрацювання'],['зберігання','зберігання'],['виведення','виведення'],['передавання','передавання'],['кілька','кілька / усі']];
+  function sel(k,l,opts){return '<select data-k="'+k+'" data-l="'+esc(l)+'" aria-label="'+esc(l)+'">'+opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>'}).join('')+'</select>'}
+  var tb=document.querySelector('#cls tbody');
+  tb.innerHTML=DEV.map(function(d,i){
+    return '<tr><td class="dev">'+d[0]+'<div class="ref" id="ref'+i+'" hidden></div></td><td>'+sel('cls'+i+'a','1.2 '+d[0]+' — призначення',O1)+'</td><td>'+sel('cls'+i+'b','1.2 '+d[0]+' — мобільність',O2)+'</td><td>'+sel('cls'+i+'c','1.2 '+d[0]+' — роль',O3)+'</td></tr>';
+  }).join('');
+  function checkCls(show){
+    var ok=0;
+    DEV.forEach(function(d,i){
+      var a=document.querySelector('[data-k="cls'+i+'a"]'),b=document.querySelector('[data-k="cls'+i+'b"]');
+      [[a,d[1]],[b,d[2]]].forEach(function(p){
+        p[0].classList.remove('ok','bad');
+        if(!p[0].value) return;
+        var good=p[1].indexOf(p[0].value)>=0; if(good) ok++;
+        p[0].classList.add(good?'ok':'bad');
+      });
+      var r=document.getElementById('ref'+i); r.textContent='роль: '+d[3]; r.hidden=false;
+    });
+    document.getElementById('clsScore').textContent=ok+' з 24';
+    document.getElementById('clsNotes').hidden=false;
+    data.clsScore=ok+' з 24'; data.clsChecked=1; save();
+  }
+  document.getElementById('clsCheck').addEventListener('click',checkCls);
+
+  // restore + autosave
+  var fields=[].slice.call(document.querySelectorAll('[data-k]')).filter(function(f){return /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName)});
+  fields.forEach(function(f){
+    var v=data[f.dataset.k];
+    if(v!=null){ if(f.type==='checkbox') f.checked=!!v; else f.value=v; }
+    var ev=(f.tagName==='SELECT'||f.type==='checkbox')?'change':'input';
+    f.addEventListener(ev,function(){
+      data[f.dataset.k]=f.type==='checkbox'?f.checked:f.value; save(); updNav();
+      if(f.tagName==='SELECT'){f.classList.remove('ok','bad')}
+    });
+  });
+  if(data.clsChecked) checkCls();
+
+  // views
+  var views=[].slice.call(document.querySelectorAll('.view'));
+  var SHORT=['Пристрої','Scratch','Промпти','Дані','Справжнє?','Пішаки','Стрічка','Практична','Надіслати'];
+  var nav=document.getElementById('nav');
+  nav.innerHTML=views.map(function(v,i){return '<button type="button" data-go="'+v.dataset.v+'">'+(i<8?(i+1)+' · ':'')+SHORT[i]+'<small></small></button>'}).join('');
+  function filled(f){return f.type==='checkbox'?f.checked:!!String(f.value).trim()}
+  function counts(v){var fs=[].slice.call(v.querySelectorAll('[data-k]')).filter(function(f){return /^(INPUT|TEXTAREA)$/.test(f.tagName)});return [fs.filter(filled).length,fs.length]}
+  function updNav(){
+    var rows='';
+    views.forEach(function(v,i){
+      if(i>7) return;
+      var c=counts(v),b=nav.children[i];
+      b.querySelector('small').textContent=c[0]+'/'+c[1];
+      b.classList.toggle('full',c[0]===c[1]);
+      rows+='<div><span>'+esc(v.dataset.t)+'</span><span class="c'+(c[0]===c[1]?' full':'')+'">'+c[0]+' з '+c[1]+'</span></div>';
+    });
+    document.getElementById('prog').innerHTML=rows;
+  }
+  var cur=1;
+  function show(n,scroll){
+    n=Math.max(1,Math.min(9,+n||1)); cur=n;
+    views.forEach(function(v){v.hidden=+v.dataset.v!==n});
+    [].forEach.call(nav.children,function(b){b.setAttribute('aria-current',+b.dataset.go===n?'true':'false')});
+    document.getElementById('prev').style.visibility=n>1?'visible':'hidden';
+    document.getElementById('next').style.visibility=n<9?'visible':'hidden';
+    document.getElementById('next').textContent=n===8?'Надіслати →':'Далі →';
+    var cb=nav.children[n-1]; if(cb&&cb.scrollIntoView) cb.scrollIntoView({block:'nearest',inline:'nearest'});
+    data.view=n; save();
+    try{history.replaceState(null,'','#u'+n)}catch(e){}
+    if(scroll) window.scrollTo(0,document.getElementById('nav').offsetTop);
+  }
+  nav.addEventListener('click',function(e){var b=e.target.closest('button');if(b) show(b.dataset.go,true)});
+  document.getElementById('prev').addEventListener('click',function(){show(cur-1,true)});
+  document.getElementById('next').addEventListener('click',function(){show(cur+1,true)});
+  var h=(location.hash.match(/^#u(\d)$/)||[])[1];
+  show(h||data.view||1,false); updNav();
+
+  // export
+  function build(){
+    var who=(data.who||'').trim()||'(прізвище не вказано)';
+    var d=new Date(),ds=('0'+d.getDate()).slice(-2)+'.'+('0'+(d.getMonth()+1)).slice(-2)+'.'+d.getFullYear();
+    var out=['ІНФОРМАТИКА · 6 КЛАС · ВІДПОВІДІ','Учень: '+who,'Дата: '+ds,''];
+    views.forEach(function(v,i){
+      if(i>7) return;
+      var c=counts(v);
+      out.push('════════════════════════════════','  '+v.dataset.t+'   ['+c[0]+' з '+c[1]+']','════════════════════════════════');
+      if(i===0){
+        out.push('','1.2 Класифікація (призначення · мобільність · роль)'+(data.clsScore?' — самоперевірка: '+data.clsScore:''));
+        DEV.forEach(function(dv,j){
+          var g=function(s){return data['cls'+j+s]||'—'};
+          out.push('   '+dv[0]+': '+g('a')+' · '+g('b')+' · '+g('c'));
+        });
+      }
+      [].forEach.call(v.querySelectorAll('[data-k]'),function(f){
+        if(!/^(INPUT|TEXTAREA)$/.test(f.tagName)) return;
+        if(f.type==='checkbox'){out.push('','['+(f.checked?'✓':' ')+'] '+f.dataset.l);return}
+        var val=String(f.value).trim();
+        out.push('',f.dataset.l,val?val.replace(/^/gm,'   '):'   (немає відповіді)');
+      });
+      out.push('');
+    });
+    return out.join('\n');
+  }
+  var TR={'а':'a','б':'b','в':'v','г':'h','ґ':'g','д':'d','е':'e','є':'ie','ж':'zh','з':'z','и':'y','і':'i','ї':'i','й':'i','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ь':'','ю':'iu','я':'ia'};
+  function tr(w){var r='';for(var i=0;i<w.length;i++){var ch=w[i],lo=ch.toLowerCase(),t=TR.hasOwnProperty(lo)?TR[lo]:(/[a-z0-9-]/i.test(ch)?ch:'');if(ch!==lo&&t)t=t.charAt(0).toUpperCase()+t.slice(1);r+=t}return r||'uchen'}
+  var st=document.getElementById('st');
+  document.getElementById('dl').addEventListener('click',function(){
+    var t=build(),sur=tr((data.who||'').trim().split(/\s+/)[0]||'uchen');
+    var blob=new Blob(['﻿'+t],{type:'text/plain;charset=utf-8'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Informatyka6_'+sur+'.txt';
+    document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+    st.textContent='Файл завантажено: '+a.download+'. Надішли його вчителю.';
+  });
+  document.getElementById('cp').addEventListener('click',function(){
+    var t=build();
+    function fallback(){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');st.textContent='Скопійовано. Встав у повідомлення вчителю.'}catch(e){st.textContent='Не вдалося скопіювати — скористайся кнопкою «Завантажити».'}ta.remove()}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){st.textContent='Скопійовано. Встав у повідомлення вчителю.'},fallback)}else fallback();
+  });
+  window.__build=build;
+})();
+</script>
+</body>
+</html>
