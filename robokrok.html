@@ -36,8 +36,8 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 
 /* level picker */
-.levels{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
-.lv{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:12px;min-width:64px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:800;font-size:20px}
+.levels{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.lv{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:12px;min-width:54px;padding:5px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:800;font-size:20px}
 .lv small{font-size:13px;letter-spacing:1px;min-height:16px}
 .lv[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .lv.hard{border-style:dashed}
@@ -111,7 +111,7 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
     <div class="seg" role="group" aria-label="Режим">
       <button type="button" data-mode="A" aria-pressed="true">⬆ Стрілки · 1 клас</button>
       <button type="button" data-mode="R" aria-pressed="false">↱ Повороти · 2 клас</button>
-      <button type="button" data-mode="TV" aria-pressed="false">📺 Програма для робота</button>
+      <button type="button" data-mode="TV" aria-pressed="false" id="tvBtn" hidden>📺 Програма для робота</button>
     </div>
   </header>
 
@@ -174,7 +174,12 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
       {m:["S...#","##..*","*.#..","..#.#","*...."]},
       {m:[".*#...","S.#.#.","..#.#*","#...#.","*.#...","..#..*"],h:1},
       {m:["*.....","####..","S.....","..####",".....*","*....."],h:1},
-      {m:["S#*...","..#.#.","#...#*","..#...","*.#.#.","..*.#*"],h:1}
+      {m:["S#*...","..#.#.","#...#*","..#...","*.#.#.","..*.#*"],h:1},
+      {m:["S.#....", "..#.##.", "..#..#*", "...#.#.", "*#.....", "...##.#", "*.....*"],h:1},
+      {m:["*.....*", ".#####.", ".#S..#.", ".#.#.#.", ".#.#.#.", ".....#.", "*##...*"],h:1},
+      {m:["S..#..*", "##.#.#.", "...#.#.", ".###.#.", "...*.#.", "##.###.", "*......"],h:1},
+      {m:["....#.*", ".##.#..", "S.#...#", "#.#.#..", "*...#.#", "..#.*..", "#...#.*"],h:1},
+      {m:["*.#.*.#", "..#...*", ".##.#..", "S...#.#", "##.##..", "*......", "..#*#.*"],h:1}
     ],
     R:[
       {m:["S...*"],d:1},
@@ -186,7 +191,12 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
       {m:["S.#..","..#.*","*....","..##.","....*"],d:1},
       {m:["*.#..","..#.#","S...*","#.#..","*.#.*"],d:1,h:1},
       {m:[".*#...","S.#.#.","..#.#*","#...#.","*.#...","..#..*"],d:2,h:1},
-      {m:["S#*...","..#.#.","#...#*","..#...","*.#.#.","..*.#*"],d:2,h:1}
+      {m:["S#*...","..#.#.","#...#*","..#...","*.#.#.","..*.#*"],d:2,h:1},
+      {m:["S.#....", "..#.##.", "..#..#*", "...#.#.", "*#.....", "...##.#", "*.....*"],d:1,h:1},
+      {m:["*.....*", ".#####.", ".#S..#.", ".#.#.#.", ".#.#.#.", ".....#.", "*##...*"],d:1,h:1},
+      {m:["S..#..*", "##.#.#.", "...#.#.", ".###.#.", "...*.#.", "##.###.", "*......"],d:1,h:1},
+      {m:["....#.*", ".##.#..", "S.#...#", "#.#.#..", "*...#.#", "..#.*..", "#...#.*"],d:1,h:1},
+      {m:["*.#.*.#", "..#...*", ".##.#..", "S...#.#", "##.##..", "*......", "..#*#.*"],d:1,h:1}
     ]
   };
   var CMD={A:[['U','⬆️'],['L','⬅️'],['D','⬇️'],['R','➡️']],R:[['F','⬆️'],['TL','↰'],['TR','↱']]};
@@ -235,7 +245,7 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
     renderLevels(); startState();
     var l=lvl(), m=l.m, H=m.length, W=m[0].length, k=S.mode+S.lv[S.mode];
     if(BEST[k]===undefined) BEST[k]=best(l,S.mode);
-    var box=Math.min(document.querySelector('.boardbox').clientWidth-24, 640), hmax=Math.max(260,window.innerHeight-260);
+    var box=Math.min(document.querySelector('.boardbox').clientWidth-24, 640), hmax=Math.max(260,window.innerHeight-Math.max(0,$('board').getBoundingClientRect().top+window.scrollY)-110);
     cellPx=Math.max(44,Math.min(92,Math.floor((box-(W-1)*4)/W),Math.floor((hmax-(H-1)*4)/H)));
     var b=$('board'); b.style.gridTemplateColumns='repeat('+W+','+cellPx+'px)'; b.style.gridAutoRows=cellPx+'px';
     var h='';
@@ -259,7 +269,7 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
     $('cmds').innerHTML=CMD[S.mode].map(function(c){ return '<button type="button" class="cmd" data-c="'+c[0]+'">'+c[1]+'</button>'; }).join('');
     Array.prototype.forEach.call(document.querySelectorAll('#cmds .cmd'),function(b){ b.addEventListener('click',function(){
       if(running) return; var c=b.getAttribute('data-c'), last=prog[prog.length-1];
-      if(last&&last.c===c&&last.n<9) last.n++; else if(prog.length<24) prog.push({c:c,n:1});
+      if(last&&last.c===c&&last.n<9) last.n++; else if(prog.length<32) prog.push({c:c,n:1});
       clearMarks(); renderProg();
     }); });
   }
@@ -337,6 +347,7 @@ h1{font-size:28px;margin:0;letter-spacing:-.01em}
   }
   Array.prototype.forEach.call(document.querySelectorAll('.seg button'),function(b){ b.addEventListener('click',function(){ setMode(b.getAttribute('data-mode')); }); });
   var q=(location.search.match(/[?&]m=(A|R|TV)/)||[])[1]; if(q) S.mode=q;
+  if(q==='A'||q==='R') document.querySelector('.seg').hidden=true; else if(q==='TV') $('tvBtn').hidden=false; else if(S.mode==='TV') S.mode='A';
   var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ if(!running&&S.mode!=='TV'){ var keep=prog; loadLevel(); prog=keep; renderProg(); } },200); });
   $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
   setMode(S.mode);
