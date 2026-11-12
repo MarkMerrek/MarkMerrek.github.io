@@ -63,6 +63,11 @@ input[type=text]{font:inherit;font-size:17px;padding:8px 10px;border:1px solid v
 .tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .tab .pt{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--muted);font-weight:500}
 .tab.full .pt{color:var(--ok);font-weight:700}
+.tabsep{align-self:center;font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.tab.bonus{border-style:dashed}
+.who small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.who small span{font-weight:600;color:var(--ink-2);letter-spacing:.04em}
+.rcode{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;letter-spacing:.06em}
 .task{border-left:4px solid var(--accent)}
 .task ol,.task ul{margin:6px 0 10px;padding-left:22px}
 .task li{margin:3px 0}
@@ -134,10 +139,11 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
   <section class="card start" id="startBox" hidden>
     <h2 data-i18n="startH">Початок</h2>
     <label><span data-i18n="nameL">Твоє ім'я та прізвище</span><input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
-    <label><span data-i18n="codeL">Код від учителя</span><input type="text" id="codeIn" maxlength="2" inputmode="numeric" autocomplete="off" style="width:90px;font-family:'IBM Plex Mono',monospace"></label>
+    <label><span data-i18n="codeL2">Код від учителя або код продовження</span><input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="width:150px;font-family:'IBM Plex Mono',monospace"></label>
     <div class="err" id="startErr"></div>
     <div><button class="btn" type="button" id="startGo" data-i18n="startGo">Почати</button></div>
     <p class="note" data-i18n="startNote"></p>
+    <p class="note" data-i18n="resumeNote"></p>
   </section>
 
   <!-- work -->
@@ -175,6 +181,7 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
   <section class="card result" id="resultBox" hidden></section>
 
   <p class="note" style="margin-top:24px">
+    <button class="btn ghost sm" type="button" id="other" data-i18n="other" hidden>Інший учень</button>
     <button class="btn ghost sm" type="button" id="restart" data-i18n="restart">Почати заново</button>
     <span class="confirm" id="ask" hidden><span data-i18n="restartQ">Усі бали зітруться. Точно?</span>
       <button class="btn no sm" type="button" id="askYes" data-i18n="yes">Так</button>
@@ -185,7 +192,7 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
 
 <script>
 (function(){
-  var KEY='prakt-v2', LANGKEY='prakt-lang';
+  var KEY='prakt-v2', KEY3='prakt-v3', LANGKEY='prakt-lang';
   /* id, emoji, colour, shape, where it grows, taste, cook's class (0 fruit · 1 vegetable · 2 berry), botanist's class (0 berry · 1 other fruit · 2 not a fruit), uk, en */
   var RAW=[
     ['apple','🍎','red','round','tree','sweet',0,1,'Яблуко','Apple'],
@@ -254,7 +261,7 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
       fbOk:'Готово! Повний бал.',fbPart:'Бали за завдання: ',fbNone:'Поки 0 балів. Що не так:',
       needTest:'Спершу натисни «Перевірити на нових продуктах» для цього набору.',
       resH:'Результат практичної роботи',resShow:'Покажи цей екран учителю.',resTime:'Час роботи',resMin:' хв',resBack:'Повернутися до завдань',
-      finish:'Завершити й показати результат',grade:function(g){ return g+' клас'; }},
+      finish:'Завершити й показати результат',codeL2:'Код від учителя або код продовження',resumeNote:'Робота зберігається на цьому комп’ютері. Перервали урок? Наступного разу введи те саме ім’я й код від учителя — продовжиш з того ж місця. Пересів за інший комп’ютер — введи ім’я й код продовження (він угорі праворуч).',other:'Інший учень',bonusSep:'★ бонус',bonusTag:'★ бонус',ptsGrade:'бали до оцінки',next:'Наступне завдання →',resGrade:'Оцінка',resBonus:'Бонус ★',resRule:'Оцінка = основні завдання + бонусні бали ★, разом не більше 12.',resCode:'Код продовження',resTime2:'Час роботи (без перерв)',codeTop:'код продовження',resumed:'Продовжуємо з того місця, де зупинився.',codeWarn:'Код продовження відновив бали, але не навчальні приклади.',errCode2:'Код не підходить. Перевір цифри й ім’я — пиши ім’я так само, як першого разу.',grade:function(g){ return g+' клас'; }},
     en:{doc:'Practical work: train and test an AI',kicker:'Computer science · practical work · AI',title:'Train and Test an AI',startH:'Start',nameL:'Your first and last name',codeL:'Code from your teacher',startGo:'Start',
       startNote:'The machine is learning to sort products: fruit, vegetable or berry. It sees only four features: colour, shape, where it grows and taste. You choose which examples to teach it with and test it on products it has never seen. You will also find out that a cook and a botanist label the same products differently.',
       errName:'Write your first and last name.',errCode:'There is no such code. Ask your teacher again.',
@@ -271,7 +278,7 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
       fbOk:'Done! Full marks.',fbPart:'Points for this task: ',fbNone:'0 points so far. What’s wrong:',
       needTest:'First press “Test on new products” for this set.',
       resH:'Practical work result',resShow:'Show this screen to your teacher.',resTime:'Time spent',resMin:' min',resBack:'Back to the tasks',
-      finish:'Finish and show the result',grade:function(g){ return 'Grade '+g; }}
+      finish:'Finish and show the result',codeL2:'Code from your teacher or continue code',resumeNote:'Your work is saved on this computer. Lesson interrupted? Next time type the same name and your teacher’s code — you will continue where you stopped. On a different computer, type your name and the continue code (top right).',other:'Another student',bonusSep:'★ bonus',bonusTag:'★ bonus',ptsGrade:'points towards the mark',next:'Next task →',resGrade:'Mark',resBonus:'Bonus ★',resRule:'Mark = main tasks + bonus points ★, 12 at most.',resCode:'Continue code',resTime2:'Time spent (without breaks)',codeTop:'continue code',resumed:'Continuing where you stopped.',codeWarn:'The continue code restored your points, but not the training examples.',errCode2:'The code doesn’t fit. Check the digits and your name — type it the same way as the first time.',grade:function(g){ return 'Grade '+g; }}
   };
   var lang='uk';
   try{ var sl=localStorage.getItem(LANGKEY); if(sl&&S[sl]) lang=sl; }catch(e){}
@@ -286,9 +293,33 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
   function esc(x){ var d=document.createElement('div'); d.textContent=x; return d.innerHTML; }
 
   function fresh(){ return {name:'',grade:null,scheme:'k',train:[],flip:false,preset:null,test:null,ttest:null,pts:{},ans:{},peek:{},ach:{},task:1,start:0,end:0,view:'work'}; }
-  var st=fresh();
-  try{ var raw=JSON.parse(localStorage.getItem(KEY)||'null'); if(raw&&raw.train) st=raw; }catch(e){}
-  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(e){} }
+  /* several students can work on one computer: every student+grade is a separate profile */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY3)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').replace(/ё/g,'е').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0, x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function pid(g,n){ return g+'|'+nnorm(n); }
+  if(!DB.mig){
+    DB.mig=1;
+    try{ var o=JSON.parse(localStorage.getItem(KEY)||'null');
+      if(o&&o.grade&&o.name&&o.pts){
+        if(o.grade==='3'||o.grade==='4'){ /* tasks 4 and 5 swapped places */
+          var sw=function(m){ if(!m) return; var a=m[4],b=m[5]; delete m[4]; delete m[5]; if(b!==undefined) m[4]=b; if(a!==undefined) m[5]=a; };
+          sw(o.pts); sw(o.peek); if(o.task===4) o.task=5; else if(o.task===5) o.task=4;
+        }
+        o.act=o.end&&o.start?Math.min(o.end-o.start,45*60000):0;
+        DB.p[pid(o.grade,o.name)]=o; DB.cur=pid(o.grade,o.name);
+      } }catch(e){}
+  }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.grade&&st.name){ var id=pid(st.grade,st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY3,JSON.stringify(DB)); }catch(e){}
+  }
+  /* active time: gaps longer than 3 minutes (an alarm, a break) are not counted */
+  function tick(){ if(!st.grade) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
 
   /* ---------- the machine: OneR. For each feature: every value → the most common label (a tie → "don't know"); keep the feature with the fewest training mistakes (a tie → the earlier feature). ---------- */
   function learn(rows){
@@ -351,11 +382,11 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
         btn:{uk:'Завантажити набір',en:'Load the set',run:function(){ loadPred('pred4'); }},
         qs:[{type:'pred',key:'pred4'}],
         check:function(){ return predTask(3,'pred4',2); }},
-      {max:1,sc:'k',uk:{t:'Найкращий учитель',x:['Добери не більше 8 продуктів так, щоб машина вгадала 8 з 12 нових.','Більше 8 з 12 одне правило не дає — перевірено.']},en:{t:'Best teacher',x:['Choose no more than 8 products so that the machine gets 8 of the 12 new ones right.','One rule cannot do better than 8 of 12 — this has been checked.']},
-        check:function(){ if(st.train.length>8) return [0,[L('Можна не більше 8 продуктів.','8 products at most.')]]; if(!allTrue()) return [0,[L('Усі позначки мають бути правильні.','All labels must be right.')]]; if(!tested()) return [0,[t('needTest')]]; return st.test.c>=8?[1,[]]:[0,[L('Зараз '+st.test.c+' з 12.','Now '+st.test.c+' of 12.')]]; }},
       {max:1,sc:'k',bad:'bad4',uk:{t:'Зіпсовані дані',x:['Натисни «Завантажити дані». Хтось розмітив їх з помилкою.','Знайди неправильну позначку й натискай на неї, доки вона не стане правильною.','Перевір машину ще раз: стало краще?']},en:{t:'Broken data',x:['Press “Load the data”. Someone labelled it with a mistake.','Find the wrong label and click it until it is right.','Test the machine again: did it get better?']},
         btn:{uk:'Завантажити дані',en:'Load the data',run:function(){ setTrain(PRESET.bad4.set,true,'bad4'); }},
         check:function(){ return checkBad('bad4',1); }},
+      {max:1,sc:'k',uk:{t:'Найкращий учитель',x:['Добери не більше 8 продуктів так, щоб машина вгадала 8 з 12 нових.','Більше 8 з 12 одне правило не дає — перевірено.']},en:{t:'Best teacher',x:['Choose no more than 8 products so that the machine gets 8 of the 12 new ones right.','One rule cannot do better than 8 of 12 — this has been checked.']},
+        check:function(){ if(st.train.length>8) return [0,[L('Можна не більше 8 продуктів.','8 products at most.')]]; if(!allTrue()) return [0,[L('Усі позначки мають бути правильні.','All labels must be right.')]]; if(!tested()) return [0,[t('needTest')]]; return st.test.c>=8?[1,[]]:[0,[L('Зараз '+st.test.c+' з 12.','Now '+st.test.c+' of 12.')]]; }},
       {max:2,sc:'k',uk:{t:'Змусь машину',x:['Добери такі продукти, щоб машина обрала ознаку «Смак», і перевір її — 1 бал.','Тепер такі, щоб обрала «Форму», і перевір — ще 1 бал.','Скільки вона при цьому вгадує, не важливо.']},en:{t:'Make the machine',x:['Choose products so that the machine picks the feature “Taste”, and test it — 1 point.','Now so that it picks “Shape”, and test — 1 more point.','How many it gets right doesn’t matter.']},
         check:function(){ var p=0,r=[]; if(st.ach.f3) p++; else r.push(L('«Смак» ще не було.','No “Taste” yet.')); if(st.ach.f1) p++; else r.push(L('«Форми» ще не було.','No “Shape” yet.')); return [p,r]; }},
       {max:1,sc:'k',uk:{t:'Детектив правила',x:['Добери продукти так, щоб правило машини було рівно таким:','«Де росте»: якщо на дереві → Фрукт; якщо під землею → Овоч.','І більше жодного рядка в правилі.']},en:{t:'Rule detective',x:['Choose products so that the machine’s rule is exactly:','“Where it grows”: if on a tree → Fruit; if underground → Vegetable.','And not a single other line in the rule.']},
@@ -377,11 +408,11 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
         btn:{uk:'Завантажити набір',en:'Load the set',run:function(){ loadPred('pred4'); }},
         qs:[{type:'pred',key:'pred4'}],
         check:function(){ return predTask(3,'pred4',2); }},
-      {max:2,sc:'k',uk:{t:'Найкращий учитель',x:['Добери не більше 8 продуктів так, щоб машина вгадала якнайбільше нових.','7 з 12 — 1 бал, 8 з 12 — 2 бали. Більше 8 машина не вміє.']},en:{t:'Best teacher',x:['Choose no more than 8 products so that the machine gets as many new ones right as possible.','7 of 12 — 1 point, 8 of 12 — 2 points. The machine can’t do better than 8.']},
-        check:function(){ if(st.train.length>8) return [0,[L('Можна не більше 8 продуктів.','8 products at most.')]]; if(!allTrue()) return [0,[L('Усі позначки мають бути правильні.','All labels must be right.')]]; if(!tested()) return [0,[t('needTest')]]; var c=st.test.c; return c>=8?[2,[]]:c>=7?[1,[L('Зараз 7 з 12. Можна 8.','Now 7 of 12. 8 is possible.')]]:[0,[L('Зараз '+c+' з 12.','Now '+c+' of 12.')]]; }},
       {max:1,sc:'k',bad:'bad4',uk:{t:'Зіпсовані дані',x:['Натисни «Завантажити дані». Хтось розмітив їх з помилкою.','Знайди неправильну позначку й натискай на неї, доки вона не стане правильною.','Перевір машину ще раз.']},en:{t:'Broken data',x:['Press “Load the data”. Someone labelled it with a mistake.','Find the wrong label and click it until it is right.','Test the machine again.']},
         btn:{uk:'Завантажити дані',en:'Load the data',run:function(){ setTrain(PRESET.bad4.set,true,'bad4'); }},
         check:function(){ return checkBad('bad4',1); }},
+      {max:2,sc:'k',uk:{t:'Найкращий учитель',x:['Добери не більше 8 продуктів так, щоб машина вгадала якнайбільше нових.','7 з 12 — 1 бал, 8 з 12 — 2 бали. Більше 8 машина не вміє.']},en:{t:'Best teacher',x:['Choose no more than 8 products so that the machine gets as many new ones right as possible.','7 of 12 — 1 point, 8 of 12 — 2 points. The machine can’t do better than 8.']},
+        check:function(){ if(st.train.length>8) return [0,[L('Можна не більше 8 продуктів.','8 products at most.')]]; if(!allTrue()) return [0,[L('Усі позначки мають бути правильні.','All labels must be right.')]]; if(!tested()) return [0,[t('needTest')]]; var c=st.test.c; return c>=8?[2,[]]:c>=7?[1,[L('Зараз 7 з 12. Можна 8.','Now 7 of 12. 8 is possible.')]]:[0,[L('Зараз '+c+' з 12.','Now '+c+' of 12.')]]; }},
       {max:2,sc:'k',uk:{t:'Змусь машину',x:['Добери продукти так, щоб машина обрала ознаку «Смак», і перевір її — 1 бал.','Тепер так, щоб обрала «Форму», — ще 1 бал.']},en:{t:'Make the machine',x:['Choose products so that the machine picks “Taste”, and test it — 1 point.','Now so that it picks “Shape” — 1 more point.']},
         check:function(){ var p=0,r=[]; if(st.ach.f3) p++; else r.push(L('«Смак» ще не було.','No “Taste” yet.')); if(st.ach.f1) p++; else r.push(L('«Форми» ще не було.','No “Shape” yet.')); return [p,r]; }},
       {max:2,sc:'both',uk:{t:'Кухар чи ботанік?',x:['Угорі над продуктами перемкни «Хто розмічав дані» то на «Кухар», то на «Ботанік».','Подивись, як змінюються позначки під назвами продуктів.','Дай відповіді на питання.']},en:{t:'Cook or botanist?',x:['Above the products, switch “Who labelled the data” between “Cook” and “Botanist”.','Watch how the labels under the product names change.','Answer the questions.']},
@@ -490,7 +521,20 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
   Array.prototype.forEach.call(document.querySelectorAll('#schemeRow button'),function(b){ b.addEventListener('click',function(){ if(b.getAttribute('data-sc')!==st.scheme) setScheme(b.getAttribute('data-sc')); }); });
 
   /* ---------- task screen ---------- */
-  function total(){ var s=0; Object.keys(st.pts).forEach(function(k){ s+=st.pts[k]; }); return s; }
+  /* main part: the first CORE tasks, each point counts double (6 points → 12). The rest are bonus ★: +1 per point, the mark is 12 at most. */
+  var CORE={'3':4,'4':4,'5':5,'6':5};
+  function isCore(n){ return n<=CORE[st.grade]; }
+  function wt(n){ return isCore(n)?2:1; }
+  function total(){ var s=0, T=TASKS[st.grade]; for(var n=1;n<=T.length;n++) s+=(st.pts[n]||0)*wt(n); return Math.min(12,s); }
+  function bonusSum(){ var s=0,m=0,T=TASKS[st.grade]; for(var n=CORE[st.grade]+1;n<=T.length;n++){ s+=st.pts[n]||0; m+=T[n-1].max; } return [s,m]; }
+  /* continue code: grade + points of every task, 7 digits with a check pair */
+  var INV=17679;
+  function encode(g,pts,nm){ var T=TASKS[g], idx=0, mul=1; for(var i=0;i<T.length;i++){ idx+=Math.min(pts[i+1]||0,T[i].max)*mul; mul*=T[i].max+1; }
+    var N=(+g-3)*4000+idx, X=(N*7919+40427)%100000, C=(N*61+29+nhash(nm))%97, d=('0000'+X).slice(-5)+('0'+C).slice(-2);
+    return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5), C=+c.slice(5), N=((X-40427+100000)%100000)*INV%100000;
+    if(N>=16000||(N*61+29+nhash(nm))%97!==C) return null; var g=String(Math.floor(N/4000)+3), idx=N%4000, T=TASKS[g], pts={};
+    for(var i=0;i<T.length;i++){ var r=T[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } if(idx) return null; return {g:g,pts:pts}; }
   function openTask(n){
     st.task=n; st.view='work';
     var tk=TASKS[st.grade][n-1];
@@ -500,12 +544,12 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
   }
   function renderTabs(){
     var T=TASKS[st.grade];
-    $('tabs').innerHTML=T.map(function(tk,i){ var n=i+1, p=st.pts[n]||0; return '<button type="button" role="tab" class="tab'+(p>=tk.max?' full':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(tk[lang].t)+' <span class="pt">'+p+'/'+tk.max+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">'+esc(t('result'))+' <span class="pt">'+total()+'/12</span></button>';
+    $('tabs').innerHTML=T.map(function(tk,i){ var n=i+1, p=st.pts[n]||0, w=wt(n); return (n===CORE[st.grade]+1?'<span class="tabsep">'+esc(t('bonusSep'))+'</span>':'')+'<button type="button" role="tab" class="tab'+(p>=tk.max?' full':'')+(isCore(n)?'':' bonus')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(tk[lang].t)+' <span class="pt">'+(isCore(n)?p*w+'/'+tk.max*w:'+'+p+'★')+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">'+esc(t('result'))+' <span class="pt">'+total()+'/12</span></button>';
     Array.prototype.forEach.call(document.querySelectorAll('#tabs .tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else openTask(+n); }); });
   }
   function renderTask(){
     var tk=TASKS[st.grade][st.task-1], L2=tk[lang], n=st.task, h='';
-    h+='<h2>'+esc(t('task'))+' '+n+' · '+esc(L2.t)+' <span class="note">('+tk.max+' '+esc(t('pts'))+')</span></h2><ol>'+L2.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ol>';
+    h+='<h2>'+esc(t('task'))+' '+n+' · '+esc(L2.t)+' <span class="note">('+(isCore(n)?tk.max*2+' '+esc(t('ptsGrade')):esc(t('bonusTag'))+', +'+tk.max)+')</span></h2><ol>'+L2.x.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ol>';
     if(tk.btn) h+='<div class="row" style="margin-bottom:8px"><button class="btn ghost" type="button" id="tBtn">'+esc(tk.btn[lang])+'</button></div>';
     (tk.qs||[]).forEach(function(qq){
       if(qq.type==='pred'){
@@ -517,7 +561,7 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
       if(qq.type==='num') h+='<div class="q"><p>'+esc(qq.text[lang])+'</p><input type="text" inputmode="numeric" maxlength="2" data-key="'+key+'" value="'+(a!==undefined?esc(String(a)):'')+'"></div>';
       else h+='<div class="q"><p>'+esc(qq.text[lang])+'</p><div class="opts">'+qq.opts.map(function(o,i){ return '<label><input type="radio" name="'+key+'" value="'+i+'"'+(a!==undefined&&+a===i?' checked':'')+'> <span>'+esc(o[lang])+'</span></label>'; }).join('')+'</div></div>';
     });
-    h+='<div class="row"><button class="btn" type="button" id="chk">'+esc(t('check'))+'</button>'+(n===TASKS[st.grade].length?'<button class="btn ghost" type="button" id="fin">'+esc(t('finish'))+'</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">'+esc(t('check'))+'</button>'+(n<TASKS[st.grade].length?'<button class="btn ghost" type="button" id="nxt">'+esc(t('next'))+'</button>':'')+(n>=CORE[st.grade]?'<button class="btn ghost" type="button" id="fin">'+esc(t('finish'))+'</button>':'')+'</div><div class="feedback" id="fb"></div>';
     $('task').innerHTML=h;
     if(tk.btn) $('tBtn').addEventListener('click',function(){ tk.btn.run(); });
     Array.prototype.forEach.call(document.querySelectorAll('#task input[type=text]'),function(i){ i.addEventListener('input',function(){ st.ans[i.getAttribute('data-key')]=i.value.replace(/\D/g,''); save(); }); });
@@ -528,15 +572,16 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
       save(); renderTabs(); renderWho();
       var fb=$('fb');
       if(p>=tk.max){ fb.className='feedback ok'; fb.textContent=t('fbOk'); }
-      else { fb.className='feedback part'; fb.innerHTML=esc(p>0?t('fbPart')+p+'/'+tk.max:t('fbNone'))+(res[1].length?'<ul>'+res[1].map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>':''); }
+      else { fb.className='feedback part'; fb.innerHTML=esc(p>0?t('fbPart')+p*wt(n)+'/'+tk.max*wt(n):t('fbNone'))+(res[1].length?'<ul>'+res[1].map(function(x){ return '<li>'+esc(x)+'</li>'; }).join('')+'</ul>':''); }
     });
     if($('fin')) $('fin').addEventListener('click',showResult);
+    if($('nxt')) $('nxt').addEventListener('click',function(){ openTask(n+1); window.scrollTo(0,0); });
   }
   function showResult(){ if(!st.end) st.end=Date.now(); st.view='result'; save(); renderAll(); }
   function renderResult(){
-    var T=TASKS[st.grade], mins=Math.max(1,Math.round(((st.end||Date.now())-st.start)/60000));
-    var h='<h2>'+esc(t('resH'))+'</h2><p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+esc(t('grade')(st.grade))+'</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">'+esc(t('of'))+' 12</span></div>';
-    h+='<table class="res">'+T.map(function(tk,i){ return '<tr><td>'+(i+1)+'. '+esc(tk[lang].t)+'</td><td>'+(st.pts[i+1]||0)+' / '+tk.max+'</td></tr>'; }).join('')+'<tr><td>'+esc(t('resTime'))+'</td><td>'+mins+esc(t('resMin'))+'</td></tr></table>';
+    var T=TASKS[st.grade], mins=Math.max(1,Math.round((st.act||0)/60000)), bs=bonusSum();
+    var h='<h2>'+esc(t('resH'))+'</h2><p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+esc(t('grade')(st.grade))+'</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">'+esc(t('of'))+' 12</span></div><p class="note" style="margin:0 0 8px">'+esc(t('resRule'))+'</p>';
+    h+='<table class="res">'+T.map(function(tk,i){ var n=i+1, p=st.pts[n]||0; return (n===CORE[st.grade]+1?'<tr><td colspan="2"><b>'+esc(t('resBonus'))+': +'+bs[0]+' '+esc(t('of'))+' '+bs[1]+'</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(tk[lang].t)+'</td><td>'+(isCore(n)?p*2+' / '+tk.max*2:'+'+p+' / '+tk.max+' ★')+'</td></tr>'; }).join('')+'<tr><td>'+esc(t('resTime2'))+'</td><td>'+mins+esc(t('resMin'))+(st.coded?' +':'')+'</td></tr><tr><td>'+esc(t('resCode'))+'</td><td class="rcode">'+encode(st.grade,st.pts,st.name)+'</td></tr></table>';
     h+='<p class="note">'+esc(t('resShow'))+'</p><button class="btn ghost" type="button" id="back">'+esc(t('resBack'))+'</button>';
     $('resultBox').innerHTML=h;
     $('back').addEventListener('click',function(){ st.view='work'; st.end=0; save(); renderAll(); });
@@ -549,17 +594,30 @@ table.res td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;f
   function go(){
     var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
     if(n.length<2){ $('startErr').textContent=t('errName'); return; }
-    if(!CODES[c]){ $('startErr').textContent=t('errCode'); return; }
-    st=fresh(); st.name=n; st.grade=CODES[c]; st.start=Date.now(); save(); renderAll();
+    var msg='';
+    if(CODES[c]){
+      var id=pid(CODES[c],n);
+      if(DB.p[id]){ st=DB.p[id]; st.view='work'; st.end=0; msg=t('resumed'); }
+      else { st=fresh(); st.name=n; st.grade=CODES[c]; st.start=Date.now(); }
+    } else {
+      var d=decode(c,n); if(!d){ $('startErr').textContent=t('errCode2'); return; }
+      var id2=pid(d.g,n), base=DB.p[id2];
+      if(!base){ base=fresh(); base.name=n; base.grade=d.g; base.start=Date.now(); }
+      Object.keys(d.pts).forEach(function(k){ if(d.pts[k]>(base.pts[k]||0)) base.pts[k]=d.pts[k]; });
+      base.coded=1; base.view='work'; base.end=0; st=base; msg=t('codeWarn');
+    }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+    if(msg){ var fb=$('fb'); if(fb){ fb.className='feedback ok'; fb.textContent=msg; } }
   }
   $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
   $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
-  $('askYes').addEventListener('click',function(){ st=fresh(); save(); $('ask').hidden=true; $('nameIn').value=''; $('codeIn').value=''; renderAll(); });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('ask').hidden=true; $('nameIn').value=''; $('codeIn').value=''; renderAll(); });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('ask').hidden=true; $('nameIn').value=''; $('codeIn').value=''; renderAll(); });
 
-  function renderWho(){ var started=!!st.grade; $('who').hidden=!started; if(started) $('who').innerHTML=esc(st.name)+' · '+esc(t('grade')(st.grade))+'<br><b>'+total()+'</b> / 12'; }
+  function renderWho(){ var started=!!st.grade; $('who').hidden=!started; if(started) $('who').innerHTML=esc(st.name)+' · '+esc(t('grade')(st.grade))+'<br><b>'+total()+'</b> / 12<small>'+esc(t('codeTop'))+': <span>'+encode(st.grade,st.pts,st.name)+'</span></small>'; }
   function renderAll(){
     var started=!!st.grade;
-    $('startBox').hidden=started; $('work').hidden=!started||st.view==='result'; $('resultBox').hidden=!started||st.view!=='result'; $('restart').hidden=!started;
+    $('startBox').hidden=started; $('work').hidden=!started||st.view==='result'; $('resultBox').hidden=!started||st.view!=='result'; $('restart').hidden=!started; $('other').hidden=!started;
     renderWho();
     if(!started) return;
     if(st.view==='result'){ renderResult(); return; }
