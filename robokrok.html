@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Робот-крок</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E8EDF4; --ink:#141922; --ink-2:#3D4656; --muted:#6B7488;
+  --line:#D5DCE6; --accent:#2D58B8; --accent-soft:#E2EAF8; --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1;
+  --cell:#FFFFFF; --wall:#CFE3C9; --gold:#C98A00;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --accent:#8DB0F2; --accent-soft:#1E2A40; --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E;
+    --cell:#1F2632; --wall:#23382A; --gold:#F2C44E; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --accent:#8DB0F2; --accent-soft:#1E2A40; --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E;
+  --cell:#1F2632; --wall:#23382A; --gold:#F2C44E; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 16px 40px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;justify-content:space-between}
+h1{font-size:28px;margin:0;letter-spacing:-.01em}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px;flex-wrap:wrap}
+.seg button{appearance:none;border:0;background:none;border-radius:9px;padding:9px 14px;font-weight:700;font-size:16px;color:var(--ink-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+/* level picker */
+.levels{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.lv{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:12px;min-width:64px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:800;font-size:20px}
+.lv small{font-size:13px;letter-spacing:1px;min-height:16px}
+.lv[aria-current="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.lv.hard{border-style:dashed}
+
+/* game */
+.game{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);gap:18px;align-items:start}
+@media (max-width:860px){.game{grid-template-columns:1fr}}
+.boardbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.info{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;font-size:18px;color:var(--ink-2)}
+.info b{color:var(--ink)}
+.board{display:grid;gap:4px;position:relative;touch-action:none}
+.cell{background:var(--cell);border:2px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;line-height:1}
+.cell.wall{background:var(--wall);border-color:transparent}
+.cell.got{opacity:.25}
+.robot{position:absolute;display:flex;align-items:center;justify-content:center;transition:left .28s ease,top .28s ease;pointer-events:none;z-index:2}
+.robot .bot{line-height:1}
+.robot .dir{position:absolute;inset:0;transition:transform .28s ease}
+.robot .dir i{position:absolute;left:50%;top:-6%;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:16px solid var(--accent)}
+.robot.boom .bot{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px) rotate(-8deg)}75%{transform:translateX(6px) rotate(8deg)}}
+.side{display:flex;flex-direction:column;gap:12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px}
+.lab{font-size:14px;font-weight:700;color:var(--muted);margin:0 0 8px;letter-spacing:.04em}
+.prog{display:flex;flex-wrap:wrap;gap:8px;min-height:72px;align-content:flex-start}
+.prog .empty{color:var(--muted);font-size:16px;align-self:center}
+.tile{position:relative;width:64px;height:64px;border-radius:12px;background:var(--accent-soft);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:34px;line-height:1}
+.tile .n{position:absolute;right:-7px;bottom:-7px;background:var(--accent);color:var(--surface);border-radius:999px;min-width:26px;height:26px;font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.tile.now{background:var(--ok-soft);border-color:var(--ok)}
+.tile.err{background:var(--bad-soft);border-color:var(--bad)}
+.cmds{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.cmd{appearance:none;width:84px;height:84px;border-radius:16px;border:2px solid var(--line);background:var(--surface-2);font-size:42px;line-height:1;display:flex;align-items:center;justify-content:center}
+.cmd:active{transform:scale(.95)}
+.cmd.wide{width:auto;padding:0 18px;font-size:22px;font-weight:800;gap:8px}
+.cmd.go{background:var(--ok);border-color:var(--ok);color:#fff}
+.cmd.go:disabled{opacity:.5}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.msg{font-size:20px;font-weight:700;text-align:center;min-height:28px}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.win{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}
+.win .card{background:var(--surface);border-radius:20px;padding:24px 28px;text-align:center;max-width:420px;width:100%}
+.win .st{font-size:64px;letter-spacing:6px;line-height:1.1}
+.win .st .off{filter:grayscale(1);opacity:.3}
+.win p{font-size:20px;margin:10px 0 18px;color:var(--ink-2)}
+
+/* TV builder */
+.tv h2{font-size:clamp(26px,3.4vw,44px);margin:6px 0 4px}
+.tv .goal{font-size:clamp(20px,2.6vw,32px);color:var(--ink-2);margin:0 0 12px}
+.tasks{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.tasks button{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 14px;font-size:18px;font-weight:700}
+.tasks button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.bprog{display:flex;flex-wrap:wrap;gap:14px;min-height:150px;background:var(--surface);border:2px dashed var(--line);border-radius:18px;padding:16px;align-content:flex-start}
+.btile{position:relative;min-width:150px;height:150px;border-radius:18px;background:var(--accent-soft);border:3px solid var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 10px}
+.btile .e{font-size:64px;line-height:1}
+.btile .t{font-size:20px;font-weight:800;text-align:center}
+.btile .n{position:absolute;right:-10px;top:-10px;background:var(--accent);color:var(--surface);border-radius:999px;min-width:44px;height:44px;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 8px;border:0}
+.btile .x{position:absolute;left:-10px;top:-10px;width:36px;height:36px;border-radius:999px;border:0;background:var(--bad);color:#fff;font-size:20px;font-weight:800}
+.bstep{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;color:var(--muted);position:absolute;left:10px;bottom:6px}
+.palette{display:flex;flex-wrap:wrap;gap:12px;margin-top:16px}
+.pbtn{appearance:none;border:2px solid var(--line);background:var(--surface);border-radius:18px;width:150px;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.pbtn .e{font-size:52px;line-height:1}
+.pbtn .t{font-size:18px;font-weight:700}
+.pbtn:active{transform:scale(.96)}
+.note{font-size:15px;color:var(--muted);margin-top:14px;max-width:80ch;line-height:1.5}
+.tog{appearance:none;background:none;border:1px solid var(--line);border-radius:10px;padding:8px 12px;color:var(--ink-2);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🤖 Робот-крок</h1>
+    <div class="seg" role="group" aria-label="Режим">
+      <button type="button" data-mode="A" aria-pressed="true">⬆ Стрілки · 1 клас</button>
+      <button type="button" data-mode="R" aria-pressed="false">↱ Повороти · 2 клас</button>
+      <button type="button" data-mode="TV" aria-pressed="false">📺 Програма для робота</button>
+    </div>
+  </header>
+
+  <!-- ===== grid game ===== -->
+  <section id="gameView">
+    <div class="levels" id="levels"></div>
+    <div class="game">
+      <div class="boardbox">
+        <div class="info" id="info"></div>
+        <div class="board" id="board"></div>
+        <div class="msg" id="msg" aria-live="polite"></div>
+      </div>
+      <div class="side">
+        <div class="panel">
+          <p class="lab">ПРОГРАМА</p>
+          <div class="prog" id="prog"></div>
+        </div>
+        <div class="panel">
+          <div class="cmds" id="cmds"></div>
+          <div class="row" style="margin-top:12px">
+            <button class="cmd wide" type="button" id="undo" aria-label="Стерти останню">⌫</button>
+            <button class="cmd wide" type="button" id="clear" aria-label="Стерти все">🗑</button>
+            <button class="cmd wide go" type="button" id="run">▶ Пуск</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TV builder ===== -->
+  <section id="tvView" class="tv" hidden>
+    <div class="tasks" id="tasks"></div>
+    <h2 id="tvTitle"></h2>
+    <p class="goal" id="tvGoal"></p>
+    <div class="bprog" id="bprog"></div>
+    <div class="row" style="justify-content:flex-start;margin-top:12px">
+      <button class="cmd wide" type="button" id="bundo">⌫ Стерти останню</button>
+      <button class="cmd wide" type="button" id="bclear">🗑 Стерти все</button>
+    </div>
+    <div class="palette" id="palette"></div>
+    <p class="note">Учні по черзі торкаються блоків — програма збирається на екрані. Торкнись числа на блоці, щоб додати ще 1 (після 9 знову 1). ✕ — прибрати блок. Учитель переносить програму в робота й запускає.</p>
+    <button class="tog" type="button" id="theme">Світла / темна тема</button>
+  </section>
+</div>
+
+<div class="win" id="win" hidden><div class="card"><div class="st" id="winStars"></div><p id="winText"></p><div class="row"><button class="cmd wide" type="button" id="again">↺ Ще раз</button><button class="cmd wide go" type="button" id="nextLv">Далі ➜</button></div></div></div>
+
+<script>
+(function(){
+  var $=function(id){ return document.getElementById(id); };
+  var DR=[[-1,0],[0,1],[1,0],[0,-1]], ARROW=['⬆️','➡️','⬇️','⬅️'];
+  var LV={
+    A:[
+      {m:["S...*"]},
+      {m:["S....","####.","*...."]},
+      {m:["*...S"]},
+      {m:["S.#*.","..#..","....."]},
+      {m:["S..*.","####.","*...."]},
+      {m:["S.#..","..#.*","*....","..##.","....*"]},
+      {m:["S...#","##..*","*.#..","..#.#","*...."]},
+      {m:[".*#...","S.#.#.","..#.#*","#...#.","*.#...","..#..*"],h:1},
+      {m:["*.....","####..","S.....","..####",".....*","*....."],h:1},
+      {m:["S#*...","..#.#.","#...#*","..#...","*.#.#.","..*.#*"],h:1}
+    ],
+    R:[
+      {m:["S...*"],d:1},
+      {m:["S..#","...*"],d:1},
+      {m:["S..","##.","*.."],d:1},
+      {m:["S.#*","..#.","...."],d:1},
+      {m:["*...S"],d:1},
+      {m:["S...*","####.","*...."],d:1},
+      {m:["S.#..","..#.*","*....","..##.","....*"],d:1},
+      {m:["*.#..","..#.#","S...*","#.#..","*.#.*"],d:1,h:1},
+      {m:[".*#...","S.#.#.","..#.#*","#...#.","*.#...","..#..*"],d:2,h:1},
+      {m:["S#*...","..#.#.","#...#*","..#...","*.#.#.","..*.#*"],d:2,h:1}
+    ]
+  };
+  var CMD={A:[['U','⬆️'],['L','⬅️'],['D','⬇️'],['R','➡️']],R:[['F','⬆️'],['TL','↰'],['TR','↱']]};
+  var EMO={U:'⬆️',D:'⬇️',L:'⬅️',R:'➡️',F:'⬆️',TL:'↰',TR:'↱'};
+
+  /* fewest tiles (same commands in a row merge into one tile) */
+  function best(lv,mode){
+    var m=lv.m,H=m.length,W=m[0].length,stars=[],s;
+    for(var r=0;r<H;r++) for(var c=0;c<W;c++){ if(m[r][c]==='S') s=[r,c]; if(m[r][c]==='*') stars.push(r*W+c); }
+    var full=(1<<stars.length)-1, free=function(r,c){ return r>=0&&r<H&&c>=0&&c<W&&m[r][c]!=='#'; };
+    var key=function(a){ return a.join(','); }, st=[s[0],s[1],mode==='R'?lv.d:0,0,'-'], dist={}, dq=[st];
+    dist[key(st)]=0;
+    while(dq.length){
+      var x=dq.shift(), cost=dist[key(x)];
+      if(x[3]===full) return cost;
+      var acts=[];
+      if(mode==='R'){ var dd=DR[x[2]]; if(free(x[0]+dd[0],x[1]+dd[1])) acts.push(['F',x[0]+dd[0],x[1]+dd[1],x[2]]); acts.push(['TL',x[0],x[1],(x[2]+3)%4]); acts.push(['TR',x[0],x[1],(x[2]+1)%4]); }
+      else ['U','R','D','L'].forEach(function(a,k){ var d=DR[k]; if(free(x[0]+d[0],x[1]+d[1])) acts.push([a,x[0]+d[0],x[1]+d[1],0]); });
+      acts.forEach(function(a){
+        var i=stars.indexOf(a[1]*W+a[2]), nm=i>=0?x[3]|(1<<i):x[3], ns=[a[1],a[2],a[3],nm,a[0]], w=a[0]===x[4]?0:1, k=key(ns);
+        if(dist[k]===undefined||dist[k]>cost+w){ dist[k]=cost+w; if(w) dq.push(ns); else dq.unshift(ns); }
+      });
+    }
+    return null;
+  }
+
+  var KEY='robokrok-v1', S={mode:'A',lv:{A:0,R:0},stars:{A:{},R:{}},tv:{task:0,prog:[]}};
+  try{ var sv=JSON.parse(localStorage.getItem(KEY)||'null'); if(sv&&sv.stars) S=sv; }catch(e){}
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+
+  var prog=[], running=false, pos, dir, got, cellPx, BEST={};
+  function pl(n){ var a=n%10,b=n%100; return a===1&&b!==11?'блок':a>=2&&a<=4&&(b<12||b>14)?'блоки':'блоків'; }
+  function lvl(){ return LV[S.mode][S.lv[S.mode]]; }
+
+  function renderLevels(){
+    var L=LV[S.mode];
+    $('levels').innerHTML=L.map(function(l,i){ var s=S.stars[S.mode][i]||0; return '<button type="button" class="lv'+(l.h?' hard':'')+'" data-i="'+i+'" aria-current="'+(i===S.lv[S.mode])+'">'+(i+1)+'<small>'+(s?'⭐'.repeat(s):(l.h?'💪':''))+'</small></button>'; }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('.lv'),function(b){ b.addEventListener('click',function(){ if(running) return; S.lv[S.mode]=+b.getAttribute('data-i'); save(); prog=[]; loadLevel(); }); });
+  }
+  function startState(){
+    var m=lvl().m; got={};
+    for(var r=0;r<m.length;r++) for(var c=0;c<m[0].length;c++) if(m[r][c]==='S') pos=[r,c];
+    dir=S.mode==='R'?lvl().d:0;
+  }
+  function loadLevel(){
+    renderLevels(); startState();
+    var l=lvl(), m=l.m, H=m.length, W=m[0].length, k=S.mode+S.lv[S.mode];
+    if(BEST[k]===undefined) BEST[k]=best(l,S.mode);
+    var box=Math.min(document.querySelector('.boardbox').clientWidth-24, 640), hmax=Math.max(260,window.innerHeight-260);
+    cellPx=Math.max(44,Math.min(92,Math.floor((box-(W-1)*4)/W),Math.floor((hmax-(H-1)*4)/H)));
+    var b=$('board'); b.style.gridTemplateColumns='repeat('+W+','+cellPx+'px)'; b.style.gridAutoRows=cellPx+'px';
+    var h='';
+    for(var r=0;r<H;r++) for(var c=0;c<W;c++){ var ch=m[r][c]; h+='<div class="cell'+(ch==='#'?' wall':'')+'" id="c'+r+'_'+c+'" style="font-size:'+Math.round(cellPx*.6)+'px">'+(ch==='#'?'🌳':ch==='*'?'⭐':'')+'</div>'; }
+    h+='<div class="robot" id="rob" style="width:'+cellPx+'px;height:'+cellPx+'px"><span class="bot" style="font-size:'+Math.round(cellPx*.66)+'px">🤖</span>'+(S.mode==='R'?'<span class="dir" id="rdir"><i></i></span>':'')+'</div>';
+    b.innerHTML=h;
+    var nst=(m.join('').match(/\*/g)||[]).length;
+    $('info').innerHTML='<span>Рівень <b>'+(S.lv[S.mode]+1)+'</b>'+(l.h?' 💪':'')+'</span><span>Збери: <b>'+'⭐'.repeat(nst)+'</b></span><span>Найкраще: <b>'+BEST[k]+'</b> '+pl(BEST[k])+'</span>';
+    $('msg').textContent=''; $('msg').className='msg';
+    placeRobot(); renderProg(); renderCmds();
+  }
+  function placeRobot(){
+    var r=$('rob'); r.style.left=(pos[1]*(cellPx+4))+'px'; r.style.top=(pos[0]*(cellPx+4))+'px';
+    var d=$('rdir'); if(d) d.style.transform='rotate('+(dir*90)+'deg)';
+  }
+  function renderProg(hi,cls){
+    $('prog').innerHTML=prog.length?prog.map(function(t,i){ return '<div class="tile'+(i===hi?' '+cls:'')+'">'+EMO[t.c]+(t.n>1?'<span class="n">'+t.n+'</span>':'')+'</div>'; }).join(''):'<span class="empty">Натискай стрілки внизу 👇</span>';
+    $('run').disabled=!prog.length||running;
+  }
+  function renderCmds(){
+    $('cmds').innerHTML=CMD[S.mode].map(function(c){ return '<button type="button" class="cmd" data-c="'+c[0]+'">'+c[1]+'</button>'; }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#cmds .cmd'),function(b){ b.addEventListener('click',function(){
+      if(running) return; var c=b.getAttribute('data-c'), last=prog[prog.length-1];
+      if(last&&last.c===c&&last.n<9) last.n++; else if(prog.length<24) prog.push({c:c,n:1});
+      clearMarks(); renderProg();
+    }); });
+  }
+  function clearMarks(){ startState(); placeRobot(); Array.prototype.forEach.call(document.querySelectorAll('.cell.got'),function(c){ c.classList.remove('got'); }); $('msg').textContent=''; }
+  $('undo').addEventListener('click',function(){ if(running) return; var l=prog[prog.length-1]; if(!l) return; if(l.n>1) l.n--; else prog.pop(); clearMarks(); renderProg(); });
+  $('clear').addEventListener('click',function(){ if(running) return; prog=[]; clearMarks(); renderProg(); });
+
+  $('run').addEventListener('click',function(){
+    if(running||!prog.length) return;
+    clearMarks(); running=true; renderProg();
+    var m=lvl().m, H=m.length, W=m[0].length, total=(m.join('').match(/\*/g)||[]).length, steps=[];
+    prog.forEach(function(t,i){ for(var k=0;k<t.n;k++) steps.push([t.c,i]); });
+    var j=0;
+    function step(){
+      if(j>=steps.length){ running=false; renderProg(); $('msg').className='msg bad'; $('msg').textContent='Ще не всі ⭐. Додай команди!'; return; }
+      var c=steps[j][0], ti=steps[j][1]; j++;
+      renderProg(ti,'now');
+      if(c==='TL') dir=(dir+3)%4; else if(c==='TR') dir=(dir+1)%4;
+      else {
+        var d=c==='F'?DR[dir]:DR[['U','R','D','L'].indexOf(c)], nr=pos[0]+d[0], nc=pos[1]+d[1];
+        if(nr<0||nr>=H||nc<0||nc>=W||m[nr][nc]==='#'){
+          running=false; renderProg(ti,'err'); var rb=$('rob'); rb.classList.add('boom'); setTimeout(function(){ rb.classList.remove('boom'); },450);
+          $('msg').className='msg bad'; $('msg').textContent='💥 Ой! Червоний блок — тут помилка.'; return;
+        }
+        pos=[nr,nc];
+        if(m[nr][nc]==='*'&&!got[nr+'_'+nc]){ got[nr+'_'+nc]=1; $('c'+nr+'_'+nc).classList.add('got'); }
+      }
+      placeRobot();
+      if(Object.keys(got).length===total){ running=false; setTimeout(win,350); return; }
+      setTimeout(step,c==='TL'||c==='TR'?320:360);
+    }
+    setTimeout(step,150);
+  });
+  function win(){
+    var k=S.mode+S.lv[S.mode], b=BEST[k], n=prog.length, s=n<=b?3:n<=b+2?2:1, i=S.lv[S.mode];
+    if(s>(S.stars[S.mode][i]||0)) S.stars[S.mode][i]=s; save(); renderProg();
+    $('winStars').innerHTML=[1,2,3].map(function(x){ return '<span class="'+(x<=s?'':'off')+'">⭐</span>'; }).join('');
+    $('winText').innerHTML='Твоя програма: <b>'+n+'</b> '+pl(n)+'. Найкраще: <b>'+b+'</b>.'+(s<3?'<br>Можна коротше!':'');
+    $('nextLv').hidden=i>=LV[S.mode].length-1; $('win').hidden=false;
+  }
+  $('again').addEventListener('click',function(){ $('win').hidden=true; clearMarks(); renderProg(); });
+  $('nextLv').addEventListener('click',function(){ $('win').hidden=true; S.lv[S.mode]++; save(); prog=[]; loadLevel(); });
+
+  /* ===== TV builder ===== */
+  var PAL=[['F','⬆️','Вперед'],['B','⬇️','Назад'],['TL','↰','Ліворуч'],['TR','↱','Праворуч'],['S','🎵','Звук'],['W','⏳','Чекай 1 с'],['T','✋','Чекай дотику']];
+  var PN={}; PAL.forEach(function(p){ PN[p[0]]=p; });
+  var TASKS=[
+    ['🏁','До мети','Доїдь до мети на підлозі й посигналь 🎵'],
+    ['🔄','Туди й назад','Доїдь до стільця й повернись на старт'],
+    ['🧱','Об’їзд','Об’їдь перешкоду й зупинись за нею'],
+    ['💃','Танець','Склади танець робота: щонайменше 6 блоків'],
+    ['✋','Розбуди мене','Робот чекає, поки його торкнуться, і тоді їде']
+  ];
+  function renderTV(){
+    $('tasks').innerHTML=TASKS.map(function(t,i){ return '<button type="button" data-t="'+i+'" aria-pressed="'+(i===S.tv.task)+'">'+t[0]+' '+t[1]+'</button>'; }).join('');
+    Array.prototype.forEach.call(document.querySelectorAll('#tasks button'),function(b){ b.addEventListener('click',function(){ S.tv.task=+b.getAttribute('data-t'); save(); renderTV(); }); });
+    var t=TASKS[S.tv.task]; $('tvTitle').textContent=t[0]+' '+t[1]; $('tvGoal').textContent=t[2];
+    var P=S.tv.prog;
+    $('bprog').innerHTML=P.length?P.map(function(x,i){ var p=PN[x.c], cnt=(x.c==='F'||x.c==='B'||x.c==='TL'||x.c==='TR'||x.c==='W'); return '<div class="btile"><button class="x" type="button" data-del="'+i+'" aria-label="Прибрати">✕</button><span class="e">'+p[1]+'</span><span class="t">'+p[2]+'</span>'+(cnt?'<button class="n" type="button" data-inc="'+i+'">'+x.n+'</button>':'')+'<span class="bstep">'+(i+1)+'</span></div>'; }).join(''):'<span style="font-size:22px;color:var(--muted);align-self:center">Торкайся блоків унизу — тут з’явиться програма</span>';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-del]'),function(b){ b.addEventListener('click',function(){ P.splice(+b.getAttribute('data-del'),1); save(); renderTV(); }); });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-inc]'),function(b){ b.addEventListener('click',function(){ var x=P[+b.getAttribute('data-inc')]; x.n=x.n>=9?1:x.n+1; save(); renderTV(); }); });
+  }
+  $('palette').innerHTML=PAL.map(function(p){ return '<button type="button" class="pbtn" data-p="'+p[0]+'"><span class="e">'+p[1]+'</span><span class="t">'+p[2]+'</span></button>'; }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('.pbtn'),function(b){ b.addEventListener('click',function(){ var c=b.getAttribute('data-p'), P=S.tv.prog, l=P[P.length-1];
+    if(l&&l.c===c&&(c==='F'||c==='B'||c==='TL'||c==='TR'||c==='W')&&l.n<9) l.n++; else if(P.length<16) P.push({c:c,n:1}); save(); renderTV(); }); });
+  $('bundo').addEventListener('click',function(){ S.tv.prog.pop(); save(); renderTV(); });
+  $('bclear').addEventListener('click',function(){ S.tv.prog=[]; save(); renderTV(); });
+
+  /* modes */
+  function setMode(m){
+    if(running) return; S.mode=m; save();
+    Array.prototype.forEach.call(document.querySelectorAll('.seg button'),function(b){ b.setAttribute('aria-pressed',b.getAttribute('data-mode')===m?'true':'false'); });
+    $('gameView').hidden=m==='TV'; $('tvView').hidden=m!=='TV';
+    if(m==='TV') renderTV(); else { prog=[]; loadLevel(); }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.seg button'),function(b){ b.addEventListener('click',function(){ setMode(b.getAttribute('data-mode')); }); });
+  var q=(location.search.match(/[?&]m=(A|R|TV)/)||[])[1]; if(q) S.mode=q;
+  var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ if(!running&&S.mode!=='TV'){ var keep=prog; loadLevel(); prog=keep; renderProg(); } },200); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  setMode(S.mode);
+  window.__rk={best:best,LV:LV};
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>micro:bit · STEM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F9; --surface:#FFFFFF; --surface-2:#EBEFF5; --ink:#161A22; --ink-2:#3E4757; --muted:#6B7488;
+  --line:#DBE1EA; --accent:#2E4A7D; --accent-ink:#2E4A7D; --accent-soft:#E3EAF5;
+  --ok:#146B66; --ok-soft:#DDF0EE; --warm:#8A570F; --warm-soft:#F5E9D7;
+  --c-basic:#1E90FF; --c-input:#D400D4; --c-music:#E63022; --c-led:#5C2D91; --c-radio:#E3008C; --c-loops:#00AA00; --c-logic:#00A4A6; --c-var:#DC143C; --c-math:#9400D3;
+  --shadow:0 1px 2px rgba(22,26,34,.05), 0 8px 24px -16px rgba(22,26,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11141A; --surface:#181C25; --surface-2:#212734; --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+    --line:#2A3140; --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637;
+    --ok:#6ACFC5; --ok-soft:#16302D; --warm:#DCA76A; --warm-soft:#2C2318;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11141A; --surface:#181C25; --surface-2:#212734; --ink:#E9EDF4; --ink-2:#C2CAD8; --muted:#8C96A9;
+  --line:#2A3140; --accent:#93B4E8; --accent-ink:#A8C4EE; --accent-soft:#1C2637;
+  --ok:#6ACFC5; --ok-soft:#16302D; --warm:#DCA76A; --warm-soft:#2C2318;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Archivo",system-ui,Arial,sans-serif;font-size:16.5px;line-height:1.55}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 80px}
+header{padding:32px 0 10px}
+.kicker{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.08;margin:6px 0 10px;letter-spacing:-.015em}
+h2{font-size:21px;margin:0 0 6px;line-height:1.25}
+h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:30px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+p{margin:0 0 10px} ul,ol{margin:0 0 10px;padding-left:1.3em} li{margin-bottom:4px}
+a{color:var(--accent-ink)}
+.lead{color:var(--ink-2);max-width:64ch}
+.go{display:inline-block;font-family:"IBM Plex Mono",monospace;font-weight:600;background:var(--accent);color:var(--surface);text-decoration:none;padding:9px 14px;border-radius:6px;margin:6px 0}
+.brief{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 6px 6px 0;padding:14px 16px;box-shadow:var(--shadow)}
+.brief p:last-child,.brief ul:last-child{margin-bottom:0}
+.sens{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;margin-top:8px}
+.sens div{background:var(--surface-2);border-radius:6px;padding:8px 10px;font-size:15px}
+.prog{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:14px 0 4px;font-size:15px;color:var(--ink-2)}
+.bar{flex:1 1 200px;height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.m{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;margin-top:14px;box-shadow:var(--shadow)}
+.m.done{border-color:var(--ok)}
+.mh{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.mh .num{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--accent-ink);display:block;margin-bottom:2px}
+.ck{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;white-space:nowrap;cursor:pointer;background:var(--surface-2);padding:6px 10px;border-radius:6px}
+.ck input{width:18px;height:18px;accent-color:var(--ok)}
+.m.done .ck{background:var(--ok-soft);color:var(--ok)}
+.test{background:var(--surface-2);border-radius:6px;padding:8px 12px;font-size:15px;margin:8px 0}
+.test b{color:var(--ink)}
+details{margin-top:8px;border:1px dashed var(--line);border-radius:6px;padding:7px 12px}
+details summary{cursor:pointer;font-weight:600;color:var(--accent-ink);font-size:15px}
+details[open] summary{margin-bottom:8px}
+details p:last-child,details ul:last-child{margin-bottom:0}
+.blk{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;color:#fff;border-radius:4px;padding:1px 7px;margin:1px 0;white-space:nowrap}
+.b-basic{background:var(--c-basic)} .b-input{background:var(--c-input)} .b-music{background:var(--c-music)} .b-led{background:var(--c-led)}
+.b-radio{background:var(--c-radio)} .b-loops{background:var(--c-loops)} .b-logic{background:var(--c-logic)} .b-var{background:var(--c-var)} .b-math{background:var(--c-math)}
+.phys{border-left:3px solid var(--warm);background:var(--warm-soft);padding:8px 12px;border-radius:0 6px 6px 0;font-size:15px;margin-top:8px}
+.phys b{color:var(--warm)}
+.star{border-left:3px solid var(--accent);background:var(--accent-soft);padding:8px 12px;border-radius:0 6px 6px 0;font-size:15px;margin-top:8px}
+.note{background:var(--warm-soft);border-radius:6px;padding:10px 13px;font-size:15px;margin-top:12px}
+code{font-family:"IBM Plex Mono",monospace;font-size:14px}
+.tog{appearance:none;background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--ink-2);cursor:pointer;font:inherit;font-size:14px;margin-top:24px}
+@media (max-width:520px){.mh{flex-direction:column}.ck{align-self:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">STEM-освіта · 9–10 клас</div>
+  <h1>micro:bit: плата, яка вимірює й говорить по радіо</h1>
+  <p class="lead">Сьогодні ти програмуєш справжній мікроконтролер — поки що в симуляторі. Найкращі програми вчитель завантажить у справжні плати наприкінці уроку.</p>
+  <a class="go" href="https://makecode.microbit.org/" target="_blank" rel="noopener">makecode.microbit.org → New Project</a>
+</header>
+
+<div class="brief">
+  <p><strong>Що вміє micro:bit V2.</strong> Ліворуч у MakeCode — симулятор: на ньому можна натискати кнопки, трясти плату, рухати повзунки температури, світла й звуку.</p>
+  <div class="sens">
+    <div>💡 25 світлодіодів 5×5</div><div>🔘 кнопки A, B і сенсорний логотип</div><div>📐 акселерометр (нахил, струс)</div>
+    <div>🧭 компас</div><div>🌡️ датчик температури</div><div>☀️ датчик світла</div>
+    <div>🎤 мікрофон · 🔊 динамік</div><div>📡 радіо між платами</div>
+  </div>
+  <p style="margin-top:10px">Назви блоків нижче — англійською, як у MakeCode за замовчуванням. Колір позначки = колір категорії. Хочеш Python — вкладка <strong>Python</strong> угорі редактора.</p>
+</div>
+
+<div class="note"><b>Важливо:</b> на екрані плати немає кирилиці. Для <span class="blk b-basic">show string</span> пиши латиницею: <code>Hi, Olena!</code></div>
+
+<div class="prog"><span id="pt">0 з 10</span><span class="bar"><i id="pb"></i></span></div>
+
+<h3>Місії</h3>
+
+<div class="m" data-k="1"><div class="mh"><div><span class="num">МІСІЯ 1</span><h2>Візитівка</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>На старті плата пише твоє ім'я. Кнопка A — серце, B — усмішка, A+B — екран гасне.</p>
+  <div class="test"><b>Перевір:</b> натисни в симуляторі A, B, а потім A+B (третя кнопка з'являється під платою).</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-basic">on start</span> + <span class="blk b-basic">show string</span> · <span class="blk b-input">on button A pressed</span> + <span class="blk b-basic">show icon</span> · <span class="blk b-basic">clear screen</span> (у More)</p></details>
+  <div class="star">★ Намалюй власну картинку блоком <span class="blk b-basic">show leds</span> на кнопку логотипа <span class="blk b-input">on logo pressed</span>.</div>
+</div>
+
+<div class="m" data-k="2"><div class="mh"><div><span class="num">МІСІЯ 2</span><h2>Кубик</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Струснув плату — випадає число від 1 до 6.</p>
+  <div class="test"><b>Перевір:</b> кнопка SHAKE у симуляторі, 10 разів. Чи бувають 1 і 6? А 0 чи 7?</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-input">on shake</span> + <span class="blk b-basic">show number</span> + <span class="blk b-math">pick random 1 to 6</span></p></details>
+  <div class="star">★ Замість цифри — крапки, як на справжньому кубику: <span class="blk b-var">set</span> змінну, потім <span class="blk b-logic">if … else if …</span> і шість <span class="blk b-basic">show leds</span>.</div>
+</div>
+
+<div class="m" data-k="3"><div class="mh"><div><span class="num">МІСІЯ 3</span><h2>Лічильник людей</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>A — зайшла людина (+1), B — вийшла (−1), A+B — обнулити. На екрані завжди поточне число.</p>
+  <div class="test"><b>Перевір:</b> 5 разів A, 2 рази B → має бути 3.</div>
+  <details><summary>Підказка: блоки</summary><p>Variables → <span class="blk b-var">Make a Variable</span> «count» · <span class="blk b-var">change count by 1</span> / <span class="blk b-var">by -1</span> · <span class="blk b-var">set count to 0</span> · <span class="blk b-basic">show number count</span></p></details>
+  <div class="star">★ Число не може бути менше за 0: <span class="blk b-logic">if count &gt; 0 then</span>.</div>
+</div>
+
+<div class="m" data-k="4"><div class="mh"><div><span class="num">МІСІЯ 4</span><h2>Термометр і світломір</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Постійно показує температуру. Натиснув A — показує рівень світла.</p>
+  <div class="test"><b>Перевір:</b> рухай у симуляторі повзунок температури (червоний) і світла (жовтий). Числа змінюються?</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-basic">forever</span> + <span class="blk b-basic">show number</span> + <span class="blk b-input">temperature (°C)</span> · <span class="blk b-input">on button A pressed</span> + <span class="blk b-input">light level</span></p></details>
+  <div class="phys"><b>Фізика.</b> Датчик температури сидить у процесорі, тому справжня плата показує на 1–3 °C більше, ніж у кімнаті. А «рівень світла» 0–255 — не люкси, а умовні одиниці: щоб зробити з нього люксметр, плату треба відкалібрувати за справжнім приладом.</div>
+  <div class="star">★ Термометр з тривогою: якщо температура вища за 30 °C — <span class="blk b-basic">show icon</span> ❗ і <span class="blk b-music">play tone</span>.</div>
+</div>
+
+<div class="m" data-k="5"><div class="mh"><div><span class="num">МІСІЯ 5</span><h2>Будівельний рівень</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Плата лежить рівно — на екрані ✓. Нахилили ліворуч — стрілка ліворуч, праворуч — стрілка праворуч.</p>
+  <div class="test"><b>Перевір:</b> веди мишкою над платою в симуляторі — вона нахиляється.</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-basic">forever</span> + <span class="blk b-logic">if … else if … else</span> · <span class="blk b-input">acceleration (mg) x</span> &lt; −150 → <span class="blk b-basic">show arrow West</span> · &gt; 150 → <span class="blk b-basic">show arrow East</span> · інакше <span class="blk b-basic">show icon Yes</span></p></details>
+  <div class="phys"><b>Фізика.</b> Плата, що лежить, вимірює прискорення ≈ 1000 mg — це вільне падіння, яке їй «заважає» стіл: 1 g ≈ 9,8 м/с². Під час нахилу на кут α на вісь x припадає a<sub>x</sub> = g · sin α.</div>
+  <div class="star">★ 10 клас: покажи сам кут у градусах. Зручніше в Python: <code>math.asin(x / 1024)</code> дає радіани, перевести в градуси — ×180/π. Чому краще ділити не на 1024, а на справжню силу тяжіння <span class="blk b-input">acceleration (mg) strength</span>?</div>
+</div>
+
+<div class="m" data-k="6"><div class="mh"><div><span class="num">МІСІЯ 6</span><h2>Час реакції</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>B — старт: екран гасне, через випадковий час 1–4 с з'являється мішень. Тиснеш A якнайшвидше — плата показує час реакції в мілісекундах.</p>
+  <div class="test"><b>Перевір:</b> зіграй 5 разів, запиши найкращий результат. Скільки в сусіда?</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-input">on button B pressed</span>: <span class="blk b-basic">clear screen</span> → <span class="blk b-basic">pause</span> <span class="blk b-math">pick random 1000 to 4000</span> → <span class="blk b-basic">show icon</span> → <span class="blk b-var">set start to</span> <span class="blk b-input">running time (ms)</span>. <span class="blk b-input">on button A pressed</span>: <span class="blk b-basic">show number</span> running time − start.</p></details>
+  <div class="phys"><b>Фізика.</b> Авто їде 60 км/год ≈ 16,7 м/с. Поки водій реагує, воно проходить s = v · t. Порахуй свій шлях: при 250 мс це вже понад 4 метри — ще до початку гальмування.</div>
+  <div class="star">★ Фальстарт: натиснув A, поки мішені ще немає — на екрані ✗, а не час.</div>
+</div>
+
+<div class="m" data-k="7"><div class="mh"><div><span class="num">МІСІЯ 7</span><h2>Шумомір</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Стовпчик на екрані росте разом із гучністю. Дуже гучно — сердите обличчя.</p>
+  <div class="test"><b>Перевір:</b> повзунок звуку в симуляторі (з'являється, щойно використаєш блок звуку).</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-basic">forever</span> + <span class="blk b-led">plot bar graph of</span> <span class="blk b-input">sound level</span> <span class="blk b-led">up to 255</span> · <span class="blk b-input">on loud sound</span> + <span class="blk b-basic">show icon Angry</span></p></details>
+  <div class="phys"><b>Фізика.</b> Мікрофон дає 0–255 — теж умовні одиниці, не децибели. Шкала децибелів логарифмічна: +10 дБ — це вдесятеро більша інтенсивність звуку.</div>
+</div>
+
+<div class="m" data-k="8"><div class="mh"><div><span class="num">МІСІЯ 8</span><h2>Радіо</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Кнопка A надсилає число по радіо. Плата, що його отримала, показує серце й посилає відповідь: усмішку.</p>
+  <div class="test"><b>Перевір:</b> щойно додаси радіоблок, у симуляторі з'являться <b>дві</b> плати. Натисни A на одній — що на другій?</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-basic">on start</span> + <span class="blk b-radio">radio set group</span> (номер скаже вчитель) · <span class="blk b-input">on button A pressed</span> + <span class="blk b-radio">radio send number 1</span> · <span class="blk b-radio">on radio received receivedNumber</span> + <span class="blk b-logic">if</span> receivedNumber = 1 → серце й <span class="blk b-radio">send number 2</span>; = 2 → усмішка</p></details>
+  <div class="phys"><b>Фізика.</b> Радіо micro:bit працює на 2,4 ГГц — як Wi-Fi і Bluetooth. Довжина хвилі λ = c / f ≈ 12,5 см. «Група» — це як канал: плати з різними групами одна одну не чують.</div>
+  <div class="star">★ Камінь-ножиці-папір по радіо: струснув — випало 0, 1 або 2, плата показує свій знак і надсилає його. Отримала знак суперника — показує, хто переміг.</div>
+</div>
+
+<div class="m" data-k="9"><div class="mh"><div><span class="num">МІСІЯ 9</span><h2>Компас</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Плата показує літеру сторони світу: N, E, S або W.</p>
+  <div class="test"><b>Перевір:</b> повзунок компаса в симуляторі. 0° — північ, 90° — схід.</div>
+  <details><summary>Підказка: блоки</summary><p><span class="blk b-input">compass heading (°)</span> у змінну · <span class="blk b-logic">if</span> менше 45 або більше 315 → <span class="blk b-basic">show string "N"</span> · і так далі для E, S, W</p></details>
+  <div class="phys"><b>Фізика.</b> Компас — це магнітометр: він вимірює магнітне поле Землі. Поруч з магнітом, динаміком чи залізом він бреше — справжню плату перед роботою калібрують, крутячи її в руках.</div>
+</div>
+
+<div class="m" data-k="10"><div class="mh"><div><span class="num">МІСІЯ 10 ★</span><h2>Свій прилад</h2></div><label class="ck"><input type="checkbox"> Готово</label></div>
+  <p>Придумай пристрій з двох і більше датчиків. Наприклад: сигналізація для дверей (світло + звук), «розумна» теплиця (температура + світло), пульт для іншої плати по радіо, гра на нахил.</p>
+  <div class="test"><b>Перевір:</b> чи можна пояснити, що робить кожен блок?</div>
+</div>
+
+<h3>Наприкінці</h3>
+<div class="brief">
+  <p>Хочеш, щоб твою програму завантажили в справжню плату? Угорі MakeCode — <strong>Share</strong> → <strong>Share Project</strong>. Покажи вчителю посилання (або QR-код, якщо він з'явиться у вікні).</p>
+  <p>Збережи роботу собі: шестерня ⚙ → <strong>Download</strong> або просто залиш вкладку — MakeCode пам'ятає проєкти в цьому браузері.</p>
+</div>
+<button class="tog" type="button" id="theme">Світла / темна тема</button>
+</div>
+<script>
+(function(){
+  var KEY='microbit-stem-v1', st={};
+  try{ st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){}
+  var ms=[].slice.call(document.querySelectorAll('.m'));
+  function upd(){ var n=0; ms.forEach(function(m){ var on=!!st[m.getAttribute('data-k')]; m.classList.toggle('done',on); if(on) n++; m.querySelector('input').checked=on; });
+    document.getElementById('pt').textContent=n+' з '+ms.length; document.getElementById('pb').style.width=(n/ms.length*100)+'%'; }
+  ms.forEach(function(m){ m.querySelector('input').addEventListener('change',function(e){ st[m.getAttribute('data-k')]=e.target.checked; try{ localStorage.setItem(KEY,JSON.stringify(st)); }catch(x){} upd(); }); });
+  upd();
+  document.getElementById('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+})();
+</script>
+</body>
+</html>
