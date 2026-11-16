@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Комп'ютерна графіка · 6 клас</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E9EEF5; --ink:#141922; --ink-2:#3D4656; --muted:#667085;
+  --line:#D5DCE6; --line-strong:#BBC5D3; --accent:#2D58B8; --accent-soft:#E2EAF8;
+  --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1; --warm:#8A570F; --warm-soft:#F6EAD6;
+  --shadow:0 1px 2px rgba(20,25,34,.05),0 8px 24px -16px rgba(20,25,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+    --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+  --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 0 10px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;margin:4px 0 0;letter-spacing:-.01em}
+.who{text-align:right;font-size:15px;color:var(--ink-2)}
+.who b{font-size:24px;color:var(--ink)}
+.who small{display:block;font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.start{max-width:600px;margin:28px auto;display:grid;gap:14px}
+.start h2{margin:0;font-size:22px}
+.start label{display:grid;gap:6px;font-weight:600}
+input[type=text],select{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 12px;font-size:17px}
+input[type=text]:focus,select:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.btn{appearance:none;border:2px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:16px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-weight:600;min-height:1.3em}
+.note{color:var(--muted);font-size:15px}
+.intro{background:var(--accent-soft);border-radius:12px;padding:14px 16px}
+.intro h3{margin:0 0 6px;font-size:16px}
+.intro p{margin:0 0 6px}.intro p:last-child{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-size:13px;color:var(--muted);font-weight:600}
+.tab.full .pt{color:var(--ok)}
+.tab.bonus{border-style:dashed}
+.tabsep{align-self:center;font-size:13px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.task h2{margin:0 0 6px;font-size:21px}
+.task h2 .note{font-size:14px;font-weight:600}
+.task ol.steps{margin:6px 0 12px;padding-left:22px}
+.task ol.steps li{margin:3px 0}
+details.remind{margin:0 0 12px;background:var(--warm-soft);border-radius:10px;padding:8px 12px}
+details.remind summary{cursor:pointer;font-weight:700;color:var(--warm)}
+details.remind div{margin-top:6px}
+.area{margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.part{background:var(--warm-soft);color:var(--ink)}
+.feedback ul{margin:6px 0 0;padding-left:20px;font-weight:500}
+/* common widgets */
+.q{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.q > p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:15.5px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.res{width:100%;border-collapse:collapse;margin:10px 0}
+.res td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.res td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.big{font-size:64px;font-weight:800;line-height:1}
+.bottom{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.confirm{display:inline-flex;gap:8px;align-items:center}
+.pxwrap{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.px{display:grid;grid-template-columns:repeat(8,36px);grid-auto-rows:36px;gap:2px;background:var(--line-strong);padding:2px;border-radius:6px;width:max-content}
+.px button{appearance:none;border:0;padding:0;cursor:pointer;border-radius:2px}
+.px.small{grid-template-columns:repeat(8,18px);grid-auto-rows:18px;gap:1px;padding:1px}
+.px i{display:block}
+.sw{appearance:none;width:40px;height:40px;border-radius:10px;border:3px solid var(--line-strong);cursor:pointer}
+.sw.on{border-color:var(--accent);outline:3px solid var(--accent-soft)}
+.mix{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--surface-2);border-radius:12px;padding:12px;margin:8px 0}
+.sws{display:flex;gap:10px}
+.sws div{display:flex;flex-direction:column;align-items:center;gap:2px}
+.sws b{display:block;width:70px;height:70px;border-radius:12px;border:2px solid var(--line-strong)}
+.sl{display:grid;gap:6px}
+.sl label{display:grid;grid-template-columns:20px 1fr 64px;gap:8px;align-items:center;font-weight:700}
+.sl input[type=text]{padding:4px 8px;font-size:15px}
+@media (max-width:560px){.mix{grid-template-columns:1fr}}
+.vwrap{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.vcan{width:min(100%,360px);background:#fff;border:2px solid var(--line-strong);border-radius:8px}
+.vcan .gl{stroke:#E3E8EF;stroke-width:.5}
+.vcan .gt{font-size:6px;fill:#8C96A9;font-family:monospace}
+.vcan .ghost{fill:none;stroke:#555;stroke-width:1;stroke-dasharray:3 2}
+.vin{display:grid;gap:6px;min-width:200px}
+.vin p{margin:6px 0 0}
+.vin label{display:grid;grid-template-columns:70px 90px;align-items:center;gap:8px}
+.vin input{padding:5px 8px;font-size:15px}
+.zbox{display:grid;grid-template-columns:auto auto;gap:16px;justify-content:start;margin-top:12px}
+.zv,#zr{width:160px;height:160px;background:#fff;border:2px solid var(--line-strong);border-radius:8px;image-rendering:pixelated}
+
+@media print{.tabs,.bottom{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="kicker">Інформатика · 6 клас · практична робота</div><h1>Комп'ютерна графіка</h1></div>
+    <div class="who" id="who" hidden></div>
+  </header>
+
+  <section class="card start" id="startBox" hidden>
+    <h2>Початок</h2>
+    <div class="intro"><h3>Сьогодні: комп'ютерна графіка</h3><p>Растр і вектор, пікселі, кольори RGB і скільки місця займає малюнок. 7 завдань: 5 основних і 2 бонусні ★. Оцінка — з 12.</p></div>
+    <label>Твоє ім'я та прізвище<input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <details style="font-size:15px"><summary class="note" style="cursor:pointer">Пересів за інший комп'ютер? Код продовження</summary>
+      <label style="margin-top:8px">Код продовження (з іншого комп'ютера)<input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="max-width:180px"></label></details>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo">Почати</button></div>
+    <p class="note" style="margin:0">Робота зберігається на цьому комп'ютері. Урок перервали? Наступного разу введи те саме ім'я — продовжиш з того ж місця.</p>
+  </section>
+
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+  </div>
+
+  <section class="card" id="resultBox" hidden></section>
+
+  <div class="bottom">
+    <button class="btn ghost sm" type="button" id="other" hidden>Інший учень</button>
+    <button class="btn ghost sm" type="button" id="restart" hidden>Почати заново</button>
+    <span class="confirm" id="ask" hidden><span>Усі бали цього учня зітруться. Точно?</span>
+      <button class="btn sm" type="button" id="askYes" style="background:var(--bad);border-color:var(--bad)">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo">Ні</button></span>
+    <button class="btn ghost sm" type="button" id="theme" style="margin-left:auto">Світла / темна</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='inf6-grafika-v1', GRADE='6';
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function shuffle(a,seed){ var r=seed||1; a=a.slice(); for(var i=a.length-1;i>0;i--){ r=(r*9301+49297)%233280; var j=Math.floor(r/233280*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  /* choose-one rows: rows=[{id,text,opts:[..]}]; answer saved in d[id] */
+  function choiceRows(el,d,rows,save){
+    el.innerHTML=rows.map(function(r){ return '<div class="q"><p>'+r.text+'</p><div class="opts">'+r.opts.map(function(o,i){ return '<button type="button" class="opt" data-r="'+r.id+'" data-i="'+i+'" aria-pressed="'+(d[r.id]===i)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.addEventListener('click',function(){ var r=b.getAttribute('data-r'); d[r]=+b.getAttribute('data-i'); save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }); });
+  }
+  function countRight(d,rows,key){ var n=0; rows.forEach(function(r){ if(d[r.id]===key[r.id]) n++; }); return n; }
+  var H={esc:esc,shuffle:shuffle,choiceRows:choiceRows,countRight:countRight};
+
+  /* ===== 6 клас: комп'ютерна графіка ===== */
+  function q(id,text,opts){ return {id:id,text:text,opts:opts}; }
+  var RV=[q('a','Фото з камери телефона',['Растрове','Векторне']),q('b','Логотип школи, який друкують і на ручці, і на величезному банері',['Растрове','Векторне']),q('c','Малюнок, намальований пензлем у Paint',['Растрове','Векторне']),q('d','Літери шрифту, які не «розсипаються» на квадратики за будь-якого розміру',['Растрове','Векторне']),q('e','Скріншот екрана',['Растрове','Векторне']),q('f','Схема з прямокутників і стрілок, побудована з фігур',['Растрове','Векторне'])];
+  var RVk={a:0,b:1,c:0,d:1,e:0,f:1};
+  var PAL={'.':'#FFFFFF','R':'#E0403A','Y':'#F2BE22','K':'#1E2430'};
+  var HEART=["........",".KK..KK.","KRRKKRRK","KRYRRRRK","KRRRRRRK",".KRRRRK.","..KRRK..","...KK..."];
+  var TARGETS=[{n:'Жовтий',c:[255,255,0]},{n:'Помаранчевий',c:[255,128,0]},{n:'Фіолетовий',c:[128,0,128]}];
+  var TOL=30;
+  var FMT=[q('a','Фото з канікул, щоб надіслати бабусі',['JPG','PNG','SVG','GIF']),q('b','Логотип для сайту, який має бути чітким на будь-якому екрані',['JPG','PNG','SVG','GIF']),q('c','Скріншот з дрібним текстом, щоб літери лишилися чіткими',['JPG','PNG','SVG','GIF']),q('d','Короткий анімований смайлик для чату',['JPG','PNG','SVG','GIF'])];
+  var FMTk={a:0,b:2,c:1,d:3};
+  var VT={c:{x:150,y:50,r:30},r:{x:30,y:110,w:80,h:70}};
+  function num(v){ return v===''||v==null?NaN:+v; }
+
+  var TASKS=[
+    {t:'Растр чи вектор',max:2,remindOpen:1,remind:'<p><b>Растрове</b> зображення — сітка з крапок-пікселів, у кожного свій колір. Збільшиш — побачиш квадратики. <b>Векторне</b> — набір фігур, описаних числами: «коло з центром тут і радіусом стільки». Збільшуй скільки завгодно — лишається чітким.</p>',
+      steps:['Для кожного зображення обери: растрове чи векторне. 6 з 6 — 2 бали, 5 — 1.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,RV,c.save); },
+      check:function(c){ var n=c.H.countRight(c.d,RV,RVk); return [n===6?2:n===5?1:0,n<6?['Правильно '+n+' з 6.']:[]]; }},
+    {t:'Піксельний художник',max:3,
+      steps:['Ліворуч — зразок 8×8 пікселів. Намалюй такий самий праворуч.','Обери колір у палітрі й торкайся клітинок. Білий — стерти.','Без помилок — 3 бали, до 2 помилок — 2, до 5 — 1.'],
+      render:function(el,c){
+        var d=c.d; if(!d.g) d.g=Array(64).join('.').split('').concat(['.']).join(''); if(!d.col) d.col='R';
+        function draw(){
+          var tgt='<div class="px small">'+HEART.join('').split('').map(function(ch){ return '<i style="background:'+PAL[ch]+'"></i>'; }).join('')+'</div>';
+          var mine='<div class="px" id="pxg">'+d.g.split('').map(function(ch,i){ return '<button type="button" data-i="'+i+'" style="background:'+PAL[ch]+'" aria-label="піксель '+(Math.floor(i/8)+1)+', '+(i%8+1)+'"></button>'; }).join('')+'</div>';
+          var pal='<div class="row" style="margin:8px 0">'+Object.keys(PAL).map(function(k){ return '<button type="button" class="sw'+(d.col===k?' on':'')+'" data-k="'+k+'" style="background:'+PAL[k]+'" aria-label="колір"></button>'; }).join('')+'<button type="button" class="btn sm ghost" id="pxClr">Стерти все</button></div>';
+          el.innerHTML='<div class="pxwrap"><div><p class="note" style="margin:0 0 4px">Зразок</p>'+tgt+'</div><div><p class="note" style="margin:0 0 4px">Твій малюнок</p>'+mine+pal+'</div></div>';
+          Array.prototype.forEach.call(el.querySelectorAll('#pxg button'),function(b){ b.onclick=function(){ var i=+b.getAttribute('data-i'); d.g=d.g.slice(0,i)+d.col+d.g.slice(i+1); c.save(); b.style.background=PAL[d.col]; }; });
+          Array.prototype.forEach.call(el.querySelectorAll('.sw'),function(b){ b.onclick=function(){ d.col=b.getAttribute('data-k'); c.save(); draw(); }; });
+          el.querySelector('#pxClr').onclick=function(){ d.g=Array(65).join('.'); c.save(); draw(); };
+        }
+        draw();
+      },
+      check:function(c){ var g=c.d.g||'', t=HEART.join(''), e=0; for(var i=0;i<64;i++) if(g[i]!==t[i]) e++; return [e===0?3:e<=2?2:e<=5?1:0,e?['Помилок: '+e+'.']:[]]; }},
+    {t:'Змішай колір',max:3,remind:'<p>Екран змішує кожен колір з трьох: <b>R</b> (червоний), <b>G</b> (зелений), <b>B</b> (синій), кожен від 0 до 255. Червоний + зелений = жовтий. Усі на 255 — білий, усі на 0 — чорний.</p>',
+      steps:['Підбери R, G, B так, щоб твій колір збігся з зразком.','Кожен колір — 1 бал (можна помилитися на 30 у кожному каналі).'],
+      render:function(el,c){
+        var d=c.d; TARGETS.forEach(function(_,k){ if(!d['m'+k]) d['m'+k]=[0,0,0]; });
+        el.innerHTML=TARGETS.map(function(t,k){ var m=d['m'+k]; return '<div class="mix" data-k="'+k+'"><div class="sws"><div><span class="note">Зразок</span><b style="background:rgb('+t.c.join(',')+')"></b></div><div><span class="note">Твій</span><b class="mine" style="background:rgb('+m.join(',')+')"></b></div></div><div class="sl">'+['R','G','B'].map(function(ch,j){ return '<label><span>'+ch+'</span><input type="range" min="0" max="255" value="'+m[j]+'" data-j="'+j+'"><input type="text" inputmode="numeric" value="'+m[j]+'" data-n="'+j+'" maxlength="3"></label>'; }).join('')+'</div><div class="note" style="grid-column:1/-1">'+t.n+'</div></div>'; }).join('');
+        Array.prototype.forEach.call(el.querySelectorAll('.mix'),function(box){ var k=+box.getAttribute('data-k'), m=d['m'+k];
+          function upd(){ box.querySelector('.mine').style.background='rgb('+m.join(',')+')'; box.querySelectorAll('input[type=range]').forEach(function(r,j){ r.value=m[j]; }); box.querySelectorAll('input[data-n]').forEach(function(t,j){ if(document.activeElement!==t) t.value=m[j]; }); c.save(); }
+          box.querySelectorAll('input[type=range]').forEach(function(r){ r.oninput=function(){ m[+r.getAttribute('data-j')]=+r.value; upd(); }; });
+          box.querySelectorAll('input[data-n]').forEach(function(t){ t.oninput=function(){ var v=Math.max(0,Math.min(255,+t.value.replace(/\D/g,'')||0)); m[+t.getAttribute('data-n')]=v; upd(); }; });
+        });
+      },
+      check:function(c){ var p=0,msg=[]; TARGETS.forEach(function(t,k){ var m=c.d['m'+k]||[0,0,0]; if(m.every(function(v,j){ return Math.abs(v-t.c[j])<=TOL; })) p++; else msg.push(t.n+' — ще не збігся.'); }); return [p,msg]; }},
+    {t:'Скільки місця займає малюнок',max:2,remind:'<p>Комп’ютер зберігає колір кожного пікселя числами R, G, B — по <b>1 байту</b> на кожне. Тож один піксель — <b>3 байти</b>. Пікселів у малюнку — ширина × висота.</p>',
+      steps:['Порахуй і впиши числа.'],
+      render:function(el,c){
+        el.innerHTML='<div class="q"><p>Скільки пікселів у малюнку-сердечку із завдання 2 (8 × 8)?</p><input type="text" inputmode="numeric" id="a1" maxlength="6" style="max-width:160px" value="'+c.H.esc(c.d.a1||'')+'"></div><div class="q"><p>Фото 100 × 100 пікселів, кожен піксель — 3 байти. Скільки байтів займає фото без стиснення?</p><input type="text" inputmode="numeric" id="a2" maxlength="8" style="max-width:160px" value="'+c.H.esc(c.d.a2||'')+'"></div>';
+        ['a1','a2'].forEach(function(k){ el.querySelector('#'+k).oninput=function(e){ c.d[k]=e.target.value.replace(/[^\d]/g,''); c.save(); }; });
+      },
+      check:function(c){ var p=0,m=[]; if(+c.d.a1===64) p++; else m.push('Пікселі: 8 × 8 = ?'); if(+c.d.a2===30000) p++; else m.push('Байти: 100 × 100 пікселів × 3 байти = ?'); return [p,m]; }},
+    {t:'Векторний малюнок',max:2,remind:'<p>У векторному малюнку кожна фігура — це числа. <b>Коло</b>: центр (x, y) і радіус r. <b>Прямокутник</b>: лівий верхній кут (x, y), ширина й висота. Увага: на екрані y рахують <b>згори вниз</b>.</p>',remindOpen:1,
+      steps:['Пунктиром показано, де мають бути сонце й будинок. Сітка — через 20.','Впиши числа для кола й прямокутника, щоб вони лягли точно на пунктир (можна помилитися на 5).','Кожна фігура — 1 бал. Потім натисни «Збільшити» й порівняй з растром.'],
+      render:function(el,c){
+        var d=c.d; if(!d.c) d.c={x:'',y:'',r:''}; if(!d.r) d.r={x:'',y:'',w:'',h:''};
+        function inp(o,k,lab){ return '<label>'+lab+' <input type="text" inputmode="numeric" maxlength="3" data-o="'+o+'" data-k="'+k+'" value="'+c.H.esc(d[o][k])+'"></label>'; }
+        el.innerHTML='<div class="vwrap"><svg viewBox="0 0 200 200" class="vcan" id="vcan"></svg><div class="vin"><p><b>☀️ Коло</b></p>'+inp('c','x','x')+inp('c','y','y')+inp('c','r','r')+'<p><b>🏠 Прямокутник</b></p>'+inp('r','x','x')+inp('r','y','y')+inp('r','w','ширина')+inp('r','h','висота')+'<button type="button" class="btn sm ghost" id="zoom" style="margin-top:10px">🔍 Збільшити ×4</button></div></div><div id="zbox" hidden class="zbox"><div><p class="note">Вектор ×4</p><svg viewBox="130 30 40 40" class="zv" id="zv"></svg></div><div><p class="note">Растр ×4</p><canvas id="zr" width="40" height="40"></canvas></div><p class="note" style="grid-column:1/-1">Вектор перемальовується за числами й лишається чітким. Растр — це ті самі пікселі, тільки більші.</p></div>';
+        function draw(){
+          var g='', s=el.querySelector('#vcan');
+          for(var i=20;i<200;i+=20) g+='<line x1="'+i+'" y1="0" x2="'+i+'" y2="200" class="gl"/><line x1="0" y1="'+i+'" x2="200" y2="'+i+'" class="gl"/>';
+          for(i=0;i<=200;i+=40) g+='<text x="'+(i+1)+'" y="8" class="gt">'+i+'</text>'+(i?'<text x="1" y="'+(i+3)+'" class="gt">'+i+'</text>':'');
+          g+='<circle cx="'+VT.c.x+'" cy="'+VT.c.y+'" r="'+VT.c.r+'" class="ghost"/><rect x="'+VT.r.x+'" y="'+VT.r.y+'" width="'+VT.r.w+'" height="'+VT.r.h+'" class="ghost"/>';
+          var C=d.c, R=d.r;
+          if(!isNaN(num(C.x))&&!isNaN(num(C.y))&&num(C.r)>0) g+='<circle cx="'+num(C.x)+'" cy="'+num(C.y)+'" r="'+num(C.r)+'" fill="#F2BE22" fill-opacity=".85"/>';
+          if(!isNaN(num(R.x))&&!isNaN(num(R.y))&&num(R.w)>0&&num(R.h)>0) g+='<rect x="'+num(R.x)+'" y="'+num(R.y)+'" width="'+num(R.w)+'" height="'+num(R.h)+'" fill="#E0403A" fill-opacity=".8"/>';
+          s.innerHTML=g;
+        }
+        Array.prototype.forEach.call(el.querySelectorAll('input[data-o]'),function(t){ t.oninput=function(){ d[t.getAttribute('data-o')][t.getAttribute('data-k')]=t.value.replace(/\D/g,''); c.save(); draw(); }; });
+        el.querySelector('#zoom').onclick=function(){ var z=el.querySelector('#zbox'); z.hidden=false; el.querySelector('#zv').innerHTML='<circle cx="150" cy="50" r="30" fill="#F2BE22"/>';
+          var cv=el.querySelector('#zr'), x=cv.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,40,40); x.fillStyle='#F2BE22'; for(var yy=0;yy<10;yy++) for(var xx=0;xx<10;xx++){ var px=130+xx*4+2, py=30+yy*4+2; if((px-150)*(px-150)+(py-50)*(py-50)<=900) x.fillRect(xx*4,yy*4,4,4); } };
+        draw();
+      },
+      check:function(c){ var C=c.d.c||{}, R=c.d.r||{}, p=0, m=[], ok=function(a,b){ return !isNaN(num(a))&&Math.abs(num(a)-b)<=5; };
+        if(ok(C.x,VT.c.x)&&ok(C.y,VT.c.y)&&ok(C.r,VT.c.r)) p++; else m.push('Коло ще не на місці. Центр — посередині пунктиру, радіус — від центру до краю.');
+        if(ok(R.x,VT.r.x)&&ok(R.y,VT.r.y)&&ok(R.w,VT.r.w)&&ok(R.h,VT.r.h)) p++; else m.push('Прямокутник ще не на місці. x і y — лівий верхній кут.');
+        return [p,m]; }},
+    {t:'Формат файлу',max:2,bonus:1,remind:'<p><b>JPG</b> — фото, добре стискається, але трохи «милить» дрібні деталі. <b>PNG</b> — без втрат, чіткий текст, прозорий фон. <b>SVG</b> — векторний формат. <b>GIF</b> — проста анімація, мало кольорів.</p>',
+      steps:['Обери найкращий формат для кожного випадку. 4 з 4 — +2, 3 — +1.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,FMT,c.save); },
+      check:function(c){ var n=c.H.countRight(c.d,FMT,FMTk); return [n===4?2:n===3?1:0,n<4?['Правильно '+n+' з 4.']:[]]; }},
+    {t:'Скільки кольорів',max:1,bonus:1,
+      steps:['Кожен з R, G, B може бути від 0 до 255 — це 256 значень. Скільки різних кольорів може показати екран? Впиши число без пробілів.'],
+      render:function(el,c){ el.innerHTML='<input type="text" inputmode="numeric" id="nc" maxlength="12" style="max-width:220px" value="'+c.H.esc(c.d.n||'')+'">'; el.querySelector('#nc').oninput=function(e){ c.d.n=e.target.value.replace(/\D/g,''); c.save(); }; },
+      check:function(c){ return +c.d.n===16777216?[1,[],'256 × 256 × 256 — понад 16 мільйонів.']:[0,['Скільки комбінацій з трьох чисел, кожне з 256 варіантів?']]; }}
+  ];
+
+
+  /* ---------- storage: one profile per student name ---------- */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0,x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function fresh(){ return {name:'',pts:{},data:{},task:1,view:'work',act:0,last:0}; }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.name){ var id=nnorm(st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  }
+  function tick(){ if(!st.name) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
+
+  function isBonus(n){ return !!TASKS[n-1].bonus; }
+  function total(){ var s=0; for(var n=1;n<=TASKS.length;n++) s+=st.pts[n]||0; return Math.min(12,s); }
+  function lastCore(){ var k=0; TASKS.forEach(function(t,i){ if(!t.bonus) k=i+1; }); return k; }
+  /* continue code */
+  var INV=17679;
+  function encode(pts,nm){ var idx=0,mul=1; TASKS.forEach(function(t,i){ idx+=Math.min(pts[i+1]||0,t.max)*mul; mul*=t.max+1; }); var N=idx,X=(N*7919+40427)%100000,C=(N*61+29+nhash(nm))%97,d=('0000'+X).slice(-5)+('0'+C).slice(-2); return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5),C=+c.slice(5),N=((X-40427+100000)%100000)*INV%100000; if((N*61+29+nhash(nm))%97!==C) return null; var pts={},idx=N; for(var i=0;i<TASKS.length;i++){ var r=TASKS[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } return idx?null:pts; }
+
+  function ctx(n){ if(!st.data[n]) st.data[n]={}; return {d:st.data[n],save:save,H:H,rerender:renderTask}; }
+  function renderTabs(){
+    $('tabs').innerHTML=TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<span class="tabsep">★ бонус</span>':'')+'<button type="button" role="tab" class="tab'+(p>=t.max?' full':'')+(t.bonus?' bonus':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(t.t)+' <span class="pt">'+(t.bonus?'+'+p+'★':p+'/'+t.max)+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">Результат <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; save(); renderAll(); window.scrollTo(0,0); } }); });
+  }
+  function renderTask(){
+    var n=st.task,t=TASKS[n-1],h='';
+    h+='<h2>Завдання '+n+' · '+esc(t.t)+' <span class="note">('+(t.bonus?'★ бонус, +'+t.max:t.max+' '+(t.max===1?'бал':t.max<5?'бали':'балів'))+')</span></h2>';
+    if(t.remind) h+='<details class="remind"'+(t.remindOpen?' open':'')+'><summary>Нагадування</summary><div>'+t.remind+'</div></details>';
+    h+='<ol class="steps">'+t.steps.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ol><div class="area" id="area"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">Перевірити завдання</button>'+(n<TASKS.length?'<button class="btn ghost" type="button" id="nxt">Наступне завдання →</button>':'')+(n>=lastCore()?'<button class="btn ghost" type="button" id="fin">Завершити й показати результат</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    t.render($('area'),ctx(n));
+    $('chk').addEventListener('click',function(){
+      var r=t.check(ctx(n)),p=r[0]; if(p>(st.pts[n]||0)) st.pts[n]=p; save(); renderTabs(); renderWho();
+      var fb=$('fb');
+      if(p>=t.max){ fb.className='feedback ok'; fb.textContent='Готово! Повний бал.'+(r[2]?' '+r[2]:''); }
+      else { fb.className='feedback part'; fb.innerHTML=(p>0?'Бали за завдання: '+p+'/'+t.max:'Поки 0 балів.')+(r[1]&&r[1].length?'<ul>'+r[1].map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>':''); }
+    });
+    if($('nxt')) $('nxt').addEventListener('click',function(){ st.task=n+1; save(); renderAll(); window.scrollTo(0,0); });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){ st.view='result'; save(); renderAll(); window.scrollTo(0,0); }
+  function renderResult(){
+    var mins=Math.max(1,Math.round((st.act||0)/60000)),h='';
+    h+='<h2 style="margin:0 0 4px">Результат практичної роботы</h2>'.replace('роботы','роботи');
+    h+='<p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+GRADE+' клас</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">з 12</span></div>';
+    h+='<table class="res">'+TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<tr><td colspan="2"><b>★ Бонус — додається до оцінки, разом не більше 12</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(t.t)+'</td><td>'+(t.bonus?'+'+p+' / '+t.max+' ★':p+' / '+t.max)+'</td></tr>'; }).join('')+'<tr><td>Час роботи (без перерв)</td><td>'+mins+' хв</td></tr><tr><td>Код продовження</td><td style="font-family:monospace;font-size:18px">'+encode(st.pts,st.name)+'</td></tr></table>';
+    h+='<p class="note">Покажи цей екран учителю.</p><button class="btn ghost" type="button" id="back">Повернутися до завдань</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; save(); renderAll(); });
+  }
+  function renderWho(){ var on=!!st.name; $('who').hidden=!on; if(on) $('who').innerHTML=esc(st.name)+' · '+GRADE+' клас<br><b>'+total()+'</b> / 12<small>код продовження: '+encode(st.pts,st.name)+'</small>'; }
+  function renderAll(){
+    var on=!!st.name;
+    $('startBox').hidden=on; $('work').hidden=!on||st.view==='result'; $('resultBox').hidden=!on||st.view!=='result';
+    $('other').hidden=!on; $('restart').hidden=!on; $('ask').hidden=true;
+    renderWho(); if(!on) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask();
+  }
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<3||n.indexOf(' ')<0&&n.length<5){ $('startErr').textContent='Напиши ім\'я та прізвище.'; return; }
+    var id=nnorm(n);
+    if(DB.p[id]){ st=DB.p[id]; st.view='work'; } else { st=fresh(); st.name=n; }
+    if(c){ var d=decode(c,n); if(!d){ $('startErr').textContent='Код не підходить. Перевір цифри й ім\'я — пиши так само, як першого разу.'; return; } Object.keys(d).forEach(function(k){ if(d[k]>(st.pts[k]||0)) st.pts[k]=d[k]; }); }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+  }
+  $('startGo').addEventListener('click',go);
+  $('nameIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('nameIn').value=''; $('codeIn').value=''; renderAll(); window.scrollTo(0,0); });
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('nameIn').value=''; renderAll(); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  renderAll();
+  window.__p={st:function(){ return st; },TASKS:TASKS};
+})();
+</script>
+</body>
+</html>

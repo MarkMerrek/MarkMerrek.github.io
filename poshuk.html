@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пошук і безпека · 5 клас</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E9EEF5; --ink:#141922; --ink-2:#3D4656; --muted:#667085;
+  --line:#D5DCE6; --line-strong:#BBC5D3; --accent:#2D58B8; --accent-soft:#E2EAF8;
+  --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1; --warm:#8A570F; --warm-soft:#F6EAD6;
+  --shadow:0 1px 2px rgba(20,25,34,.05),0 8px 24px -16px rgba(20,25,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+    --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+  --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 0 10px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;margin:4px 0 0;letter-spacing:-.01em}
+.who{text-align:right;font-size:15px;color:var(--ink-2)}
+.who b{font-size:24px;color:var(--ink)}
+.who small{display:block;font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.start{max-width:600px;margin:28px auto;display:grid;gap:14px}
+.start h2{margin:0;font-size:22px}
+.start label{display:grid;gap:6px;font-weight:600}
+input[type=text],select{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 12px;font-size:17px}
+input[type=text]:focus,select:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.btn{appearance:none;border:2px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:16px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-weight:600;min-height:1.3em}
+.note{color:var(--muted);font-size:15px}
+.intro{background:var(--accent-soft);border-radius:12px;padding:14px 16px}
+.intro h3{margin:0 0 6px;font-size:16px}
+.intro p{margin:0 0 6px}.intro p:last-child{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-size:13px;color:var(--muted);font-weight:600}
+.tab.full .pt{color:var(--ok)}
+.tab.bonus{border-style:dashed}
+.tabsep{align-self:center;font-size:13px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.task h2{margin:0 0 6px;font-size:21px}
+.task h2 .note{font-size:14px;font-weight:600}
+.task ol.steps{margin:6px 0 12px;padding-left:22px}
+.task ol.steps li{margin:3px 0}
+details.remind{margin:0 0 12px;background:var(--warm-soft);border-radius:10px;padding:8px 12px}
+details.remind summary{cursor:pointer;font-weight:700;color:var(--warm)}
+details.remind div{margin-top:6px}
+.area{margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.part{background:var(--warm-soft);color:var(--ink)}
+.feedback ul{margin:6px 0 0;padding-left:20px;font-weight:500}
+/* common widgets */
+.q{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.q > p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:15.5px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.res{width:100%;border-collapse:collapse;margin:10px 0}
+.res td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.res td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.big{font-size:64px;font-weight:800;line-height:1}
+.bottom{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.confirm{display:inline-flex;gap:8px;align-items:center}
+.serp{display:grid;gap:10px;margin:8px 0}
+.sbox{border:2px solid var(--line-strong);border-radius:999px;padding:8px 16px;background:var(--surface);font-weight:600}
+.sres{background:var(--surface-2);border-radius:10px;padding:10px 12px}
+.su{font-size:13px;color:var(--ok)}
+.st{font-size:17px;font-weight:700;color:var(--accent)}
+.ss{font-size:15px;color:var(--ink-2)}
+
+@media print{.tabs,.bottom{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="kicker">Інформатика · 5 клас · практична робота</div><h1>Пошук і безпека в мережі</h1></div>
+    <div class="who" id="who" hidden></div>
+  </header>
+
+  <section class="card start" id="startBox" hidden>
+    <h2>Початок</h2>
+    <div class="intro"><h3>Практична: пошук і оцінювання інформації</h3><p>Як шукати в інтернеті, кому вірити й як спілкуватися безпечно. 7 завдань: 5 основних і 2 бонусні ★. Оцінка — з 12. Інтернет не потрібен: пошук тут — навчальний.</p></div>
+    <label>Твоє ім'я та прізвище<input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <details style="font-size:15px"><summary class="note" style="cursor:pointer">Пересів за інший комп'ютер? Код продовження</summary>
+      <label style="margin-top:8px">Код продовження (з іншого комп'ютера)<input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="max-width:180px"></label></details>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo">Почати</button></div>
+    <p class="note" style="margin:0">Робота зберігається на цьому комп'ютері. Урок перервали? Наступного разу введи те саме ім'я — продовжиш з того ж місця.</p>
+  </section>
+
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+  </div>
+
+  <section class="card" id="resultBox" hidden></section>
+
+  <div class="bottom">
+    <button class="btn ghost sm" type="button" id="other" hidden>Інший учень</button>
+    <button class="btn ghost sm" type="button" id="restart" hidden>Почати заново</button>
+    <span class="confirm" id="ask" hidden><span>Усі бали цього учня зітруться. Точно?</span>
+      <button class="btn sm" type="button" id="askYes" style="background:var(--bad);border-color:var(--bad)">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo">Ні</button></span>
+    <button class="btn ghost sm" type="button" id="theme" style="margin-left:auto">Світла / темна</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='inf5-poshuk-v1', GRADE='5';
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function shuffle(a,seed){ var r=seed||1; a=a.slice(); for(var i=a.length-1;i>0;i--){ r=(r*9301+49297)%233280; var j=Math.floor(r/233280*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  /* choose-one rows: rows=[{id,text,opts:[..]}]; answer saved in d[id] */
+  function choiceRows(el,d,rows,save){
+    el.innerHTML=rows.map(function(r){ return '<div class="q"><p>'+r.text+'</p><div class="opts">'+r.opts.map(function(o,i){ return '<button type="button" class="opt" data-r="'+r.id+'" data-i="'+i+'" aria-pressed="'+(d[r.id]===i)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.addEventListener('click',function(){ var r=b.getAttribute('data-r'); d[r]=+b.getAttribute('data-i'); save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }); });
+  }
+  function countRight(d,rows,key){ var n=0; rows.forEach(function(r){ if(d[r.id]===key[r.id]) n++; }); return n; }
+  var H={esc:esc,shuffle:shuffle,choiceRows:choiceRows,countRight:countRight};
+
+  /* ===== 5 клас: пошук і оцінювання інформації, безпека ===== */
+  function q(id,text,opts){ return {id:id,text:text,opts:opts}; }
+  var KW=[q('a','Ти хочеш дізнатися висоту найвищої гори України. Що краще ввести в пошук?',['гора','Говерла висота','скажіть будь ласка яка гора найвища у нашій країні і яка в неї висота','найвища гора світу']),
+          q('b','Ти хочеш навчитися малювати кота в Paint. Який запит найкращий?',['кіт','малювати','як намалювати кота в Paint','Paint завантажити безкоштовно']),
+          q('c','Тобі треба знати, в якому році заснували Одесу.',['Одеса','рік заснування Одеси','Одеса море пляжі','фото Одеси'])];
+  var KWk={a:1,b:2,c:1};
+  var SERP=[
+    {u:'uk.wikipedia.org › wiki › Скелет_людини',t:'Скелет людини — Вікіпедія',s:'Скелет дорослої людини складається з 206 кісток. У новонародженої дитини їх більше — частина зростається з віком…',k:0},
+    {u:'superfakty-shok.blogspot.com',t:'ШОК!!! Лікарі ПРИХОВУЮТЬ правду про кістки 😱😱😱',s:'Ви не повірите, але насправді в людини 300 кісток! Поділися, поки не видалили!!!',k:1},
+    {u:'esu.com.ua › article',t:'Скелет — Енциклопедія Сучасної України',s:'Скелет людини — сукупність кісток… у дорослої людини понад 200 кісток…',k:0},
+    {u:'forum.chat-pro-vse.net › thread 4512',t:'скільки кісток??? терміново',s:'Хтось казав, що 212, а може 190, я точно не пам’ятаю, але десь так',k:1},
+    {u:'osvita.ua › school › biology',t:'Біологія, 8 клас. Опорно-руховий апарат людини',s:'Скелет людини утворюють 206 кісток, з’єднаних між собою…',k:0},
+    {u:'kupy-vitaminy.shop',t:'Вітаміни для ваших 206 кісток — знижка 50% тільки сьогодні!',s:'Купуй зараз — і твої кістки будуть найміцнішими! Доставка безкоштовно…',k:1}
+  ];
+  var FO=[q('a','Київ — столиця України.',['Факт','Думка']),q('b','Математика — найцікавіший предмет.',['Факт','Думка']),q('c','У тижні сім днів.',['Факт','Думка']),q('d','Цей мультфільм — найкращий у світі.',['Факт','Думка']),q('e','Вода замерзає за 0 °C.',['Факт','Думка']),q('f','Зима краща за літо.',['Факт','Думка'])];
+  var FOk={a:0,b:1,c:0,d:1,e:0,f:1};
+  var SAFE=[q('a','Незнайомець у грі просить твоє фото й адресу «щоб надіслати подарунок».',['Надіслати — це ж подарунок','Не відповідати, заблокувати й розповісти дорослим','Надіслати лише адресу']),
+            q('b','Повідомлення: «Ти виграв телефон! Щоб отримати, введи пароль від свого акаунта».',['Ввести пароль, якщо телефон новий','Це шахрайство — нічого не вводити','Переслати друзям, хай теж виграють']),
+            q('c','Який пароль найнадійніший?',['123456','masha2015','Kit!Sonce_7Ryba','qwerty']),
+            q('d','Однокласник просить твій пароль від електронного щоденника «на хвилинку».',['Дати — він же друг','Не давати: пароль знаєш тільки ти (і батьки)','Дати, а потім змінити'])];
+  var SAFEk={a:1,b:1,c:2,d:1};
+  var FOOT=[q('a','Малюнок твого кота',['Можна','Не можна']),q('b','Домашня адреса',['Можна','Не можна']),q('c','Відгук про прочитану книжку',['Можна','Не можна']),q('d','Номер телефону',['Можна','Не можна']),q('e','Де ти зараз (геолокація)',['Можна','Не можна']),q('f','Фото квитка на концерт із QR-кодом',['Можна','Не можна'])];
+  var FOOTk={a:0,b:1,c:0,d:1,e:1,f:1};
+  var URLQ=[q('a','Адреса: <b>https://uk.wikipedia.org/wiki/Кіт</b>. Яка частина — назва сайту (домен)?',['https','uk.wikipedia.org','wiki/Кіт']),
+            q('b','Біля адреси замок 🔒 (https). Що це означає?',['Сайту можна вірити в усьому','Зв’язок із сайтом зашифрований, але сайт усе одно може бути шахрайським','Сайт державний'])];
+  function sc(n,tot,max){ return n===tot?max:Math.max(0,max-(tot-n)); }
+
+  var TASKS=[
+    {t:'Ключові слова',max:3,remindOpen:1,remind:'<p><b>Ключові слова</b> — найважливіші слова запиту. Пошуковій системі не потрібні «будь ласка» й довгі речення. Добрий запит — 2–5 точних слів про те, що саме треба знайти.</p>',
+      steps:['Для кожної ситуації обери найкращий запит.','Кожна правильна відповідь — 1 бал.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,KW,c.save); },
+      check:function(c){ var n=c.H.countRight(c.d,KW,KWk); return [n,n<3?['Правильно '+n+' з 3. Запит має бути коротким і точним.']:[]]; }},
+    {t:'Яким сайтам вірити?',max:3,remind:'<p>Ознаки <b>надійного</b> джерела: енциклопедія, підручник, офіційний сайт, відомий освітній ресурс; є автор чи організація; немає крику й реклами. Ознаки <b>сумнівного</b>: «ШОК!!!», багато знаків оклику, «поділися, поки не видалили», форум «хтось казав», сайт, що щось продає.</p>',remindOpen:1,
+      steps:['Ти шукав «скільки кісток у дорослої людини». Ось результати.','Для кожного обери: надійне чи сумнівне. 6 з 6 — 3 бали, 5 — 2, 4 — 1.'],
+      render:function(el,c){
+        el.innerHTML='<div class="serp"><div class="sbox">🔍 скільки кісток у дорослої людини</div>'+SERP.map(function(r,i){ return '<div class="sres"><div class="su">'+r.u+'</div><div class="st">'+r.t+'</div><div class="ss">'+r.s+'</div><div class="opts" style="margin-top:6px">'+['✅ Надійне','⚠️ Сумнівне'].map(function(o,k){ return '<button type="button" class="opt" data-r="'+i+'" data-i="'+k+'" aria-pressed="'+(c.d[i]===k)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('')+'</div>';
+        Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.onclick=function(){ var r=b.getAttribute('data-r'); c.d[r]=+b.getAttribute('data-i'); c.save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }; });
+      },
+      check:function(c){ var n=0; SERP.forEach(function(r,i){ if(c.d[i]===r.k) n++; }); return [n===6?3:n===5?2:n===4?1:0,n<6?['Правильно '+n+' з 6. Перечитай нагадування.']:[]]; }},
+    {t:'Факт чи думка',max:2,remind:'<p><b>Факт</b> можна перевірити — і він буде однаковий для всіх. <b>Думка</b> — те, що людина вважає: інший може думати інакше. Слова «найкращий», «найцікавіший», «краще» — часто ознака думки.</p>',
+      steps:['Для кожного речення: факт чи думка? 6 з 6 — 2 бали, 5 — 1.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,FO,c.save); },
+      check:function(c){ var n=c.H.countRight(c.d,FO,FOk); return [n===6?2:n===5?1:0,n<6?['Правильно '+n+' з 6.']:[]]; }},
+    {t:'Перевір у двох джерелах',max:2,
+      steps:['Три сайти пишуть про висоту Говерли. Один помиляється.','Впиши правильну висоту й поясни, як ти це визначив.'],
+      render:function(el,c){
+        el.innerHTML='<div class="serp"><div class="sres"><div class="su">uk.wikipedia.org › wiki › Говерла</div><div class="st">Говерла — Вікіпедія</div><div class="ss">Говерла — найвища вершина України, висота 2061 м над рівнем моря…</div></div>'+
+          '<div class="sres"><div class="su">top-mandrivky.blog</div><div class="st">Я піднявся на Говерлу!!! Мій досвід</div><div class="ss">…і от я на вершині, а це аж 2500 метрів, уявляєте?! Ставте лайки…</div></div>'+
+          '<div class="sres"><div class="su">esu.com.ua › article</div><div class="st">Говерла — Енциклопедія Сучасної України</div><div class="ss">Говерла — гора в Українських Карпатах, найвища точка України (2061 м)…</div></div></div>'+
+          '<div class="q"><p>Висота Говерли (у метрах):</p><input type="text" inputmode="numeric" id="hv" maxlength="5" style="max-width:140px" value="'+c.H.esc(c.d.h||'')+'"></div><div id="why"></div>';
+        el.querySelector('#hv').oninput=function(e){ c.d.h=e.target.value.replace(/\D/g,''); c.save(); };
+        c.H.choiceRows(el.querySelector('#why'),c.d,[q('w','Чому блогу тут не варто вірити?',['Бо там є смайлики','Бо два незалежні надійні джерела — енциклопедії — кажуть інше','Бо це найновіша сторінка'])],c.save);
+      },
+      check:function(c){ var p=0,m=[]; if(+c.d.h===2061) p++; else m.push('Висота не та. Яке число однакове у двох надійних джерелах?'); if(c.d.w===1) p++; else m.push('Пояснення — не те.'); return [p,m]; }},
+    {t:'Безпечне спілкування',max:2,remind:'<p>Особисте (адреса, телефон, паролі, фото) — тільки для своїх. Паролем не діляться навіть із друзями. Надійний пароль — довгий, з великими й малими літерами, цифрами та знаками, і не «ім’я + рік».</p>',
+      steps:['Що робити в кожній ситуації? 4 з 4 — 2 бали, 3 — 1.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,SAFE,c.save); },
+      check:function(c){ var n=c.H.countRight(c.d,SAFE,SAFEk); return [n===4?2:n===3?1:0,n<4?['Правильно '+n+' з 4.']:[]]; }},
+    {t:'Цифровий слід',max:2,bonus:1,
+      steps:['Усе, що ти публікуєш, лишається в мережі надовго — це цифровий слід.','Що можна викласти у відкритий доступ, а що ні? 6 з 6 — +2, 5 — +1.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,FOOT,c.save); },
+      check:function(c){ var n=c.H.countRight(c.d,FOOT,FOOTk); return [n===6?2:n===5?1:0,n<6?['Правильно '+n+' з 6. Подумай про QR-код на квитку: за ним можна пройти замість тебе.']:[]]; }},
+    {t:'Читаємо адресу сайту',max:1,bonus:1,
+      steps:['Обидві відповіді правильні — +1.'],
+      render:function(el,c){ c.H.choiceRows(el,c.d,URLQ,c.save); },
+      check:function(c){ return c.d.a===1&&c.d.b===1?[1,[]]:[0,['Ще не обидві правильні.']]; }}
+  ];
+
+
+  /* ---------- storage: one profile per student name ---------- */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0,x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function fresh(){ return {name:'',pts:{},data:{},task:1,view:'work',act:0,last:0}; }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.name){ var id=nnorm(st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  }
+  function tick(){ if(!st.name) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
+
+  function isBonus(n){ return !!TASKS[n-1].bonus; }
+  function total(){ var s=0; for(var n=1;n<=TASKS.length;n++) s+=st.pts[n]||0; return Math.min(12,s); }
+  function lastCore(){ var k=0; TASKS.forEach(function(t,i){ if(!t.bonus) k=i+1; }); return k; }
+  /* continue code */
+  var INV=17679;
+  function encode(pts,nm){ var idx=0,mul=1; TASKS.forEach(function(t,i){ idx+=Math.min(pts[i+1]||0,t.max)*mul; mul*=t.max+1; }); var N=idx,X=(N*7919+40427)%100000,C=(N*61+29+nhash(nm))%97,d=('0000'+X).slice(-5)+('0'+C).slice(-2); return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5),C=+c.slice(5),N=((X-40427+100000)%100000)*INV%100000; if((N*61+29+nhash(nm))%97!==C) return null; var pts={},idx=N; for(var i=0;i<TASKS.length;i++){ var r=TASKS[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } return idx?null:pts; }
+
+  function ctx(n){ if(!st.data[n]) st.data[n]={}; return {d:st.data[n],save:save,H:H,rerender:renderTask}; }
+  function renderTabs(){
+    $('tabs').innerHTML=TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<span class="tabsep">★ бонус</span>':'')+'<button type="button" role="tab" class="tab'+(p>=t.max?' full':'')+(t.bonus?' bonus':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(t.t)+' <span class="pt">'+(t.bonus?'+'+p+'★':p+'/'+t.max)+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">Результат <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; save(); renderAll(); window.scrollTo(0,0); } }); });
+  }
+  function renderTask(){
+    var n=st.task,t=TASKS[n-1],h='';
+    h+='<h2>Завдання '+n+' · '+esc(t.t)+' <span class="note">('+(t.bonus?'★ бонус, +'+t.max:t.max+' '+(t.max===1?'бал':t.max<5?'бали':'балів'))+')</span></h2>';
+    if(t.remind) h+='<details class="remind"'+(t.remindOpen?' open':'')+'><summary>Нагадування</summary><div>'+t.remind+'</div></details>';
+    h+='<ol class="steps">'+t.steps.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ol><div class="area" id="area"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">Перевірити завдання</button>'+(n<TASKS.length?'<button class="btn ghost" type="button" id="nxt">Наступне завдання →</button>':'')+(n>=lastCore()?'<button class="btn ghost" type="button" id="fin">Завершити й показати результат</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    t.render($('area'),ctx(n));
+    $('chk').addEventListener('click',function(){
+      var r=t.check(ctx(n)),p=r[0]; if(p>(st.pts[n]||0)) st.pts[n]=p; save(); renderTabs(); renderWho();
+      var fb=$('fb');
+      if(p>=t.max){ fb.className='feedback ok'; fb.textContent='Готово! Повний бал.'+(r[2]?' '+r[2]:''); }
+      else { fb.className='feedback part'; fb.innerHTML=(p>0?'Бали за завдання: '+p+'/'+t.max:'Поки 0 балів.')+(r[1]&&r[1].length?'<ul>'+r[1].map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>':''); }
+    });
+    if($('nxt')) $('nxt').addEventListener('click',function(){ st.task=n+1; save(); renderAll(); window.scrollTo(0,0); });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){ st.view='result'; save(); renderAll(); window.scrollTo(0,0); }
+  function renderResult(){
+    var mins=Math.max(1,Math.round((st.act||0)/60000)),h='';
+    h+='<h2 style="margin:0 0 4px">Результат практичної роботы</h2>'.replace('роботы','роботи');
+    h+='<p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+GRADE+' клас</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">з 12</span></div>';
+    h+='<table class="res">'+TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<tr><td colspan="2"><b>★ Бонус — додається до оцінки, разом не більше 12</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(t.t)+'</td><td>'+(t.bonus?'+'+p+' / '+t.max+' ★':p+' / '+t.max)+'</td></tr>'; }).join('')+'<tr><td>Час роботи (без перерв)</td><td>'+mins+' хв</td></tr><tr><td>Код продовження</td><td style="font-family:monospace;font-size:18px">'+encode(st.pts,st.name)+'</td></tr></table>';
+    h+='<p class="note">Покажи цей екран учителю.</p><button class="btn ghost" type="button" id="back">Повернутися до завдань</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; save(); renderAll(); });
+  }
+  function renderWho(){ var on=!!st.name; $('who').hidden=!on; if(on) $('who').innerHTML=esc(st.name)+' · '+GRADE+' клас<br><b>'+total()+'</b> / 12<small>код продовження: '+encode(st.pts,st.name)+'</small>'; }
+  function renderAll(){
+    var on=!!st.name;
+    $('startBox').hidden=on; $('work').hidden=!on||st.view==='result'; $('resultBox').hidden=!on||st.view!=='result';
+    $('other').hidden=!on; $('restart').hidden=!on; $('ask').hidden=true;
+    renderWho(); if(!on) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask();
+  }
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<3||n.indexOf(' ')<0&&n.length<5){ $('startErr').textContent='Напиши ім\'я та прізвище.'; return; }
+    var id=nnorm(n);
+    if(DB.p[id]){ st=DB.p[id]; st.view='work'; } else { st=fresh(); st.name=n; }
+    if(c){ var d=decode(c,n); if(!d){ $('startErr').textContent='Код не підходить. Перевір цифри й ім\'я — пиши так само, як першого разу.'; return; } Object.keys(d).forEach(function(k){ if(d[k]>(st.pts[k]||0)) st.pts[k]=d[k]; }); }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+  }
+  $('startGo').addEventListener('click',go);
+  $('nameIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('nameIn').value=''; $('codeIn').value=''; renderAll(); window.scrollTo(0,0); });
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('nameIn').value=''; renderAll(); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  renderAll();
+  window.__p={st:function(){ return st; },TASKS:TASKS};
+})();
+</script>
+</body>
+</html>
