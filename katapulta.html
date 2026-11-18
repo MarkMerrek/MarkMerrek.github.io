@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Катапульта · STEM 6 клас</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E9EEF5; --ink:#141922; --ink-2:#3D4656; --muted:#667085;
+  --line:#D5DCE6; --line-strong:#BBC5D3; --accent:#2D58B8; --accent-soft:#E2EAF8;
+  --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1; --warm:#8A570F; --warm-soft:#F6EAD6;
+  --shadow:0 1px 2px rgba(20,25,34,.05),0 8px 24px -16px rgba(20,25,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+    --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+  --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 0 10px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;margin:4px 0 0;letter-spacing:-.01em}
+.who{text-align:right;font-size:15px;color:var(--ink-2)}
+.who b{font-size:24px;color:var(--ink)}
+.who small{display:block;font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.start{max-width:600px;margin:28px auto;display:grid;gap:14px}
+.start h2{margin:0;font-size:22px}
+.start label{display:grid;gap:6px;font-weight:600}
+input[type=text],select{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 12px;font-size:17px}
+input[type=text]:focus,select:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.btn{appearance:none;border:2px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:16px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-weight:600;min-height:1.3em}
+.note{color:var(--muted);font-size:15px}
+.intro{background:var(--accent-soft);border-radius:12px;padding:14px 16px}
+.intro h3{margin:0 0 6px;font-size:16px}
+.intro p{margin:0 0 6px}.intro p:last-child{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-size:13px;color:var(--muted);font-weight:600}
+.tab.full .pt{color:var(--ok)}
+.tab.bonus{border-style:dashed}
+.tabsep{align-self:center;font-size:13px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.task h2{margin:0 0 6px;font-size:21px}
+.task h2 .note{font-size:14px;font-weight:600}
+.task ol.steps{margin:6px 0 12px;padding-left:22px}
+.task ol.steps li{margin:3px 0}
+details.remind{margin:0 0 12px;background:var(--warm-soft);border-radius:10px;padding:8px 12px}
+details.remind summary{cursor:pointer;font-weight:700;color:var(--warm)}
+details.remind div{margin-top:6px}
+.area{margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.part{background:var(--warm-soft);color:var(--ink)}
+.feedback ul{margin:6px 0 0;padding-left:20px;font-weight:500}
+/* common widgets */
+.q{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.q > p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:15.5px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.res{width:100%;border-collapse:collapse;margin:10px 0}
+.res td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.res td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.res td[colspan]{white-space:normal;text-align:left}
+.big{font-size:64px;font-weight:800;line-height:1}
+.bottom{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.confirm{display:inline-flex;gap:8px;align-items:center}
+.poly{display:grid;gap:10px}
+.cv{width:100%;border-radius:10px;border:2px solid var(--line-strong);display:block;touch-action:manipulation}
+.ctl{display:grid;gap:8px}
+.ln{display:grid;grid-template-columns:130px 44px 1fr 44px 60px;gap:8px;align-items:center;font-weight:600}
+.ln input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.ln b{font-size:20px;text-align:right;font-variant-numeric:tabular-nums}
+.pmb{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;height:40px;font-size:22px;font-weight:800;cursor:pointer}
+.pmb:disabled,.ln input:disabled{opacity:.4}
+.fire{font-size:18px}
+.pl{color:var(--muted);font-size:15px}
+.out{min-height:28px;font-size:16px}
+.out .good{color:var(--ok);font-weight:800}
+.out .bad{color:var(--bad);font-weight:800}
+.lg{border-collapse:collapse;font-size:15px;min-width:280px}
+.lg th,.lg td{padding:3px 10px;border-bottom:1px solid var(--line);text-align:left}
+.lg th{color:var(--muted);font-weight:600;font-size:13px}
+.chipx{background:var(--surface-2);border-radius:999px;padding:6px 12px;font-weight:700;font-size:15px}
+.chipx.cur{background:var(--accent-soft);outline:2px solid var(--accent)}
+@media (max-width:560px){.ln{grid-template-columns:40px minmax(0,1fr) 40px 46px}.ln span{grid-column:1/-1}}
+
+@media print{.tabs,.bottom{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="kicker">STEM-освіта · 6 клас · інженерний полігон</div><h1>Катапульта</h1></div>
+    <div class="who" id="who" hidden></div>
+  </header>
+
+  <section class="card start" id="startBox" hidden>
+    <h2>Початок</h2>
+    <div class="intro"><h3>Сьогодні ти — інженер-балістик</h3><p>Налаштуй катапульту: швидкість і кут. Місії — від першого влучання до пострілу через стіну, на Місяці й з першого разу. 6 основних місій і 2 бонусні ★, разом до 12 балів.</p></div>
+    <label>Твоє ім'я та прізвище<input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <details style="font-size:15px"><summary class="note" style="cursor:pointer">Пересів за інший комп'ютер? Код продовження</summary>
+      <label style="margin-top:8px">Код продовження (з іншого комп'ютера)<input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="max-width:180px"></label></details>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo">Почати</button></div>
+    <p class="note" style="margin:0">Робота зберігається на цьому комп'ютері. Урок перервали? Наступного разу введи те саме ім'я — продовжиш з того ж місця.</p>
+  </section>
+
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+  </div>
+
+  <section class="card" id="resultBox" hidden></section>
+
+  <div class="bottom">
+    <button class="btn ghost sm" type="button" id="other" hidden>Інший учень</button>
+    <button class="btn ghost sm" type="button" id="restart" hidden>Почати заново</button>
+    <span class="confirm" id="ask" hidden><span>Усі бали цього учня зітруться. Точно?</span>
+      <button class="btn sm" type="button" id="askYes" style="background:var(--bad);border-color:var(--bad)">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo">Ні</button></span>
+    <button class="btn ghost sm" type="button" id="theme" style="margin-left:auto">Світла / темна</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='stem6-katapulta-v1', GRADE='6';
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function shuffle(a,seed){ var r=seed||1; a=a.slice(); for(var i=a.length-1;i>0;i--){ r=(r*9301+49297)%233280; var j=Math.floor(r/233280*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  /* choose-one rows: rows=[{id,text,opts:[..]}]; answer saved in d[id] */
+  function choiceRows(el,d,rows,save){
+    el.innerHTML=rows.map(function(r){ return '<div class="q"><p>'+r.text+'</p><div class="opts">'+r.opts.map(function(o,i){ return '<button type="button" class="opt" data-r="'+r.id+'" data-i="'+i+'" aria-pressed="'+(d[r.id]===i)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.addEventListener('click',function(){ var r=b.getAttribute('data-r'); d[r]=+b.getAttribute('data-i'); save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }); });
+  }
+  function countRight(d,rows,key){ var n=0; rows.forEach(function(r){ if(d[r.id]===key[r.id]) n++; }); return n; }
+  var H={esc:esc,shuffle:shuffle,choiceRows:choiceRows,countRight:countRight};
+
+  /* ===== STEM 6: катапульта ===== */
+  var PL={earth:['🌍 Земля',9.8],moon:['🌙 Місяць',1.62],mars:['🔴 Марс',3.71]};
+  function rng(seed){ var s=seed%2147483647; if(s<=0) s+=2147483646; return function(){ s=s*16807%2147483647; return (s-1)/2147483646; }; }
+  function range(v,a,g){ return v*v*Math.sin(2*a*Math.PI/180)/g; }
+
+  /* the polygon: cfg = {target, tol, wall:{x,h}, hoop:{x,y}, lockV, planet, view, onShot(shot), tag} */
+  function polygon(el,c,cfg){
+    var d=c.d; if(!d.log) d.log=[]; var key=cfg.tag||'p';
+    if(!d[key]) d[key]={v:cfg.lockV||15,a:45};
+    var P=d[key], g=PL[cfg.planet||'earth'][1], anim=null, last=null;
+    var h='<div class="poly"><canvas class="cv" aria-label="полігон"></canvas><div class="ctl">'+
+      '<div class="ln"><span>Швидкість, м/с</span><button type="button" class="pmb" data-k="v" data-d="-1"'+(cfg.lockV?' disabled':'')+'>−</button><input type="range" min="1" max="30" step="1" data-k="v"'+(cfg.lockV?' disabled':'')+'><button type="button" class="pmb" data-k="v" data-d="1"'+(cfg.lockV?' disabled':'')+'>+</button><b data-o="v"></b></div>'+
+      '<div class="ln"><span>Кут, °</span><button type="button" class="pmb" data-k="a" data-d="-1">−</button><input type="range" min="1" max="90" step="1" data-k="a"><button type="button" class="pmb" data-k="a" data-d="1">+</button><b data-o="a"></b></div>'+
+      '<div class="row"><button type="button" class="btn fire">🚀 Пуск</button><span class="pl">'+PL[cfg.planet||'earth'][0]+' · g = '+g+' м/с²'+(cfg.lockV?' · швидкість зафіксована':'')+'</span></div>'+
+      '<div class="out" aria-live="polite"></div></div></div>';
+    el.innerHTML=h;
+    var cv=el.querySelector('.cv'), out=el.querySelector('.out');
+    function sync(){ el.querySelector('input[data-k="v"]').value=P.v; el.querySelector('input[data-k="a"]').value=P.a; el.querySelector('[data-o="v"]').textContent=P.v; el.querySelector('[data-o="a"]').textContent=P.a+'°'; }
+    Array.prototype.forEach.call(el.querySelectorAll('input[type=range]'),function(r){ r.oninput=function(){ P[r.getAttribute('data-k')]=+r.value; c.save(); sync(); }; });
+    Array.prototype.forEach.call(el.querySelectorAll('.pmb'),function(b){ b.onclick=function(){ var k=b.getAttribute('data-k'), lim=k==='v'?[1,30]:[1,90]; P[k]=Math.max(lim[0],Math.min(lim[1],P[k]+(+b.getAttribute('data-d')))); c.save(); sync(); }; });
+    function path(v,a){
+      var t=a*Math.PI/180, vx=v*Math.cos(t), vy=v*Math.sin(t), pts=[], dt=0.02, T=0, x=0, y=0, res={hit:false,blocked:false,hoop:false,maxH:0};
+      while(T<400){ T+=dt; x=vx*T; y=vy*T-g*T*T/2;
+        if(cfg.wall&&!res.blocked&&x>=cfg.wall.x&&pts.length&&pts[pts.length-1][0]<cfg.wall.x){ var yw=vy*(cfg.wall.x/vx)-g*Math.pow(cfg.wall.x/vx,2)/2; if(yw<cfg.wall.h){ res.blocked=true; pts.push([cfg.wall.x,Math.max(0,yw)]); res.dist=cfg.wall.x; break; } }
+        if(cfg.hoop&&pts.length&&pts[pts.length-1][0]<cfg.hoop.x&&x>=cfg.hoop.x){ var th=cfg.hoop.x/vx, yh=vy*th-g*th*th/2; if(Math.abs(yh-cfg.hoop.y)<=0.5&&vy-g*th<0) res.hoop=true; }
+        if(y<0){ var tl=2*vy/g; pts.push([vx*tl,0]); res.dist=vx*tl; res.time=tl; break; }
+        res.maxH=Math.max(res.maxH,y); pts.push([x,y]); }
+      if(!res.time) res.time=T;
+      if(cfg.target!=null&&!res.blocked) res.hit=Math.abs(res.dist-cfg.target)<=cfg.tol;
+      return {pts:pts,res:res};
+    }
+    function view(){ var X=cfg.view||Math.max(20,(cfg.target||20)*1.3); if(last) X=Math.max(X,last.res.dist*1.08); return X; }
+    function draw(upto){
+      var W=cv.clientWidth||600, Hh=Math.round(Math.min(360,Math.max(220,W*0.5))), dpr=window.devicePixelRatio||1;
+      cv.width=W*dpr; cv.height=Hh*dpr; cv.style.height=Hh+'px'; var x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0);
+      var X=view(), Y=X*Hh/W*0.92, pad=24, sx=(W-pad-10)/X, sy=sx, ox=pad, oy=Hh-24;
+      if(last&&last.res.maxH*sy>oy-10){ sy=(oy-14)/last.res.maxH; }
+      if(cfg.wall&&cfg.wall.h*sy>oy-10) sy=Math.min(sy,(oy-14)/cfg.wall.h);
+      if(cfg.hoop&&(cfg.hoop.y+1)*sy>oy-10) sy=Math.min(sy,(oy-24)/(cfg.hoop.y+1));
+      function P2(px,py){ return [ox+px*sx,oy-py*sy]; }
+      var dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.getAttribute('data-theme')!=='light'||document.documentElement.getAttribute('data-theme')==='dark';
+      x.fillStyle=dark?'#1A2230':'#EAF3FF'; x.fillRect(0,0,W,Hh);
+      x.fillStyle=dark?'#2E4A2E':'#9BCF7A'; x.fillRect(0,oy,W,Hh-oy);
+      x.font='11px system-ui'; x.fillStyle=dark?'#9AA3B5':'#5A6475';
+      var step=X>150?50:X>60?10:5; for(var m=0;m<=X;m+=step){ var p=P2(m,0); x.fillRect(p[0],oy,1,5); x.fillText(m+' м',p[0]+2,oy+16); }
+      if(cfg.target!=null){ var a=P2(cfg.target-cfg.tol,0), b=P2(cfg.target+cfg.tol,0); x.fillStyle='#E0403A'; x.fillRect(a[0],oy-5,Math.max(4,b[0]-a[0]),5); var f=P2(cfg.target,0); x.fillRect(f[0]-1,oy-30,2,25); x.beginPath(); x.moveTo(f[0]+1,oy-30); x.lineTo(f[0]+14,oy-25); x.lineTo(f[0]+1,oy-20); x.fill(); x.fillStyle=dark?'#EEF2F8':'#141922'; x.fillText('ціль '+cfg.target+' м',f[0]+4,oy-34); }
+      if(cfg.wall){ var w1=P2(cfg.wall.x-0.6,cfg.wall.h), w2=P2(cfg.wall.x+0.6,0); x.fillStyle='#8B5A3C'; x.fillRect(w1[0],w1[1],Math.max(5,w2[0]-w1[0]),w2[1]-w1[1]); x.fillStyle=dark?'#EEF2F8':'#141922'; x.fillText('стіна '+cfg.wall.h+' м',w1[0]-10,w1[1]-6); }
+      if(cfg.hoop){ var hp=P2(cfg.hoop.x,cfg.hoop.y); x.strokeStyle='#E07B1A'; x.lineWidth=3; x.beginPath(); x.ellipse(hp[0],hp[1],Math.max(6,0.5*sx),3,0,0,Math.PI*2); x.stroke(); x.fillStyle='#8B5A3C'; x.fillRect(hp[0]+Math.max(6,0.5*sx),hp[1]-12,3,oy-hp[1]+12); x.fillStyle=dark?'#EEF2F8':'#141922'; x.fillText('кошик: '+cfg.hoop.x+' м, висота '+cfg.hoop.y+' м',hp[0]-60,hp[1]-16); }
+      var base=P2(0,0); x.fillStyle='#6B4A2B'; x.fillRect(base[0]-12,oy-8,24,8); x.strokeStyle='#6B4A2B'; x.lineWidth=4; x.beginPath(); x.moveTo(base[0],oy-6); var ang=P.a*Math.PI/180; x.lineTo(base[0]+18*Math.cos(ang),oy-6-18*Math.sin(ang)); x.stroke();
+      (d.ghost||[]).forEach(function(gp){ x.strokeStyle=dark?'rgba(255,255,255,.18)':'rgba(20,25,34,.15)'; x.lineWidth=1.5; x.beginPath(); gp.forEach(function(q,k){ var p=P2(q[0],q[1]); if(k) x.lineTo(p[0],p[1]); else x.moveTo(p[0],p[1]); }); x.stroke(); });
+      if(last){ var n=upto==null?last.pts.length:upto; x.strokeStyle='#2D58B8'; x.lineWidth=2.5; x.setLineDash([5,4]); x.beginPath(); for(var k=0;k<n;k++){ var p=P2(last.pts[k][0],last.pts[k][1]); if(k) x.lineTo(p[0],p[1]); else x.moveTo(p[0],p[1]); } x.stroke(); x.setLineDash([]);
+        var e=last.pts[Math.max(0,n-1)], pe=P2(e[0],e[1]); x.fillStyle='#1E2430'; x.beginPath(); x.arc(pe[0],pe[1],5,0,Math.PI*2); x.fill(); }
+    }
+    el.querySelector('.fire').onclick=function(){
+      if(anim) return; if(cfg.before&&!cfg.before()) return;
+      var sh=path(P.v,P.a); if(last){ d.ghost=(d.ghost||[]).concat([last.pts.filter(function(_,k){ return k%3===0; })]).slice(-3); }
+      last=sh; var n=sh.pts.length, t0=performance.now(), dur=Math.min(1600,400+n*6);
+      (function stepA(now){ var k=Math.max(1,Math.round((now-t0)/dur*n)); draw(Math.min(n,k)); if(k<n) anim=requestAnimationFrame(stepA); else { anim=null; done(); } })(t0);
+      function done(){
+        var r=sh.res, txt='Дальність <b>'+(r.blocked?'—':r.dist.toFixed(1)+' м')+'</b> · найбільша висота <b>'+r.maxH.toFixed(1)+' м</b> · час польоту <b>'+r.time.toFixed(1)+' с</b>';
+        var verdict=r.blocked?'<span class="bad">💥 У стіну!</span>':cfg.hoop?(r.hoop?'<span class="good">🏀 У кошику!</span>':'<span class="bad">Повз кошик</span>'):cfg.target!=null?(r.hit?'<span class="good">🎯 Влучив!</span>':'<span class="bad">'+(r.dist<cfg.target?'Недоліт':'Переліт')+' на '+Math.abs(r.dist-cfg.target).toFixed(1)+' м</span>'):'';
+        out.innerHTML=verdict+' '+txt;
+        var rec={v:P.v,a:P.a,pl:cfg.planet||'earth',dist:r.blocked?null:+r.dist.toFixed(1),h:+r.maxH.toFixed(1),hit:!!(r.hit||r.hoop),tag:key};
+        d.log.unshift(rec); d.log=d.log.slice(0,12); if(cfg.onShot) cfg.onShot(rec,r); c.save(); drawLog();
+      }
+    };
+    var logEl=document.createElement('div'); logEl.className='logbox'; el.appendChild(logEl);
+    function drawLog(){ var L=d.log.filter(function(r){ return !cfg.logTag||r.tag===cfg.logTag; });
+      logEl.innerHTML='<p class="note" style="margin:8px 0 4px"><b>Інженерний журнал</b> — останні постріли'+(cfg.logTag?' в цьому завданні':'')+'</p>'+(L.length?'<table class="lg"><tr><th>v, м/с</th><th>кут</th><th>дальність</th><th></th></tr>'+L.slice(0,8).map(function(r){ return '<tr><td>'+r.v+'</td><td>'+r.a+'°</td><td>'+(r.dist==null?'стіна':r.dist+' м')+'</td><td>'+(r.hit?'✅':'')+'</td></tr>'; }).join('')+'</table>':'<p class="note">Поки порожньо.</p>'); }
+    sync(); draw(); drawLog();
+    window.addEventListener('resize',function(){ if(!anim&&document.body.contains(cv)) draw(); });
+    return {redraw:function(){ draw(); }};
+  }
+
+  var TASKS=[
+    {t:'Перший постріл',max:1,remindOpen:1,remind:'<p>Ти — інженер на полігоні. Катапульта кидає ядро з певною <b>швидкістю</b> і під певним <b>кутом</b>. Інженери працюють циклом: <b>передбач → запусти → виміряй → виправ</b>. Журнал під полігоном запам’ятовує кожен постріл — користуйся ним.</p>',
+      steps:['Влучи в ціль на 30 м. Швидкість і кут — які хочеш.','Недоліт — додай швидкості, переліт — зменш.'],
+      render:function(el,c){ polygon(el,c,{target:30,tol:1.5,tag:'m1',logTag:'m1',onShot:function(r){ if(r.hit) c.d.hit=1; }}); },
+      check:function(c){ return c.d.hit?[1,[]]:[0,['Ще не було влучання в 30 м.']]; }},
+    {t:'Два кути',max:2,
+      steps:['Швидкість зафіксована: 20 м/с. Змінювати можна лише кут.','Влучи в ціль на 36 м <b>двома різними кутами</b>, які відрізняються щонайменше на 15°.','Одне влучання — 1 бал, два різні кути — 2.'],
+      render:function(el,c){ polygon(el,c,{target:36,tol:1.5,lockV:20,tag:'m2',logTag:'m2',onShot:function(r){ if(r.hit){ var A=c.d.angles||(c.d.angles=[]); if(A.indexOf(r.a)<0) A.push(r.a); } }}); },
+      check:function(c){ var A=c.d.angles||[]; if(!A.length) return [0,['Ще немає влучань.']]; var mx=Math.max.apply(null,A), mn=Math.min.apply(null,A); return mx-mn>=15?[2,[],'Помітив? Ці два кути разом дають майже 90°.']:[1,['Влучання є ('+A.join('°, ')+'°). Знайди ще один кут — зовсім інший.']]; }},
+    {t:'Найдалі',max:2,
+      steps:['Швидкість та сама — 20 м/с. Закинь ядро якнайдалі: треба щонайменше 40,5 м.','Подивись у журнал і дай відповідь на питання.'],
+      render:function(el,c){ var box=document.createElement('div'); el.appendChild(box); polygon(box,c,{target:null,lockV:20,view:46,tag:'m3',logTag:'m3',onShot:function(r){ if(r.dist&&r.dist>(c.d.best||0)) c.d.best=r.dist; }});
+        var q=document.createElement('div'); el.appendChild(q); c.H.choiceRows(q,c.d,[{id:'q',text:'Під яким кутом ядро летить найдалі?',opts:['30°','45°','60°','90°']}],c.save); },
+      check:function(c){ var p=0,m=[]; if((c.d.best||0)>=40.5) p++; else m.push('Найдальший постріл поки '+(c.d.best||0)+' м — треба 40,5.'); if(c.d.q===1) p++; else m.push('Відповідь на питання — не та.'); return [p,m]; }},
+    {t:'Через стіну',max:2,
+      steps:['Між катапультою й ціллю — стіна заввишки 14 м на відстані 25 м.','Перекинь ядро через стіну й влучи в ціль на 35 м. Тепер можна змінювати і швидкість, і кут.','Перелетів стіну, але не влучив — 1 бал, влучив — 2.'],
+      render:function(el,c){ polygon(el,c,{target:35,tol:1.5,wall:{x:25,h:14},tag:'m4',logTag:'m4',onShot:function(r,res){ if(!res.blocked) c.d.over=1; if(r.hit) c.d.hit=1; }}); },
+      check:function(c){ return c.d.hit?[2,[]]:c.d.over?[1,['Через стіну вже перелітає — тепер у ціль.']]:[0,['Поки ядро б’ється в стіну. Подумай, що треба для крутішої траєкторії.']]; }},
+    {t:'Інші планети',max:2,remind:'<p>На кожній планеті своє притягання — <b>g</b>. На Землі 9,8, на Марсі 3,7, на Місяці лише 1,6. Чим менше g, тим повільніше ядро падає назад — і тим далі летить.</p>',
+      steps:['Перемикай планету кнопками.','🌙 Місяць: влуч у ціль на 150 м. 🔴 Марс: влуч у ціль на 80 м. Кожна планета — 1 бал.'],
+      render:function(el,c){ var d=c.d; if(!d.pl) d.pl='moon';
+        function draw(){ el.innerHTML='<div class="row" style="margin-bottom:8px"><button type="button" class="opt" data-pl="moon" aria-pressed="'+(d.pl==='moon')+'">🌙 Місяць · ціль 150 м'+(d.moon?' ✅':'')+'</button><button type="button" class="opt" data-pl="mars" aria-pressed="'+(d.pl==='mars')+'">🔴 Марс · ціль 80 м'+(d.mars?' ✅':'')+'</button></div><div id="pbox"></div>';
+          Array.prototype.forEach.call(el.querySelectorAll('[data-pl]'),function(b){ b.onclick=function(){ d.pl=b.getAttribute('data-pl'); c.save(); draw(); }; });
+          var T=d.pl==='moon'?150:80; polygon(el.querySelector('#pbox'),c,{target:T,tol:T*0.02,planet:d.pl,tag:'m5'+d.pl,logTag:'m5'+d.pl,onShot:function(r){ if(r.hit){ d[d.pl]=1; c.save(); var b=el.querySelector('[data-pl="'+d.pl+'"]'); if(b&&b.textContent.indexOf('✅')<0) b.textContent+=' ✅'; } }}); }
+        draw(); },
+      check:function(c){ var p=(c.d.moon?1:0)+(c.d.mars?1:0), m=[]; if(!c.d.moon) m.push('Місяць — ще не влучив.'); if(!c.d.mars) m.push('Марс — ще не влучив.'); return [p,m]; }},
+    {t:'З першого разу',max:3,remindOpen:1,remind:'<p>Справжній інженер не має сотні спроб: снаряд дорогий. Тут на кожну ціль — <b>один постріл</b>. Швидкість 20 м/с, як у завданнях 2 і 3. Спершу подумай, який кут дасть потрібну дальність, — допоможуть твої записи з журналу.</p>',
+      steps:['Три цілі, по одному пострілу на кожну. Влучання — 1 бал.','Не вийшло — «Нова серія»: цілі будуть інші, зараховується найкраща серія.'],
+      render:function(el,c){ var d=c.d;
+        function series(){ var r=rng((Date.now()%100000)+7), t=[]; while(t.length<3){ var v=22+Math.floor(r()*18); if(t.every(function(x){ return Math.abs(x-v)>=3; })) t.push(v); } d.s={t:t,k:0,hits:0}; c.save(); }
+        if(!d.s) series();
+        function draw(){ var s=d.s, done=s.k>=3;
+          el.innerHTML='<div class="row" style="margin-bottom:8px">'+s.t.map(function(t,i){ return '<span class="chipx'+(i===s.k?' cur':'')+'">Ціль '+(i+1)+': '+t+' м '+(i<s.k?(s['r'+i]?'✅':'❌'):'')+'</span>'; }).join('')+'<span class="note">Влучань у цій серії: '+s.hits+' · найкраще: '+(d.best||0)+'</span><button type="button" class="btn sm ghost" id="ns">Нова серія</button></div><div id="pbox"></div>';
+          el.querySelector('#ns').onclick=function(){ series(); draw(); };
+          if(done){ el.querySelector('#pbox').innerHTML='<p class="note">Серію завершено. Перевір завдання або спробуй нову серію.</p>'; return; }
+          polygon(el.querySelector('#pbox'),c,{target:s.t[s.k],tol:1.5,lockV:20,tag:'m6',logTag:'m6',onShot:function(r){ s['r'+s.k]=r.hit?1:0; if(r.hit) s.hits++; s.k++; if(s.hits>(d.best||0)) d.best=s.hits; c.save(); var fb=el.querySelector('#pbox .fire'); if(fb) fb.disabled=true; var nb=document.createElement('button'); nb.type='button'; nb.className='btn'; nb.id='nextT'; nb.textContent=s.k<3?'Наступна ціль →':'Підсумок серії'; nb.onclick=draw; var o=el.querySelector('#pbox .out'); o.appendChild(document.createElement('br')); o.appendChild(nb); }}); }
+        draw(); },
+      check:function(c){ var b=c.d.best||0; return [b,b<3?['Найкраща серія: '+b+' з 3.']:[]]; }},
+    {t:'Свічка',max:1,bonus:1,
+      steps:['Підкинь ядро на висоту щонайменше 30 м. Будь-яка швидкість, будь-який кут.'],
+      render:function(el,c){ polygon(el,c,{target:null,view:40,tag:'b1',logTag:'b1',onShot:function(r){ if(r.h>=30) c.d.ok=1; }}); },
+      check:function(c){ return c.d.ok?[1,[]]:[0,['Ще не було 30 м висоти. Під яким кутом летить найвище?']]; }},
+    {t:'Баскетбол',max:2,bonus:1,
+      steps:['Кошик висить на висоті 3 м за 15 м від катапульти.','Закинь ядро в кошик <b>згори</b> — ядро має падати, коли проходить кошик.'],
+      render:function(el,c){ polygon(el,c,{target:null,view:22,hoop:{x:15,y:3},tag:'b2',logTag:'b2',onShot:function(r){ if(r.hit) c.d.ok=1; }}); },
+      check:function(c){ return c.d.ok?[2,[]]:[0,['Ще не влучив. Ядро має проходити кошик на висоті 3 м і вже падати.']]; }}
+  ];
+
+
+  /* ---------- storage: one profile per student name ---------- */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0,x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function fresh(){ return {name:'',pts:{},data:{},task:1,view:'work',act:0,last:0}; }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.name){ var id=nnorm(st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  }
+  function tick(){ if(!st.name) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
+
+  function isBonus(n){ return !!TASKS[n-1].bonus; }
+  function total(){ var s=0; for(var n=1;n<=TASKS.length;n++) s+=st.pts[n]||0; return Math.min(12,s); }
+  function lastCore(){ var k=0; TASKS.forEach(function(t,i){ if(!t.bonus) k=i+1; }); return k; }
+  /* continue code */
+  var INV=17679;
+  function encode(pts,nm){ var idx=0,mul=1; TASKS.forEach(function(t,i){ idx+=Math.min(pts[i+1]||0,t.max)*mul; mul*=t.max+1; }); var N=idx,X=(N*7919+40427)%100000,C=(N*61+29+nhash(nm))%97,d=('0000'+X).slice(-5)+('0'+C).slice(-2); return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5),C=+c.slice(5),N=((X-40427+100000)%100000)*INV%100000; if((N*61+29+nhash(nm))%97!==C) return null; var pts={},idx=N; for(var i=0;i<TASKS.length;i++){ var r=TASKS[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } return idx?null:pts; }
+
+  function ctx(n){ if(!st.data[n]) st.data[n]={}; return {d:st.data[n],save:save,H:H,rerender:renderTask}; }
+  function renderTabs(){
+    $('tabs').innerHTML=TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<span class="tabsep">★ бонус</span>':'')+'<button type="button" role="tab" class="tab'+(p>=t.max?' full':'')+(t.bonus?' bonus':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(t.t)+' <span class="pt">'+(t.bonus?'+'+p+'★':p+'/'+t.max)+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">Результат <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; save(); renderAll(); window.scrollTo(0,0); } }); });
+  }
+  function renderTask(){
+    var n=st.task,t=TASKS[n-1],h='';
+    h+='<h2>Завдання '+n+' · '+esc(t.t)+' <span class="note">('+(t.bonus?'★ бонус, +'+t.max:t.max+' '+(t.max===1?'бал':t.max<5?'бали':'балів'))+')</span></h2>';
+    if(t.remind) h+='<details class="remind"'+(t.remindOpen?' open':'')+'><summary>Нагадування</summary><div>'+t.remind+'</div></details>';
+    h+='<ol class="steps">'+t.steps.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ol><div class="area" id="area"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">Перевірити завдання</button>'+(n<TASKS.length?'<button class="btn ghost" type="button" id="nxt">Наступне завдання →</button>':'')+(n>=lastCore()?'<button class="btn ghost" type="button" id="fin">Завершити й показати результат</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    t.render($('area'),ctx(n));
+    $('chk').addEventListener('click',function(){
+      var r=t.check(ctx(n)),p=r[0]; if(p>(st.pts[n]||0)) st.pts[n]=p; save(); renderTabs(); renderWho();
+      var fb=$('fb');
+      if(p>=t.max){ fb.className='feedback ok'; fb.textContent='Готово! Повний бал.'+(r[2]?' '+r[2]:''); }
+      else { fb.className='feedback part'; fb.innerHTML=(p>0?'Бали за завдання: '+p+'/'+t.max:'Поки 0 балів.')+(r[1]&&r[1].length?'<ul>'+r[1].map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>':''); }
+    });
+    if($('nxt')) $('nxt').addEventListener('click',function(){ st.task=n+1; save(); renderAll(); window.scrollTo(0,0); });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){ st.view='result'; save(); renderAll(); window.scrollTo(0,0); }
+  function renderResult(){
+    var mins=Math.max(1,Math.round((st.act||0)/60000)),h='';
+    h+='<h2 style="margin:0 0 4px">Результат на полігоні</h2>';
+    h+='<p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+GRADE+' клас</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">з 12</span></div>';
+    h+='<table class="res">'+TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<tr><td colspan="2"><b>★ Бонус — додається до оцінки, разом не більше 12</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(t.t)+'</td><td>'+(t.bonus?'+'+p+' / '+t.max+' ★':p+' / '+t.max)+'</td></tr>'; }).join('')+'<tr><td>Час роботи (без перерв)</td><td>'+mins+' хв</td></tr><tr><td>Код продовження</td><td style="font-family:monospace;font-size:18px">'+encode(st.pts,st.name)+'</td></tr></table>';
+    h+='<p class="note">Покажи цей екран учителю.</p><button class="btn ghost" type="button" id="back">Повернутися до завдань</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; save(); renderAll(); });
+  }
+  function renderWho(){ var on=!!st.name; $('who').hidden=!on; if(on) $('who').innerHTML=esc(st.name)+' · '+GRADE+' клас<br><b>'+total()+'</b> / 12<small>код продовження: '+encode(st.pts,st.name)+'</small>'; }
+  function renderAll(){
+    var on=!!st.name;
+    $('startBox').hidden=on; $('work').hidden=!on||st.view==='result'; $('resultBox').hidden=!on||st.view!=='result';
+    $('other').hidden=!on; $('restart').hidden=!on; $('ask').hidden=true;
+    renderWho(); if(!on) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask();
+  }
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<3||n.indexOf(' ')<0&&n.length<5){ $('startErr').textContent='Напиши ім\'я та прізвище.'; return; }
+    var id=nnorm(n);
+    if(DB.p[id]){ st=DB.p[id]; st.view='work'; } else { st=fresh(); st.name=n; }
+    if(c){ var d=decode(c,n); if(!d){ $('startErr').textContent='Код не підходить. Перевір цифри й ім\'я — пиши так само, як першого разу.'; return; } Object.keys(d).forEach(function(k){ if(d[k]>(st.pts[k]||0)) st.pts[k]=d[k]; }); }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+  }
+  $('startGo').addEventListener('click',go);
+  $('nameIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('nameIn').value=''; $('codeIn').value=''; renderAll(); window.scrollTo(0,0); });
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('nameIn').value=''; renderAll(); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  renderAll();
+  window.__p={st:function(){ return st; },TASKS:TASKS};
+})();
+</script>
+</body>
+</html>
