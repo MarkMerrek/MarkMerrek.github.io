@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Малюки й роботи</title>
+<style>
+:root{--bg:#FFF8EC;--card:#FFFFFF;--ink:#2B2620;--muted:#8A7F70;--line:#EADFCB;--ok:#2FA36B;--bad:#E05A4F;--acc:#3D7BE0;--sun:#FFC83D;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1D1A16;--card:#2A2621;--ink:#F5EFE6;--muted:#B5AA99;--line:#3D372F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1D1A16;--card:#2A2621;--ink:#F5EFE6;--muted:#B5AA99;--line:#3D372F;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;overflow:hidden;touch-action:manipulation}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;display:flex;flex-direction:column}
+button{font:inherit;color:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:12px;padding:10px 16px;flex:0 0 auto}
+.ib{appearance:none;border:0;background:var(--card);border-radius:18px;width:64px;height:64px;font-size:34px;box-shadow:0 3px 0 var(--line)}
+.ib:active{transform:translateY(2px);box-shadow:none}
+.stars{margin-left:auto;font-size:30px;font-weight:800;display:flex;align-items:center;gap:6px;background:var(--card);border-radius:18px;padding:8px 16px;box-shadow:0 3px 0 var(--line)}
+.ttl{font-size:26px;font-weight:800}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4vmin;padding:1vmin 3vmin 3vmin;min-height:0}
+.menu{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3vmin;width:min(100%,980px)}
+@media (orientation:portrait){.menu{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mb{appearance:none;border:0;background:var(--card);border-radius:28px;padding:3vmin 2vmin;display:flex;flex-direction:column;align-items:center;gap:1vmin;box-shadow:0 6px 0 var(--line);font-size:clamp(18px,3vmin,28px);font-weight:800}
+.mb .e{font-size:clamp(60px,12vmin,120px);line-height:1}
+.mb:active{transform:translateY(4px);box-shadow:0 2px 0 var(--line)}
+.task{font-size:clamp(46px,9vmin,90px);line-height:1;display:flex;gap:2vmin;align-items:center;justify-content:center;flex-wrap:wrap}
+.grid{display:grid;gap:2vmin}
+.card{appearance:none;border:0;border-radius:20px;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:clamp(40px,9vmin,90px);box-shadow:0 5px 0 rgba(0,0,0,.18);transition:transform .25s}
+.card.open,.card.done{background:var(--card)}
+.card.done{opacity:.55}
+.card .f{opacity:0;transition:opacity .15s}.card.open .f,.card.done .f{opacity:1}
+.card .back{font-size:.6em;color:#fff}.card.open .back,.card.done .back{display:none}
+.seq{display:flex;gap:1.6vmin;flex-wrap:wrap;justify-content:center}
+.seq span{width:clamp(64px,12vmin,120px);height:clamp(64px,12vmin,120px);border-radius:18px;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:clamp(40px,8vmin,80px);box-shadow:0 4px 0 var(--line)}
+.seq span.q{border:4px dashed var(--acc);color:var(--acc);font-weight:900}
+.opts{display:flex;gap:3vmin;justify-content:center;flex-wrap:wrap}
+.ob{appearance:none;border:0;width:clamp(96px,18vmin,170px);height:clamp(96px,18vmin,170px);border-radius:26px;background:var(--card);font-size:clamp(56px,11vmin,110px);box-shadow:0 6px 0 var(--line)}
+.ob.ok{background:#CFF2DF}.ob.no{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.items{display:flex;flex-wrap:wrap;gap:2vmin;justify-content:center;max-width:900px}
+.it{appearance:none;border:0;width:clamp(76px,13vmin,120px);height:clamp(76px,13vmin,120px);border-radius:20px;background:var(--card);font-size:clamp(46px,8vmin,80px);box-shadow:0 4px 0 var(--line)}
+.it.sel{outline:6px solid var(--acc);transform:scale(1.08)}
+.it.gone{visibility:hidden}
+.baskets{display:flex;gap:3vmin;justify-content:center;flex-wrap:wrap}
+.bk{appearance:none;border:0;width:clamp(130px,24vmin,230px);min-height:clamp(110px,20vmin,190px);border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:1vmin;font-size:clamp(50px,9vmin,90px);box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.bk small{font-size:clamp(20px,3.6vmin,34px);display:flex;flex-wrap:wrap;justify-content:center;min-height:1.2em}
+.board{display:grid;gap:6px;background:var(--line);padding:6px;border-radius:18px}
+.board div{background:#BFE6A6;border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative}
+.board div.rock{background:#C9B8A3}
+.prog{display:flex;gap:1.4vmin;min-height:clamp(64px,10vmin,96px);background:var(--card);border-radius:20px;padding:1vmin 2vmin;align-items:center;min-width:min(90vw,520px);box-shadow:0 4px 0 var(--line)}
+.prog span{font-size:clamp(40px,7vmin,70px)}
+.prog span.now{outline:4px solid var(--ok);border-radius:10px}
+.arrows{display:flex;gap:2vmin;flex-wrap:wrap;justify-content:center}
+.ar{appearance:none;border:0;width:clamp(80px,14vmin,130px);height:clamp(80px,14vmin,130px);border-radius:24px;background:var(--card);font-size:clamp(46px,8vmin,80px);box-shadow:0 5px 0 var(--line)}
+.ar.go{background:var(--ok);color:#fff}
+.ar.del{background:#F4D9D6}
+.cheer{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vmin;background:rgba(255,248,236,.92);z-index:20;font-size:clamp(90px,24vmin,220px)}
+.cheer button{font-size:clamp(28px,5vmin,44px);font-weight:900;border:0;border-radius:24px;padding:2vmin 6vmin;background:var(--ok);color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.conf{position:fixed;top:-10vh;font-size:44px;animation:fall 1.6s linear forwards;pointer-events:none;z-index:21}
+@keyframes fall{to{transform:translateY(120vh) rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.conf{display:none}}
+</style>
+</head>
+<body>
+<div class="top"><button class="ib" id="home" type="button" aria-label="Додому">🏠</button><button class="ib" id="say" type="button" aria-label="Послухати завдання">🔊</button><span class="ttl" id="ttl">Малюки й роботи</span><span class="stars">⭐ <span id="st">0</span></span></div>
+<main id="main"></main>
+<div class="cheer" id="cheer" hidden><div id="cheerE">🎉</div><button type="button" id="again">Ще! ▶</button></div>
+
+<script>
+(function(){
+  var $=function(id){ return document.getElementById(id); };
+  var stars=0, game=null, sayText='Обери гру';
+  function rnd(n){ return Math.floor(Math.random()*n); }
+  function shuf(a){ a=a.slice(); for(var i=a.length-1;i>0;i--){ var j=rnd(i+1),t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  function say(t){ try{ if(!window.speechSynthesis) return; speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(t); u.lang='uk-UA'; u.rate=.9; var v=speechSynthesis.getVoices().filter(function(x){ return /^uk/i.test(x.lang); })[0]; if(v) u.voice=v; speechSynthesis.speak(u); }catch(e){} }
+  function star(n){ stars+=n||1; $('st').textContent=stars; }
+  function cheer(){ var e=['🎉','🥳','🌟','🏆','👏'][rnd(5)]; $('cheerE').textContent=e; $('cheer').hidden=false; for(var i=0;i<14;i++){ var s=document.createElement('span'); s.className='conf'; s.textContent=['⭐','🎈','✨','🎊'][rnd(4)]; s.style.left=(rnd(95))+'vw'; s.style.animationDelay=(Math.random()*.6)+'s'; document.body.appendChild(s); setTimeout(function(x){ return function(){ x.remove(); }; }(s),2400); } star(3); }
+  $('again').onclick=function(){ $('cheer').hidden=true; if(game) GAMES[game].start(); };
+  $('home').onclick=menu; $('say').onclick=function(){ say(sayText); };
+
+  var GAMES={
+    teach:{e:'🤖',t:'Навчи робота',start:function(){
+      var C={r:['🍎','🍓','🍒','🌹','🚒','❤️'],y:['🍌','🍋','🌻','⭐','🐤','🧀'],g:['🥒','🥦','🍏','🐸','🌲','🍀']}, H=['🏠','⛺','🏰'];
+      var pick=function(c,n){ return shuf(C[c]).slice(0,n).map(function(e){ return [e,c]; }); };
+      var teach=shuf(pick('r',2).concat(pick('y',2),pick('g',2))), used={}; teach.forEach(function(x){ used[x[0]]=1; });
+      var test=shuf(['r','y','g'].reduce(function(a,c){ return a.concat(C[c].filter(function(e){ return !used[e]; }).slice(0,2).map(function(e){ return [e,c]; })); },[]));
+      var put={}, sel=null, left=teach.length;
+      sayText='Навчи робота розкладати за кольором. Кожен колір — у свій будиночок. Робот дивиться і вчиться!';
+      function phase1(){
+        $('main').innerHTML='<div class="task">🤖 👀</div><div class="items">'+teach.map(function(x,i){ return '<button class="it" type="button" data-i="'+i+'">'+x[0]+'</button>'; }).join('')+'</div><div class="baskets">'+H.map(function(h,k){ return '<button class="bk" type="button" data-k="'+k+'" style="background:#EFE6D6"><small></small>'+h+'</button>'; }).join('')+'</div>';
+        Array.prototype.forEach.call(document.querySelectorAll('.it'),function(b){ b.onclick=function(){ Array.prototype.forEach.call(document.querySelectorAll('.it'),function(x){ x.classList.remove('sel'); }); sel=b; b.classList.add('sel'); }; });
+        Array.prototype.forEach.call(document.querySelectorAll('.bk'),function(bk){ bk.onclick=function(){ if(!sel) return; var it=teach[+sel.dataset.i], k=+bk.dataset.k; (put[it[1]]=put[it[1]]||[]).push(k); bk.querySelector('small').insertAdjacentHTML('beforeend','<span>'+it[0]+'</span>'); sel.classList.add('gone'); sel.classList.remove('sel'); sel=null; left--; if(!left) setTimeout(phase2,600); }; });
+      }
+      function rule(c){ var a=put[c]||[], cnt={}; a.forEach(function(k){ cnt[k]=(cnt[k]||0)+1; }); var best=null,bn=0,tie=false; Object.keys(cnt).forEach(function(k){ if(cnt[k]>bn){ bn=cnt[k]; best=+k; tie=false; } else if(cnt[k]===bn) tie=true; }); return tie?null:best; }
+      function phase2(){
+        sayText='Тепер робот сам! Дивіться, чи він навчився'; say(sayText);
+        $('main').innerHTML='<div class="task">🤖 💭</div><div class="items" id="tq">'+test.map(function(x,i){ return '<span class="it" data-i="'+i+'" style="display:flex;align-items:center;justify-content:center">'+x[0]+'</span>'; }).join('')+'</div><div class="baskets">'+H.map(function(h,k){ return '<div class="bk" data-k="'+k+'" style="background:#EFE6D6"><small></small>'+h+'</div>'; }).join('')+'<div class="bk" data-k="x" style="background:#F2E2E0"><small></small>🤷</div></div>';
+        var i=0, okAll=true;
+        (function step(){ if(i>=test.length){ setTimeout(function(){ if(okAll){ say('Робот навчився! Бо ви добре його вчили'); cheer(); } else { say('Робот заплутався. Він робить так, як ви його навчили'); $('main').insertAdjacentHTML('beforeend','<div class="opts"><button class="ob" type="button" id="re" style="font-size:clamp(28px,5vmin,44px);width:auto;padding:0 5vmin">🔄 Навчити ще раз</button></div>'); $('re').onclick=function(){ GAMES.teach.start(); }; } },700); return; }
+          var x=test[i], r=rule(x[1]), el=document.querySelector('#tq [data-i="'+i+'"]'), dest=document.querySelector('.baskets [data-k="'+(r===null?'x':r)+'"] small');
+          var same=true; if(r===null) same=false; else { ['r','y','g'].forEach(function(c){ if(c!==x[1]&&rule(c)===r) same=false; }); }
+          if(!same) okAll=false;
+          el.style.visibility='hidden'; dest.insertAdjacentHTML('beforeend','<span>'+x[0]+'</span>'); if(same) star(); i++; setTimeout(step,800); })();
+      }
+      phase1(); say(sayText);
+    }},
+    smart:{e:'🧠',t:'Розумне чи ні?',start:function(){
+      var it=shuf([['📱',0],['💻',0],['🤖',0],['⌚',0],['🎮',0],['🥄',1],['⚽',1],['📖',1],['✏️',1],['🧸',1]]), sel=null, left=it.length;
+      sayText='Що вміє навчатися й думати, як розумна машина? Розумне — до робота, звичайну річ — до ведмедика';
+      $('main').innerHTML='<div class="items">'+it.map(function(x,i){ return '<button class="it" type="button" data-i="'+i+'">'+x[0]+'</button>'; }).join('')+'</div><div class="baskets"><button class="bk" type="button" data-k="0" style="background:#D9E7FB"><small></small>🤖</button><button class="bk" type="button" data-k="1" style="background:#F3EEE4"><small></small>🧸</button></div>';
+      Array.prototype.forEach.call(document.querySelectorAll('.it'),function(b){ b.onclick=function(){ Array.prototype.forEach.call(document.querySelectorAll('.it'),function(x){ x.classList.remove('sel'); }); sel=b; b.classList.add('sel'); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('.bk'),function(bk){ bk.onclick=function(){ if(!sel) return; var x=it[+sel.dataset.i];
+        if(x[1]===+bk.dataset.k){ bk.querySelector('small').insertAdjacentHTML('beforeend','<span>'+x[0]+'</span>'); sel.classList.add('gone'); sel.classList.remove('sel'); sel=null; star(); left--; if(!left) setTimeout(cheer,400); }
+        else { bk.style.animation='shake .4s'; setTimeout(function(){ bk.style.animation=''; },450); } }; });
+      say(sayText);
+    }},
+    pairs:{e:'🃏',t:'Пари роботів',start:function(){
+      var pool=shuf(['🤖','👾','🛸','🚀','💻','📱','🧠','💡','🔋','🎮','⌚','🛰️']).slice(0,6), cards=shuf(pool.concat(pool)), open=[], done=0, lock=false;
+      sayText='Знайди дві однакові картинки'; var portrait=innerHeight>innerWidth, cols=portrait?3:4, rows=12/cols, sz=Math.min((innerWidth*0.9-(cols-1)*16)/cols,(innerHeight-170-(rows-1)*16)/rows,170);
+      $('main').innerHTML='<div class="grid" style="grid-template-columns:repeat('+cols+','+sz+'px);grid-auto-rows:'+sz+'px">'+cards.map(function(c,i){ return '<button class="card" data-i="'+i+'" type="button"><span class="back">❓</span><span class="f">'+c+'</span></button>'; }).join('')+'</div>';
+      Array.prototype.forEach.call(document.querySelectorAll('.card'),function(b){ b.onclick=function(){ if(lock||b.classList.contains('open')||b.classList.contains('done')) return; b.classList.add('open'); open.push(b);
+        if(open.length===2){ lock=true; var a=open[0],c=open[1];
+          if(cards[a.dataset.i]===cards[c.dataset.i]){ setTimeout(function(){ a.classList.replace('open','done'); c.classList.replace('open','done'); open=[]; lock=false; done++; star(); if(done===6) setTimeout(cheer,300); },350); }
+          else setTimeout(function(){ a.classList.remove('open'); c.classList.remove('open'); open=[]; lock=false; },900); } }; });
+    }},
+    next:{e:'🔁',t:'Що далі?',round:0,start:function(){
+      var self=this; self.round=0; sayText='Розумні машини шукають закономірності. Знайди й ти: що буде далі?'; self.q();
+    },q:function(){
+      var self=this, S=shuf(['🔴','🔵','🟡','🟢','⭐','🌙','🍎','🐟','🌸','🚗']), pats=[[0,1],[0,0,1],[0,1,2],[0,1,1],[0,1,0,2]], p=pats[Math.min(pats.length-1,rnd(2+self.round))], seq=[], L=p.length*2+(self.round%2), i;
+      for(i=0;i<L;i++) seq.push(S[p[i%p.length]]); var ans=S[p[L%p.length]], opts=shuf([ans].concat(shuf(S.slice(0,4).filter(function(x){ return x!==ans; })).slice(0,2)));
+      $('main').innerHTML='<div class="seq">'+seq.map(function(x){ return '<span>'+x+'</span>'; }).join('')+'<span class="q">?</span></div><div class="opts">'+opts.map(function(o){ return '<button class="ob" type="button">'+o+'</button>'; }).join('')+'</div>';
+      Array.prototype.forEach.call(document.querySelectorAll('.ob'),function(b){ b.onclick=function(){ if(b.textContent===ans){ b.classList.add('ok'); document.querySelector('.seq .q').textContent=ans; star(); self.round++; setTimeout(function(){ if(self.round>=6) cheer(); else self.q(); },700); } else { b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); } }; });
+    }},
+    sort:{e:'🧺',t:'Допоможи роботу',start:function(){
+      var sets=[
+        {say:'Розклади за кольором',b:[['#F7C6C2','🔴'],['#FBE7A6','🟡'],['#CDEBC0','🟢']],it:[['🍎',0],['🍓',0],['🍒',0],['🍌',1],['🍋',1],['🌻',1],['🥒',2],['🍏',2],['🥦',2]]},
+        {say:'Хто де живе: у воді чи на землі?',b:[['#C9E3F7','🌊'],['#D8EFC8','🌳']],it:[['🐟',0],['🐙',0],['🐳',0],['🦀',0],['🐶',1],['🐰',1],['🦊',1],['🐻',1]]},
+        {say:'Що їдять, а з чим граються?',b:[['#FBE0C3','🍽'],['#E3D9F7','🧸']],it:[['🍕',0],['🍌',0],['🥕',0],['🧀',0],['⚽',1],['🪁',1],['🧸',1],['🎲',1]]},
+        {say:'Великі й маленькі',b:[['#E7E1D6','🐘'],['#F3EEE4','🐭']],it:[['🐘',0],['🐋',0],['🦒',0],['🐻',0],['🐭',1],['🐞',1],['🐜',1],['🐤',1]]}];
+      var s=sets[rnd(sets.length)], items=shuf(s.it), sel=null, left=items.length;
+      sayText=s.say+'. Торкнись картинки, потім кошика';
+      $('main').innerHTML='<div class="items">'+items.map(function(x,i){ return '<button class="it" type="button" data-i="'+i+'">'+x[0]+'</button>'; }).join('')+'</div><div class="baskets">'+s.b.map(function(b,k){ return '<button class="bk" type="button" data-k="'+k+'" style="background:'+b[0]+'"><small></small>'+b[1]+'</button>'; }).join('')+'</div>';
+      Array.prototype.forEach.call(document.querySelectorAll('.it'),function(b){ b.onclick=function(){ Array.prototype.forEach.call(document.querySelectorAll('.it'),function(x){ x.classList.remove('sel'); }); sel=b; b.classList.add('sel'); }; });
+      Array.prototype.forEach.call(document.querySelectorAll('.bk'),function(bk){ bk.onclick=function(){ if(!sel) return; var it=items[+sel.dataset.i];
+        if(it[1]===+bk.dataset.k){ bk.querySelector('small').insertAdjacentHTML('beforeend','<span>'+it[0]+'</span>'); sel.classList.add('gone'); sel.classList.remove('sel'); sel=null; star(); left--; if(!left) setTimeout(cheer,400); }
+        else { bk.classList.remove('no'); void bk.offsetWidth; bk.style.animation='shake .4s'; setTimeout(function(){ bk.style.animation=''; },450); } }; });
+      say(sayText);
+    }},
+    bunny:{e:'🔋',t:'Робот до батарейки',lvl:0,start:function(){
+      var self=this, N=4, D={'⬆️':[-1,0],'⬇️':[1,0],'⬅️':[0,-1],'➡️':[0,1]}, g, s, t, prog=[], run=false;
+      function solv(g,s,t){ var q=[[s,0]],seen={}; seen[s]=1; while(q.length){ var x=q.shift(); if(x[0]===t) return x[1]; var r=Math.floor(x[0]/N),c=x[0]%N; for(var k in D){ var nr=r+D[k][0],nc=c+D[k][1],n=nr*N+nc; if(nr>=0&&nr<N&&nc>=0&&nc<N&&!g[n]&&!seen[n]){ seen[n]=1; q.push([n,x[1]+1]); } } } return -1; }
+      var need=Math.min(3+self.lvl,6);
+      do{ g={}; s=rnd(16); t=rnd(16); var rocks=Math.min(1+self.lvl,4); for(var i=0;i<rocks;i++){ var r=rnd(16); if(r!==s&&r!==t) g[r]=1; } }while(s===t||solv(g,s,t)<Math.max(2,need-2)||solv(g,s,t)>need);
+      var pos=s; sayText='Робот розрядився! Склади йому шлях зі стрілочок до батарейки і натисни зелену кнопку';
+      var sz=Math.min(innerWidth*0.8,innerHeight-380,440)/N;
+      function draw(){ $('main').innerHTML='<div class="board" style="grid-template-columns:repeat('+N+','+sz+'px);grid-auto-rows:'+sz+'px">'+Array.apply(null,{length:16}).map(function(_,i){ return '<div class="'+(g[i]?'rock':'')+'" style="font-size:'+(sz*.62)+'px">'+(g[i]?'🪨':i===pos?'🤖':i===t?'🔋':'')+'</div>'; }).join('')+'</div>'+
+        '<div class="prog" id="prog">'+prog.map(function(a,k){ return '<span data-k="'+k+'">'+a+'</span>'; }).join('')+'</div><div class="arrows">'+Object.keys(D).map(function(a){ return '<button class="ar" type="button" data-a="'+a+'">'+a+'</button>'; }).join('')+'<button class="ar del" type="button" id="del">⌫</button><button class="ar go" type="button" id="go">▶</button></div>';
+        Array.prototype.forEach.call(document.querySelectorAll('[data-a]'),function(b){ b.onclick=function(){ if(run||prog.length>=8) return; prog.push(b.dataset.a); pos=s; draw(); }; });
+        $('del').onclick=function(){ if(run) return; prog.pop(); pos=s; draw(); };
+        $('go').onclick=function(){ if(run||!prog.length) return; run=true; pos=s; var k=0;
+          (function step(){ if(k>=prog.length){ run=false; if(pos!==t){ say('Ще трошки! Спробуй ще'); setTimeout(function(){ pos=s; draw(); },900); } return; }
+            var r=Math.floor(pos/N),c=pos%N,d=D[prog[k]],nr=r+d[0],nc=c+d[1],n=nr*N+nc;
+            if(nr<0||nr>=N||nc<0||nc>=N||g[n]){ var sp=document.querySelector('#prog span[data-k="'+k+'"]'); if(sp) sp.style.outline='4px solid var(--bad)'; run=false; say('Ой! Тут не пройти'); setTimeout(function(){ pos=s; draw(); },1100); return; }
+            pos=n; draw(); var sp2=document.querySelector('#prog span[data-k="'+k+'"]'); if(sp2) sp2.classList.add('now'); k++;
+            if(pos===t){ run=false; self.lvl++; setTimeout(cheer,400); return; } setTimeout(step,500); })(); };
+      }
+      draw(); say(sayText);
+    }},
+    odd:{e:'🔍',t:'Робот помилився',round:0,start:function(){ this.round=0; sayText='Робот зібрав групу, але помилився. Знайди зайве'; this.q(); say(sayText); },q:function(){
+      var self=this, G=[['🐶','🐱','🐰','🐻','🦊','🐮'],['🍎','🍌','🍐','🍇','🍓','🍒'],['🚗','🚌','🚲','🚂','✈️','🚀'],['⚽','🏀','🎾','🏐','🏈','⚾'],['🌸','🌻','🌷','🌹','🌼','🪻'],['🔴','🟠','🟡','🟢','🔵','🟣']];
+      var gs=shuf(G), main=shuf(gs[0]).slice(0,3), odd=gs[1][rnd(6)], all=shuf(main.concat([odd]));
+      $('main').innerHTML='<div class="opts">'+all.map(function(o){ return '<button class="ob" type="button">'+o+'</button>'; }).join('')+'</div>';
+      Array.prototype.forEach.call(document.querySelectorAll('.ob'),function(b){ b.onclick=function(){ if(b.textContent===odd){ b.classList.add('ok'); star(); self.round++; setTimeout(function(){ if(self.round>=6) cheer(); else self.q(); },700); } else { b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); } }; });
+    }}
+  };
+  function menu(){ game=null; $('cheer').hidden=true; $('ttl').textContent='Малюки й роботи'; sayText='Обери гру';
+    $('main').innerHTML='<div class="menu">'+Object.keys(GAMES).map(function(k){ return '<button class="mb" type="button" data-g="'+k+'"><span class="e">'+GAMES[k].e+'</span>'+GAMES[k].t+'</button>'; }).join('')+'</div>';
+    Array.prototype.forEach.call(document.querySelectorAll('.mb'),function(b){ b.onclick=function(){ game=b.dataset.g; $('ttl').textContent=GAMES[game].t; GAMES[game].start(); if(game==='pairs'||game==='next') say(sayText); }; }); }
+  if(window.speechSynthesis) speechSynthesis.getVoices();
+  menu();
+  window.__kg={GAMES:GAMES};
+})();
+</script>
+</body>
+</html>
