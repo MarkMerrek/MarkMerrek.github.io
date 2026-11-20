@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Посадка · STEM 7 клас</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E9EEF5; --ink:#141922; --ink-2:#3D4656; --muted:#667085;
+  --line:#D5DCE6; --line-strong:#BBC5D3; --accent:#2D58B8; --accent-soft:#E2EAF8;
+  --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1; --warm:#8A570F; --warm-soft:#F6EAD6;
+  --shadow:0 1px 2px rgba(20,25,34,.05),0 8px 24px -16px rgba(20,25,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+    --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+  --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 0 10px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;margin:4px 0 0;letter-spacing:-.01em}
+.who{text-align:right;font-size:15px;color:var(--ink-2)}
+.who b{font-size:24px;color:var(--ink)}
+.who small{display:block;font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.start{max-width:600px;margin:28px auto;display:grid;gap:14px}
+.start h2{margin:0;font-size:22px}
+.start label{display:grid;gap:6px;font-weight:600}
+input[type=text],select{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 12px;font-size:17px}
+input[type=text]:focus,select:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.btn{appearance:none;border:2px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:16px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.err{color:var(--bad);font-weight:600;min-height:1.3em}
+.note{color:var(--muted);font-size:15px}
+.intro{background:var(--accent-soft);border-radius:12px;padding:14px 16px}
+.intro h3{margin:0 0 6px;font-size:16px}
+.intro p{margin:0 0 6px}.intro p:last-child{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-size:13px;color:var(--muted);font-weight:600}
+.tab.full .pt{color:var(--ok)}
+.tab.bonus{border-style:dashed}
+.tabsep{align-self:center;font-size:13px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.task h2{margin:0 0 6px;font-size:21px}
+.task h2 .note{font-size:14px;font-weight:600}
+.task ol.steps{margin:6px 0 12px;padding-left:22px}
+.task ol.steps li{margin:3px 0}
+details.remind{margin:0 0 12px;background:var(--warm-soft);border-radius:10px;padding:8px 12px}
+details.remind summary{cursor:pointer;font-weight:700;color:var(--warm)}
+details.remind div{margin-top:6px}
+.area{margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.part{background:var(--warm-soft);color:var(--ink)}
+.feedback ul{margin:6px 0 0;padding-left:20px;font-weight:500}
+/* common widgets */
+.q{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.q > p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:15.5px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.res{width:100%;border-collapse:collapse;margin:10px 0}
+.res td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.res td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.res td[colspan]{white-space:normal;text-align:left}
+.big{font-size:64px;font-weight:800;line-height:1}
+.bottom{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.confirm{display:inline-flex;gap:8px;align-items:center}
+.lnd{display:grid;gap:10px}
+.lcv{width:100%;border-radius:12px;border:2px solid var(--line-strong);display:block}
+.gau{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gau div{background:var(--surface-2);border-radius:10px;padding:6px 10px;display:flex;flex-direction:column}
+.gau span{font-size:13px;color:var(--muted);font-weight:600}
+.gau b{font-size:24px;font-variant-numeric:tabular-nums}
+.gau b.good{color:var(--ok)} .gau b.warn{color:var(--warm)} .gau b.bad{color:var(--bad)}
+.fb{display:block;height:14px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:8px}
+.fb i{display:block;height:100%;background:var(--ok);width:100%}
+.thr{appearance:none;border:0;border-radius:18px;background:#E8590C;color:#fff;font-weight:900;font-size:24px;padding:16px 28px;min-width:200px;touch-action:none;-webkit-user-select:none;user-select:none;cursor:pointer;line-height:1.1}
+.thr:active{background:#C2410C;transform:scale(.97)}
+.thr:disabled{opacity:.4}
+.thr small{font-size:13px;font-weight:600}
+.code{font-family:ui-monospace,Consolas,monospace;font-size:17px;line-height:2;background:var(--surface-2);border-radius:10px;padding:8px 12px}
+.code input{width:80px;font-family:inherit;font-size:17px;padding:4px 8px}
+.out{min-height:26px;font-size:16px}
+.out .good{color:var(--ok);font-weight:800} .out .warn{color:var(--warm);font-weight:800} .out .bad{color:var(--bad);font-weight:800}
+.lg{border-collapse:collapse;font-size:15px}
+.lg th,.lg td{padding:3px 10px;border-bottom:1px solid var(--line);text-align:left}
+.lg th{color:var(--muted);font-size:13px;font-weight:600}
+
+@media print{.tabs,.bottom{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="kicker">STEM-освіта · 7 клас · космічний полігон</div><h1>Посадка на Місяць</h1></div>
+    <div class="who" id="who" hidden></div>
+  </header>
+
+  <section class="card start" id="startBox" hidden>
+    <h2>Початок</h2>
+    <div class="intro"><h3>Сьогодні ти — пілот посадкового модуля</h3><p>Посади модуль на Місяць, Марс і Землю — спершу вручну, потім напиши програму автопілота. 5 основних місій і 2 бонусні ★, разом до 12 балів.</p></div>
+    <label>Твоє ім'я та прізвище<input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <details style="font-size:15px"><summary class="note" style="cursor:pointer">Пересів за інший комп'ютер? Код продовження</summary>
+      <label style="margin-top:8px">Код продовження (з іншого комп'ютера)<input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="max-width:180px"></label></details>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo">Почати</button></div>
+    <p class="note" style="margin:0">Робота зберігається на цьому комп'ютері. Урок перервали? Наступного разу введи те саме ім'я — продовжиш з того ж місця.</p>
+  </section>
+
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+  </div>
+
+  <section class="card" id="resultBox" hidden></section>
+
+  <div class="bottom">
+    <button class="btn ghost sm" type="button" id="other" hidden>Інший учень</button>
+    <button class="btn ghost sm" type="button" id="restart" hidden>Почати заново</button>
+    <span class="confirm" id="ask" hidden><span>Усі бали цього учня зітруться. Точно?</span>
+      <button class="btn sm" type="button" id="askYes" style="background:var(--bad);border-color:var(--bad)">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo">Ні</button></span>
+    <button class="btn ghost sm" type="button" id="theme" style="margin-left:auto">Світла / темна</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='stem7-posadka-v1', GRADE='7';
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function shuffle(a,seed){ var r=seed||1; a=a.slice(); for(var i=a.length-1;i>0;i--){ r=(r*9301+49297)%233280; var j=Math.floor(r/233280*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  /* choose-one rows: rows=[{id,text,opts:[..]}]; answer saved in d[id] */
+  function choiceRows(el,d,rows,save){
+    el.innerHTML=rows.map(function(r){ var ord=r.order||r.opts.map(function(_,i){ return i; }); return '<div class="q"><p>'+r.text+'</p><div class="opts">'+ord.map(function(i){ var o=r.opts[i]; return '<button type="button" class="opt" data-r="'+r.id+'" data-i="'+i+'" aria-pressed="'+(d[r.id]===i)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.addEventListener('click',function(){ var r=b.getAttribute('data-r'); d[r]=+b.getAttribute('data-i'); save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }); });
+  }
+  function countRight(d,rows,key){ var n=0; rows.forEach(function(r){ if(d[r.id]===key[r.id]) n++; }); return n; }
+  var H={esc:esc,shuffle:shuffle,choiceRows:choiceRows,countRight:countRight};
+
+  /* ===== STEM 7: посадка ===== */
+  var PLN={moon:{n:'🌙 Місяць',g:1.62,T:4.5,h:100,v:6,sky:'#0E1222',gr:'#8E8E93'},mars:{n:'🔴 Марс',g:3.71,T:8,h:150,v:10,sky:'#3A1E14',gr:'#B5562F'},earth:{n:'🌍 Земля',g:9.8,T:14,h:100,v:10,sky:'#8FC5F2',gr:'#5FA34A'}};
+  /* cfg: planet, fuel, mode 'manual'|'auto', fixV (auto with V fixed), tag, onLand(rec) */
+  function lander(el,c,cfg){
+    var P=PLN[cfg.planet], d=c.d; if(!d.log) d.log=[]; if(!d.ap) d.ap={H:'',V:cfg.fixV!=null?String(cfg.fixV):''};
+    var S=null, raf=null, burn=false, acc=0, last=0;
+    var h='<div class="lnd"><canvas class="lcv"></canvas><div class="gau"><div><span>Висота</span><b data-o="h">—</b></div><div><span>Швидкість ↓</span><b data-o="v">—</b></div><div><span>Пальне</span><i class="fb"><i data-o="f"></i></i></div></div>';
+    if(cfg.mode==='manual') h+='<div class="row"><button type="button" class="btn" data-x="start">▶ Старт</button><button type="button" class="thr" data-x="thr" disabled>🔥 Двигун<br><small>тримай</small></button></div>';
+    else h+='<div class="prog"><p class="note" style="margin:0 0 6px">Програма автопілота:</p><div class="code">ЯКЩО висота &lt; <input type="text" inputmode="decimal" data-k="H" maxlength="5" value="'+c.H.esc(d.ap.H)+'"> м <b>І</b> швидкість &gt; <input type="text" inputmode="decimal" data-k="V" maxlength="4" value="'+c.H.esc(d.ap.V)+'"'+(cfg.fixV!=null?' disabled':'')+'> м/с<br>ТО двигун увімкнено, ІНАКШЕ — вимкнено</div><button type="button" class="btn" data-x="start" style="margin-top:8px">▶ Запустити автопілот</button></div>';
+    h+='<div class="out" aria-live="polite"></div><div class="lg2"></div></div>';
+    el.innerHTML=h;
+    var cv=el.querySelector('.lcv'), out=el.querySelector('.out');
+    Array.prototype.forEach.call(el.querySelectorAll('input[data-k]'),function(x){ x.oninput=function(){ d.ap[x.getAttribute('data-k')]=x.value.replace(',','.').replace(/[^\d.]/g,''); c.save(); }; });
+    function num(v){ return v===''||v==null?NaN:+v; }
+    function draw(){
+      var W=cv.clientWidth||400, Hh=Math.round(Math.min(380,Math.max(240,W*0.7))), dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=Hh*dpr; cv.style.height=Hh+'px';
+      var x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0);
+      x.fillStyle=P.sky; x.fillRect(0,0,W,Hh); var gy=Hh-30; x.fillStyle=P.gr; x.fillRect(0,gy,W,30); x.fillStyle='#F2C44E'; x.fillRect(W/2-50,gy,100,5);
+      if(cfg.planet!=='earth'){ x.fillStyle='rgba(255,255,255,.7)'; for(var i=0;i<30;i++){ x.fillRect((i*97)%W,(i*53)%(gy-20),1.5,1.5); } }
+      var hh=S?S.h:P.h, ly=gy-12-(hh/P.h)*(gy-60), lx=W/2;
+      if(S&&S.on){ x.fillStyle='#FF9A1F'; x.beginPath(); x.moveTo(lx-7,ly+12); x.lineTo(lx+7,ly+12); x.lineTo(lx,ly+30+Math.random()*10); x.fill(); }
+      x.fillStyle='#E9EDF4'; x.fillRect(lx-12,ly-10,24,20); x.fillStyle='#2D58B8'; x.beginPath(); x.arc(lx,ly-3,5,0,Math.PI*2); x.fill();
+      x.strokeStyle='#E9EDF4'; x.lineWidth=2; x.beginPath(); x.moveTo(lx-10,ly+10); x.lineTo(lx-16,ly+18); x.moveTo(lx+10,ly+10); x.lineTo(lx+16,ly+18); x.stroke();
+      if(S&&S.done&&S.res==='crash'){ x.font='40px system-ui'; x.fillText('💥',lx-20,gy-4); }
+      el.querySelector('[data-o="h"]').textContent=(S?Math.max(0,S.h):P.h).toFixed(1)+' м';
+      var vv=S?S.v:P.v; el.querySelector('[data-o="v"]').textContent=vv.toFixed(1)+' м/с'; el.querySelector('[data-o="v"]').className=vv>4?'bad':vv>2?'warn':'good';
+      el.querySelector('[data-o="f"]').style.width=Math.max(0,(S?S.fuel:cfg.fuel)/cfg.fuel*100)+'%';
+    }
+    function rule(){ var H=num(d.ap.H),V=cfg.fixV!=null?cfg.fixV:num(d.ap.V); return S.h<H&&S.v>V; }
+    function step(dt){ var on=(cfg.mode==='manual'?burn:rule())&&S.fuel>0; S.on=on; var a=P.g-(on?P.T:0); if(on){ S.fuel-=dt; } S.v+=a*dt; S.h-=S.v*dt; S.t+=dt; if(S.h<=0){ S.h=0; S.done=true; } if(S.t>200){ S.done=true; S.v=99; } }
+    function finish(){
+      var v=S.v, res=v<=2?'soft':v<=4?'hard':'crash'; S.res=res; burn=false; draw();
+      var used=cfg.fuel-Math.max(0,S.fuel);
+      out.innerHTML=(res==='soft'?'<span class="good">✅ М’яка посадка!</span>':res==='hard'?'<span class="warn">⚠️ Жорстка посадка</span>':'<span class="bad">💥 Аварія</span>')+' Швидкість при посадці <b>'+v.toFixed(1)+' м/с</b> · пального витрачено <b>'+used.toFixed(1)+' с</b>'+(S.fuel<=0?' · <span class="bad">пальне скінчилося</span>':'');
+      var rec={v:+v.toFixed(1),used:+used.toFixed(1),res:res,H:d.ap.H,V:cfg.fixV!=null?cfg.fixV:d.ap.V}; d.log.unshift(rec); d.log=d.log.slice(0,8); if(cfg.onLand) cfg.onLand(rec); c.save(); drawLog();
+      var th=el.querySelector('[data-x="thr"]'); if(th) th.disabled=true; var st=el.querySelector('[data-x="start"]'); if(st){ st.disabled=false; st.textContent=cfg.mode==='manual'?'↺ Ще раз':'▶ Запустити автопілот'; }
+    }
+    function loop(now){ var dt=Math.min(.1,(now-last)/1000); last=now; acc+=dt*1.2; while(acc>=.02&&!S.done){ step(.02); acc-=.02; } draw(); if(S.done){ raf=null; finish(); return; } raf=requestAnimationFrame(loop); }
+    el.querySelector('[data-x="start"]').onclick=function(){
+      if(raf) return;
+      if(cfg.mode==='auto'){ var H=num(d.ap.H),V=cfg.fixV!=null?cfg.fixV:num(d.ap.V); if(isNaN(H)||isNaN(V)){ out.innerHTML='<span class="warn">Впиши числа в програму автопілота.</span>'; return; } }
+      S={h:P.h,v:P.v,fuel:cfg.fuel,t:0,on:false,done:false}; out.textContent=''; this.disabled=true; var th=el.querySelector('[data-x="thr"]'); if(th) th.disabled=false; last=performance.now(); acc=0; raf=requestAnimationFrame(loop);
+    };
+    var th=el.querySelector('[data-x="thr"]');
+    if(th){ var dn=function(e){ e.preventDefault(); if(S&&!S.done) burn=true; }, up=function(){ burn=false; };
+      th.addEventListener('pointerdown',dn); th.addEventListener('pointerup',up); th.addEventListener('pointerleave',up); th.addEventListener('pointercancel',up); th.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+      el._key=function(e){ if(e.code==='Space'&&S&&!S.done&&document.body.contains(el)){ e.preventDefault(); burn=e.type==='keydown'; } }; document.addEventListener('keydown',el._key); document.addEventListener('keyup',el._key); }
+    var lg=el.querySelector('.lg2');
+    function drawLog(){ lg.innerHTML=d.log.length?'<table class="lg"><tr><th>посадка</th><th>швидкість</th><th>пальне</th>'+(cfg.mode==='auto'?'<th>H</th><th>V</th>':'')+'</tr>'+d.log.map(function(r){ return '<tr><td>'+(r.res==='soft'?'✅':r.res==='hard'?'⚠️':'💥')+'</td><td>'+r.v+' м/с</td><td>'+r.used+' с</td>'+(cfg.mode==='auto'?'<td>'+c.H.esc(r.H)+'</td><td>'+c.H.esc(String(r.V))+'</td>':'')+'</tr>'; }).join('')+'</table>':''; }
+    draw(); drawLog(); window.addEventListener('resize',function(){ if(!raf&&document.body.contains(cv)) draw(); });
+  }
+  function best(c){ return c.d.best||99; }
+  function rec(c){ return function(r){ if(r.v<(c.d.best||99)&&r.res!=='crash'||r.res==='soft'&&r.v<(c.d.best||99)) c.d.best=r.v; if(r.res==='soft') c.d.soft=1; if(r.res==='hard') c.d.hard=1; }; }
+  function grade(c,full,part){ return c.d.soft?[full,[]]:c.d.hard?[part,['Була жорстка посадка — треба м’яка: швидкість не більше 2 м/с.']]:[0,['Поки без вдалої посадки.']]; }
+
+  var TASKS=[
+    {t:'Перша посадка',max:2,remindOpen:1,remind:'<p>Посадковий модуль падає: його тягне вниз <b>сила тяжіння</b>. Двигун штовхає вгору й гальмує падіння. <b>М’яка посадка</b> — швидкість не більше <b>2 м/с</b>, до 4 м/с — жорстка, більше — аварія. Тримай «🔥 Двигун» (або пробіл) і стеж за швидкістю.</p>',
+      steps:['Місяць. Посади модуль м’яко. Пального вдосталь.','М’яка посадка — 2 бали, жорстка — 1.'],
+      render:function(el,c){ lander(el,c,{planet:'moon',fuel:30,mode:'manual',onLand:rec(c)}); }, check:function(c){ return grade(c,2,1); }},
+    {t:'Марс',max:2,
+      steps:['На Марсі тяжіння більше, ніж на Місяці, а модуль падає швидше — 10 м/с на старті.','М’яка посадка — 2 бали, жорстка — 1.'],
+      render:function(el,c){ lander(el,c,{planet:'mars',fuel:30,mode:'manual',onLand:rec(c)}); }, check:function(c){ return grade(c,2,1); }},
+    {t:'Ощадливий пілот',max:2,remind:'<p>Пального лише на <b>7 секунд</b> роботи двигуна. Якщо гальмувати весь час потроху — не вистачить. Подумай: коли вмикати двигун вигідніше — одразу чи ближче до землі?</p>',remindOpen:1,
+      steps:['Знову Місяць, але пального мало.','Тільки м’яка посадка — 2 бали.'],
+      render:function(el,c){ lander(el,c,{planet:'moon',fuel:7,mode:'manual',onLand:rec(c)}); }, check:function(c){ return c.d.soft?[2,[]]:[0,['Поки без м’якої посадки. Порада: падай вільно, а гальмуй довго й без перерв ближче до поверхні.']]; }},
+    {t:'Автопілот',max:3,remind:'<p>Справжні модулі сідають на <b>автопілоті</b> — за програмою. Програма тут — одне правило з двох умов: <b>якщо висота менша за H І швидкість більша за V — двигун увімкнено</b>. V уже задано: 1,5 м/с. Твоє завдання — знайти висоту H, з якої автопілот почне гальмувати.</p>',remindOpen:1,
+      steps:['Місяць, пального — 10 с. Підбери H.','Замало H — не встигне загальмувати. Забагато — витратить пальне на «зависання».','М’яка посадка — 3 бали, жорстка — 1.'],
+      render:function(el,c){ lander(el,c,{planet:'moon',fuel:10,mode:'auto',fixV:1.5,onLand:rec(c)}); }, check:function(c){ return grade(c,3,1); }},
+    {t:'Автопілот на Марсі',max:3,
+      steps:['Марс, пального — 15 с. Тепер підбери і H, і V.','Користуйся журналом спроб: що змінюється, коли міняєш одне число?','М’яка посадка — 3 бали, жорстка — 1.'],
+      render:function(el,c){ lander(el,c,{planet:'mars',fuel:15,mode:'auto',onLand:rec(c)}); }, check:function(c){ return grade(c,3,1); }},
+    {t:'Земля',max:2,bonus:1,
+      steps:['На Землі тяжіння вшестеро більше, ніж на Місяці, усе відбувається дуже швидко. Ручне керування, пального — 12 с.','М’яка посадка — +2.'],
+      render:function(el,c){ lander(el,c,{planet:'earth',fuel:12,mode:'manual',onLand:rec(c)}); }, check:function(c){ return c.d.soft?[2,[]]:[0,['Поки без м’якої посадки.']]; }},
+    {t:'Автопілот-скнара',max:1,bonus:1,
+      steps:['Місяць, пального лише 6 с. Підбери H і V для автопілота.','М’яка посадка — +1.'],
+      render:function(el,c){ lander(el,c,{planet:'moon',fuel:6,mode:'auto',onLand:rec(c)}); }, check:function(c){ return c.d.soft?[1,[]]:[0,['Поки без м’якої посадки.']]; }}
+  ];
+
+
+  /* ---------- storage: one profile per student name ---------- */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0,x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function fresh(){ return {name:'',pts:{},data:{},task:1,view:'work',act:0,last:0}; }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.name){ var id=nnorm(st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  }
+  function tick(){ if(!st.name) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
+
+  function isBonus(n){ return !!TASKS[n-1].bonus; }
+  function total(){ var s=0; for(var n=1;n<=TASKS.length;n++) s+=st.pts[n]||0; return Math.min(12,s); }
+  function lastCore(){ var k=0; TASKS.forEach(function(t,i){ if(!t.bonus) k=i+1; }); return k; }
+  /* continue code */
+  var INV=17679;
+  function encode(pts,nm){ var idx=0,mul=1; TASKS.forEach(function(t,i){ idx+=Math.min(pts[i+1]||0,t.max)*mul; mul*=t.max+1; }); var N=idx,X=(N*7919+40427)%100000,C=(N*61+29+nhash(nm))%97,d=('0000'+X).slice(-5)+('0'+C).slice(-2); return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5),C=+c.slice(5),N=((X-40427+100000)%100000)*INV%100000; if((N*61+29+nhash(nm))%97!==C) return null; var pts={},idx=N; for(var i=0;i<TASKS.length;i++){ var r=TASKS[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } return idx?null:pts; }
+
+  function ctx(n){ if(!st.data[n]) st.data[n]={}; var sd=0,nm=nnorm(st.name||''); for(var i=0;i<nm.length;i++) sd=(sd*31+nm.charCodeAt(i))%100003; return {d:st.data[n],save:save,H:H,rerender:renderTask,seed:sd+n*101+1}; }
+  function renderTabs(){
+    $('tabs').innerHTML=TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<span class="tabsep">★ бонус</span>':'')+'<button type="button" role="tab" class="tab'+(p>=t.max?' full':'')+(t.bonus?' bonus':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(t.t)+' <span class="pt">'+(t.bonus?'+'+p+'★':p+'/'+t.max)+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">Результат <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; save(); renderAll(); window.scrollTo(0,0); } }); });
+  }
+  function renderTask(){
+    var n=st.task,t=TASKS[n-1],h='';
+    h+='<h2>Завдання '+n+' · '+esc(t.t)+' <span class="note">('+(t.bonus?'★ бонус, +'+t.max:t.max+' '+(t.max===1?'бал':t.max<5?'бали':'балів'))+')</span></h2>';
+    if(t.remind) h+='<details class="remind"'+(t.remindOpen?' open':'')+'><summary>Нагадування</summary><div>'+t.remind+'</div></details>';
+    h+='<ol class="steps">'+t.steps.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ol><div class="area" id="area"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">Перевірити завдання</button>'+(n<TASKS.length?'<button class="btn ghost" type="button" id="nxt">Наступне завдання →</button>':'')+(n>=lastCore()?'<button class="btn ghost" type="button" id="fin">Завершити й показати результат</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    t.render($('area'),ctx(n));
+    $('chk').addEventListener('click',function(){
+      var r=t.check(ctx(n)),p=r[0]; if(p>(st.pts[n]||0)) st.pts[n]=p; save(); renderTabs(); renderWho();
+      var fb=$('fb');
+      if(p>=t.max){ fb.className='feedback ok'; fb.textContent='Готово! Повний бал.'+(r[2]?' '+r[2]:''); }
+      else { fb.className='feedback part'; fb.innerHTML=(p>0?'Бали за завдання: '+p+'/'+t.max:'Поки 0 балів.')+(r[1]&&r[1].length?'<ul>'+r[1].map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>':''); }
+    });
+    if($('nxt')) $('nxt').addEventListener('click',function(){ st.task=n+1; save(); renderAll(); window.scrollTo(0,0); });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){ st.view='result'; save(); renderAll(); window.scrollTo(0,0); }
+  function renderResult(){
+    var mins=Math.max(1,Math.round((st.act||0)/60000)),h='';
+    h+='<h2 style="margin:0 0 4px">Результат пілота</h2>';
+    h+='<p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+GRADE+' клас</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">з 12</span></div>';
+    h+='<table class="res">'+TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<tr><td colspan="2"><b>★ Бонус — додається до оцінки, разом не більше 12</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(t.t)+'</td><td>'+(t.bonus?'+'+p+' / '+t.max+' ★':p+' / '+t.max)+'</td></tr>'; }).join('')+'<tr><td>Час роботи (без перерв)</td><td>'+mins+' хв</td></tr><tr><td>Код продовження</td><td style="font-family:monospace;font-size:18px">'+encode(st.pts,st.name)+'</td></tr></table>';
+    h+='<p class="note">Покажи цей екран учителю.</p><button class="btn ghost" type="button" id="back">Повернутися до завдань</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; save(); renderAll(); });
+  }
+  function renderWho(){ var on=!!st.name; $('who').hidden=!on; if(on) $('who').innerHTML=esc(st.name)+' · '+GRADE+' клас<br><b>'+total()+'</b> / 12<small>код продовження: '+encode(st.pts,st.name)+'</small>'; }
+  function renderAll(){
+    var on=!!st.name;
+    $('startBox').hidden=on; $('work').hidden=!on||st.view==='result'; $('resultBox').hidden=!on||st.view!=='result';
+    $('other').hidden=!on; $('restart').hidden=!on; $('ask').hidden=true;
+    renderWho(); if(!on) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask();
+  }
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<3||n.indexOf(' ')<0&&n.length<5){ $('startErr').textContent='Напиши ім\'я та прізвище.'; return; }
+    var id=nnorm(n);
+    if(DB.p[id]){ st=DB.p[id]; st.view='work'; } else { st=fresh(); st.name=n; }
+    if(c){ var d=decode(c,n); if(!d){ $('startErr').textContent='Код не підходить. Перевір цифри й ім\'я — пиши так само, як першого разу.'; return; } Object.keys(d).forEach(function(k){ if(d[k]>(st.pts[k]||0)) st.pts[k]=d[k]; }); }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+  }
+  $('startGo').addEventListener('click',go);
+  $('nameIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('nameIn').value=''; $('codeIn').value=''; renderAll(); window.scrollTo(0,0); });
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('nameIn').value=''; renderAll(); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  renderAll();
+  window.__p={st:function(){ return st; },TASKS:TASKS};
+})();
+</script>
+</body>
+</html>
