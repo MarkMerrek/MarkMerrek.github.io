@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Інформаційна взаємодія · 4 клас</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E9EEF5; --ink:#141922; --ink-2:#3D4656; --muted:#667085;
+  --line:#D5DCE6; --line-strong:#BBC5D3; --accent:#2D58B8; --accent-soft:#E2EAF8;
+  --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1; --warm:#8A570F; --warm-soft:#F6EAD6;
+  --shadow:0 1px 2px rgba(20,25,34,.05),0 8px 24px -16px rgba(20,25,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+    --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+  --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 0 10px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;margin:4px 0 0;letter-spacing:-.01em}
+.who{text-align:right;font-size:15px;color:var(--ink-2)}
+.who b{font-size:24px;color:var(--ink)}
+.who small{display:block;font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.start{max-width:600px;margin:28px auto;display:grid;gap:14px}
+.start h2{margin:0;font-size:22px}
+.start label{display:grid;gap:6px;font-weight:600}
+input[type=text],select{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 12px;font-size:17px}
+input[type=text]:focus,select:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.btn{appearance:none;border:2px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:16px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.pen{color:var(--warm);font-weight:600;margin:8px 0 0;font-size:15px}
+.err{color:var(--bad);font-weight:600;min-height:1.3em}
+.note{color:var(--muted);font-size:15px}
+.intro{background:var(--accent-soft);border-radius:12px;padding:14px 16px}
+.intro h3{margin:0 0 6px;font-size:16px}
+.intro p{margin:0 0 6px}.intro p:last-child{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-size:13px;color:var(--muted);font-weight:600}
+.tab.full .pt{color:var(--ok)}
+.tab.bonus{border-style:dashed}
+.tabsep{align-self:center;font-size:13px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.task h2{margin:0 0 6px;font-size:21px}
+.task h2 .note{font-size:14px;font-weight:600}
+.task ol.steps{margin:6px 0 12px;padding-left:22px}
+.task ol.steps li{margin:3px 0}
+details.remind{margin:0 0 12px;background:var(--warm-soft);border-radius:10px;padding:8px 12px}
+details.remind summary{cursor:pointer;font-weight:700;color:var(--warm)}
+details.remind div{margin-top:6px}
+.area{margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.part{background:var(--warm-soft);color:var(--ink)}
+.feedback ul{margin:6px 0 0;padding-left:20px;font-weight:500}
+/* common widgets */
+.q{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.q > p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:15.5px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.res{width:100%;border-collapse:collapse;margin:10px 0}
+.res td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.res td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.res td[colspan]{white-space:normal;text-align:left}
+.big{font-size:64px;font-weight:800;line-height:1}
+.bottom{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.confirm{display:inline-flex;gap:8px;align-items:center}
+.dcr{display:flex;flex-wrap:wrap;gap:10px 18px}
+.dcr label{display:flex;gap:8px;align-items:center;font-weight:600}
+.dcr select{min-width:180px;max-width:100%}
+.ctab{border-collapse:collapse;margin:4px 0 12px;font-size:20px}
+.ctab th,.ctab td{border:1px solid var(--line-strong);padding:6px 10px;text-align:center;min-width:42px}
+.ctab th{background:var(--surface-2)}
+.sym{font-size:26px;letter-spacing:.08em}
+.mo{font-family:ui-monospace,Consolas,monospace;font-size:18px;white-space:nowrap}
+.big2{font-size:24px;font-weight:700}
+.kb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.kb .btn.sk{font-size:24px;min-width:52px;padding:4px 10px}
+.out2,.out3{min-height:36px;background:var(--surface-2);border-radius:8px;padding:4px 10px}
+.msg{display:inline-block;background:var(--accent-soft);border-radius:14px 14px 14px 4px;padding:6px 12px}
+ol.ord{padding-left:28px;display:grid;gap:8px}
+ol.ord li{background:var(--surface-2);border-radius:10px;padding:8px 10px}
+ol.ord li{display:list-item}
+ol.ord li span{display:inline}
+ol.ord li .btn{margin-left:6px;padding:2px 10px}
+@media (max-width:560px){.ctab{font-size:16px}.ctab th,.ctab td{padding:4px 5px;min-width:28px}.mo{font-size:14px}}
+.ctabw{overflow-x:auto}
+
+@media print{.tabs,.bottom{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="kicker">Інформатика · 4 клас · практична робота</div><h1>Інформаційна взаємодія</h1></div>
+    <div class="who" id="who" hidden></div>
+  </header>
+
+  <section class="card start" id="startBox" hidden>
+    <h2>Початок</h2>
+    <div class="intro"><h3>Як ми обмінюємося повідомленнями</h3><p>Люди, пристрої, сигнали, коди й завади. Основні 5 завдань дають до 10 балів, 11 і 12 — тільки з бонусними ★.</p><p><b>Перевіряй уважно:</b> перша помилкова перевірка завдання безкоштовна, кожна наступна знімає бал.</p></div>
+    <label>Твоє ім'я та прізвище<input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <details style="font-size:15px"><summary class="note" style="cursor:pointer">Пересів за інший комп'ютер? Код продовження</summary>
+      <label style="margin-top:8px">Код продовження (з іншого комп'ютера)<input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="max-width:180px"></label></details>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo">Почати</button></div>
+    <p class="note" style="margin:0">Робота зберігається на цьому комп'ютері. Урок перервали? Наступного разу введи те саме ім'я — продовжиш з того ж місця.</p>
+  </section>
+
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+  </div>
+
+  <section class="card" id="resultBox" hidden></section>
+
+  <div class="bottom">
+    <button class="btn ghost sm" type="button" id="other" hidden>Інший учень</button>
+    <button class="btn ghost sm" type="button" id="restart" hidden>Почати заново</button>
+    <span class="confirm" id="ask" hidden><span>Усі бали цього учня зітруться. Точно?</span>
+      <button class="btn sm" type="button" id="askYes" style="background:var(--bad);border-color:var(--bad)">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo">Ні</button></span>
+    <button class="btn ghost sm" type="button" id="theme" style="margin-left:auto">Світла / темна</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='inf4-vzaiemodiia-v1', GRADE='4';
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function shuffle(a,seed){ var r=seed||1; a=a.slice(); for(var i=a.length-1;i>0;i--){ r=(r*9301+49297)%233280; var j=Math.floor(r/233280*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  /* choose-one rows: rows=[{id,text,opts:[..]}]; answer saved in d[id] */
+  function choiceRows(el,d,rows,save){
+    el.innerHTML=rows.map(function(r){ var ord=r.order||r.opts.map(function(_,i){ return i; }); return '<div class="q"><p>'+r.text+'</p><div class="opts">'+ord.map(function(i){ var o=r.opts[i]; return '<button type="button" class="opt" data-r="'+r.id+'" data-i="'+i+'" aria-pressed="'+(d[r.id]===i)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.addEventListener('click',function(){ var r=b.getAttribute('data-r'); d[r]=+b.getAttribute('data-i'); save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }); });
+  }
+  function countRight(d,rows,key){ var n=0; rows.forEach(function(r){ if(d[r.id]===key[r.id]) n++; }); return n; }
+  var H={esc:esc,shuffle:shuffle,choiceRows:choiceRows,countRight:countRight};
+
+  /* ===== 4 клас: інформаційна взаємодія ===== */
+  function q(id,text,opts){ return {id:id,text:text,opts:opts}; }
+  var KIND=['Людина — людина','Людина — пристрій','Пристрій — пристрій'];
+  var K1=[['a','Друг махає тобі рукою через вікно',0],['b','Ти натискаєш кнопку виклику ліфта',1],['c','Принтер повідомляє комп’ютеру, що скінчився папір',2],['d','Смарт-годинник передає на телефон, скільки ти пройшов кроків',2],['e','Розумна колонка відповідає на твоє запитання про погоду',1],['f','Учителька пояснює нову тему',0],['g','Телефон показує тобі: «Заряд 5 %»',1],['h','Роутер передає ноутбуку сторінку сайту',2],['i','Двоє людей розмовляють жестовою мовою',0],['j','Банкомат просить тебе ввести PIN-код',1]];
+  var ROLES=['джерело','канал','приймач'];
+  var SC=[{id:'s1',t:'Оля дзвонить бабусі й розповідає про свою оцінку.',c:['Оля','телефонний зв’язок','бабуся','оцінка']},
+    {id:'s2',t:'Пожежна сигналізація вмикає сирену, і всі в школі її чують.',c:['сигналізація','звук у повітрі','учні й учителі','пожежа']},
+    {id:'s3',t:'Космічний апарат надсилає фото Марса на Землю.',c:['космічний апарат','радіохвилі','центр керування на Землі','фото Марса']},
+    {id:'s4',t:'Ти пишеш записку другові й передаєш її через сусіда по парті.',c:['ти','сусід, який передає записку','друг','записка']},
+    {id:'s5',t:'Учитель відповідає на твоє повідомлення в месенджері.',c:['учитель','інтернет','ти','відповідь']}];
+  var LET=['А','К','Л','Н','И','С','Т','О','М'], SYM=['▲','●','■','◆','★','♥','✚','☾','♣'];
+  function cmap(seed){ var s=H.shuffle(SYM,seed*3+11),m={}; LET.forEach(function(l,i){ m[l]=s[i]; }); return m; }
+  function enc(w,m){ return w.split('').map(function(ch){ return m[ch]; }).join(' '); }
+  function up(x){ return String(x||'').toUpperCase().replace(/[^А-ЯҐЄІЇ]/g,''); }
+  var NOISE=[q('n1','Повідомлення: «Зустрі▒емося о п’я▒ій біля ▒коли». Що там було?',['Зустрінемося о п’ятій біля школи','Зустрічаємося о п’ятій біля кола','Зустрінемося о шостій біля школи','Зустріли мене о п’ятій біля школи']),
+    q('n2','Повідомлення: «Ко▒тр▒льна в ▒етвер». Що там було?',['Контрольна в четвер','Контрольна в вівторок','Концертна в четвер','Контрольна в середу']),
+    q('n3','Повідомлення: «Приходь о ▒ годині». О котрій годині приходити?',['Точно знати не можна — треба перепитати','О першій','О п’ятій','О восьмій']),
+    q('n4','Що таке завада?',['Те, що спотворює або губить частину повідомлення під час передавання','Людина, яка отримує повідомлення','Пристрій, який надсилає повідомлення','Мова, якою написане повідомлення']),
+    q('n5','Як найнадійніше продиктувати номер телефону, коли зв’язок поганий?',['Сказати двічі й попросити співрозмовника повторити його вголос','Сказати якомога швидше','Сказати пошепки','Надіслати смайлик']),
+    q('n6','Чому в шумному класі вчитель часто пише важливе на дошці, а не тільки каже?',['Другий канал допомагає, коли шум заважає першому','Бо писати швидше, ніж говорити','Бо учні не люблять слухати','Бо дошка — це приймач'])];
+  var NET=[['a','ПРИВІТ!!! ХТО ЗРОБИВ ДОМАШКУ??? ВІДПОВІДАЙТЕ!!!',1],['b','Дякую, що допоміг із задачею 🙂',0],['c','Ось фото Максима, як він смішно заснув на перерві 😂',1],['d','Перешли це 10 друзям, бо інакше тобі не пощастить!',1],['e','Скинь мені свій пароль від гри, я прокачаю тобі героя',1],['f','Вибачте, я помилково надіслав не той файл. Ось правильний.',0],['g','Можна я додам твій малюнок у презентацію класу? Підпишу, що він твій.',0],['h','Хто не прийде на мій день народження — той дурень.',1],['i','Нагадую: завтра екскурсія, зустріч о 8:30 біля школи.',0]];
+  var MORSE={'А':'•—','К':'—•—','Л':'•—••','М':'——','Н':'—•','О':'———','С':'•••','Т':'—','И':'—•——','Р':'•—•'};
+  var PATH=['Ти пишеш повідомлення в месенджері й натискаєш «Надіслати»','Телефон перетворює текст на сигнали й передає їх радіохвилями до роутера чи вежі зв’язку','Через інтернет повідомлення потрапляє на сервер месенджера','Сервер знаходить телефон друга й пересилає йому повідомлення','Телефон друга приймає сигнали й знову перетворює їх на текст','Друг читає повідомлення'];
+
+  function inp(el,c,k,ph,w){ var i=el.querySelector('[data-k="'+k+'"]'); i.value=c.d[k]||''; i.oninput=function(){ c.d[k]=i.value; c.save(); }; }
+
+  var TASKS=[
+    {t:'Хто з ким',max:2,remindOpen:1,remind:'<p><b>Інформаційна взаємодія</b> — це обмін повідомленнями. Він буває між людьми (розмова, жест, записка), між людиною й пристроєм (кнопка ліфта, сповіщення на екрані, голосовий помічник) і між пристроями (принтер і комп’ютер, годинник і телефон).</p>',
+      steps:['Для кожної ситуації обери, хто з ким обмінюється повідомленнями.','Усі 10 правильно — 2 бали, 8–9 — 1 бал.'],
+      render:function(el,c){ var rows=H.shuffle(K1,c.seed+5).map(function(r){ return {id:r[0],text:r[1],opts:KIND}; }); H.choiceRows(el,c.d,rows,c.save); },
+      check:function(c){ var n=0; K1.forEach(function(r){ if(c.d[r[0]]===r[2]) n++; }); return [n===10?2:n>=8?1:0,n<10?['Правильно: '+n+' з 10.']:[]]; }},
+    {t:'Джерело, канал, приймач',max:2,remindOpen:1,remind:'<p><b>Джерело</b> — той, хто надсилає повідомлення. <b>Приймач</b> — той, хто його отримує. <b>Канал</b> — те, чим або через що повідомлення передається. Саме повідомлення — це ні те, ні інше.</p>',
+      steps:['У кожній ситуації визнач джерело, канал і приймач. Один варіант у кожній ситуації зайвий.','Усі 15 правильно — 2 бали, 12–14 — 1 бал.'],
+      render:function(el,c){ el.innerHTML=H.shuffle(SC,c.seed+9).map(function(s,k){ var ord=H.shuffle([0,1,2,3],c.seed*5+k*17+1); return '<div class="q"><p>'+s.t+'</p><div class="dcr">'+ROLES.map(function(r,j){ return '<label>'+r+' <select data-k="'+s.id+j+'"><option value="">—</option>'+ord.map(function(i){ return '<option value="'+i+'">'+H.esc(s.c[i])+'</option>'; }).join('')+'</select></label>'; }).join('')+'</div></div>'; }).join('');
+        Array.prototype.forEach.call(el.querySelectorAll('select'),function(x){ var k=x.getAttribute('data-k'); if(c.d[k]!=null) x.value=String(c.d[k]); x.onchange=function(){ c.d[k]=x.value===''?null:+x.value; c.save(); }; }); },
+      check:function(c){ var n=0; SC.forEach(function(s){ for(var j=0;j<3;j++) if(c.d[s.id+j]===j) n++; }); return [n===15?2:n>=12?1:0,n<15?['Правильно: '+n+' з 15.']:[]]; }},
+    {t:'Таємний код',max:2,remind:'<p>Щоб передати повідомлення, його <b>кодують</b> — замінюють знаки іншими: літери — сигналами, звуками, значками. Приймач має знати ту саму таблицю коду, інакше не зрозуміє.</p>',remindOpen:1,
+      steps:['У кожного учня своя таблиця коду — у сусіда вона інша.','Розшифруй два слова (1 бал за обидва).','Зашифруй слово <b>КАНАЛ</b>, натискаючи значки (1 бал).'],
+      render:function(el,c){ var m=cmap(c.seed); c.d.code=c.d.code||'';
+        el.innerHTML='<div class="ctabw"><table class="ctab"><tr>'+LET.map(function(l){ return '<th>'+l+'</th>'; }).join('')+'</tr><tr>'+LET.map(function(l){ return '<td>'+m[l]+'</td>'; }).join('')+'</tr></table></div>'+
+        '<div class="q"><p>Розшифруй: <span class="sym">'+enc('ЛИСТ',m)+'</span></p><input type="text" data-k="d1" maxlength="12"></div>'+
+        '<div class="q"><p>Розшифруй: <span class="sym">'+enc('МОЛОТОК',m)+'</span></p><input type="text" data-k="d2" maxlength="12"></div>'+
+        '<div class="q"><p>Зашифруй слово <b>КАНАЛ</b>:</p><div class="sym out2"></div><div class="kb">'+SYM.map(function(s){ return '<button type="button" class="btn ghost sm sk" data-s="'+s+'">'+s+'</button>'; }).join('')+'<button type="button" class="btn ghost sm" data-s="bs">⌫</button></div></div>';
+        inp(el,c,'d1'); inp(el,c,'d2'); var o=el.querySelector('.out2'); function sh(){ o.textContent=c.d.code.split('').join(' ')||'…'; } sh();
+        Array.prototype.forEach.call(el.querySelectorAll('[data-s]'),function(b){ b.onclick=function(){ var s=b.getAttribute('data-s'); var a=Array.from(c.d.code); if(s==='bs') a.pop(); else if(a.length<10) a.push(s); c.d.code=a.join(''); c.save(); sh(); }; }); },
+      check:function(c){ var m=cmap(c.seed),p=0,msg=[]; if(up(c.d.d1)==='ЛИСТ'&&up(c.d.d2)==='МОЛОТОК') p++; else msg.push('Розшифровано не все правильно.'); if(Array.from(c.d.code||'').join(' ')===enc('КАНАЛ',m)) p++; else msg.push('Шифр слова КАНАЛ неправильний.'); return [p,msg]; }},
+    {t:'Завади',max:2,
+      steps:['Під час передавання частина повідомлення загубилася (▒). Дай відповіді на 6 запитань.','Усі 6 правильно — 2 бали, 5 — 1 бал.'],
+      render:function(el,c){ H.choiceRows(el,c.d,NOISE.map(function(r,k){ return {id:r.id,text:r.text,opts:r.opts,order:H.shuffle([0,1,2,3],c.seed*11+k*29+7)}; }),c.save); },
+      check:function(c){ var n=0; NOISE.forEach(function(r){ if(c.d[r.id]===0) n++; }); return [n===6?2:n===5?1:0,n<6?['Правильно: '+n+' з 6.']:[]]; }},
+    {t:'Чат класу',max:2,remind:'<p>У мережі діють ті самі правила ввічливості, що й наживо. Великі літери — це крик. Чуже фото чи малюнок — тільки зі згоди людини. Пароль не дають нікому. Ланцюжки «перешли 10 друзям» — спам.</p>',
+      steps:['Ці повідомлення з’явилися в чаті класу. Яке можна надсилати, а яке ні?','Усі 9 правильно — 2 бали, 8 — 1 бал.'],
+      render:function(el,c){ H.choiceRows(el,c.d,H.shuffle(NET,c.seed+21).map(function(r){ return {id:r[0],text:'<span class="msg">'+H.esc(r[1])+'</span>',opts:['✅ Можна','⛔ Не можна']}; }),c.save); },
+      check:function(c){ var n=0; NET.forEach(function(r){ if(c.d[r[0]]===r[2]) n++; }); return [n===9?2:n===8?1:0,n<9?['Правильно: '+n+' з 9.']:[]]; }},
+    {t:'Азбука Морзе',max:2,bonus:1,remind:'<p>Азбукою Морзе передавали повідомлення телеграфом і ліхтариком: коротким сигналом (•) і довгим (—). Між літерами — пауза.</p>',remindOpen:1,
+      steps:['Розшифруй два слова й зашифруй одне. Між літерами став пробіл.','Усі три — +2, два — +1.'],
+      render:function(el,c){ var ks=Object.keys(MORSE); c.d.mz=c.d.mz||'';
+        el.innerHTML='<div class="ctabw"><table class="ctab"><tr>'+ks.map(function(l){ return '<th>'+l+'</th>'; }).join('')+'</tr><tr>'+ks.map(function(l){ return '<td class="mo">'+MORSE[l]+'</td>'; }).join('')+'</tr></table></div>'+
+        '<div class="q"><p>Розшифруй: <span class="mo big2">— &nbsp; •— &nbsp; —•—</span></p><input type="text" data-k="m1" maxlength="10"></div>'+
+        '<div class="q"><p>Розшифруй: <span class="mo big2">••• &nbsp; ——— &nbsp; —•</span></p><input type="text" data-k="m2" maxlength="10"></div>'+
+        '<div class="q"><p>Зашифруй слово <b>МАК</b>:</p><div class="mo big2 out3"></div><div class="kb"><button type="button" class="btn ghost sm" data-m="•">• коротко</button><button type="button" class="btn ghost sm" data-m="—">— довго</button><button type="button" class="btn ghost sm" data-m=" ">пробіл</button><button type="button" class="btn ghost sm" data-m="bs">⌫</button></div></div>';
+        inp(el,c,'m1'); inp(el,c,'m2'); var o=el.querySelector('.out3'); function sh(){ o.textContent=c.d.mz||'…'; } sh();
+        Array.prototype.forEach.call(el.querySelectorAll('[data-m]'),function(b){ b.onclick=function(){ var s=b.getAttribute('data-m'); if(s==='bs') c.d.mz=c.d.mz.slice(0,-1); else if(c.d.mz.length<20) c.d.mz+=s; c.save(); sh(); }; }); },
+      check:function(c){ var n=0; if(up(c.d.m1)==='ТАК') n++; if(up(c.d.m2)==='СОН') n++; if((c.d.mz||'').trim().replace(/\s+/g,' ')==='—— •— —•—') n++; return [n===3?2:n===2?1:0,n<3?['Правильно: '+n+' з 3.']:[]]; }},
+    {t:'Шлях повідомлення',max:2,bonus:1,
+      steps:['Ти надсилаєш другові повідомлення в месенджері. Розстав кроки в правильному порядку кнопками ↑ і ↓.','Правильний порядок — +2.'],
+      render:function(el,c){ if(!c.d.ord) c.d.ord=H.shuffle([0,1,2,3,4,5],c.seed+3); if(c.d.ord.join()==='0,1,2,3,4,5') c.d.ord=[1,0,3,2,5,4];
+        function draw(){ el.innerHTML='<ol class="ord">'+c.d.ord.map(function(i,k){ return '<li><span>'+H.esc(PATH[i])+'</span><button type="button" class="btn ghost sm" data-u="'+k+'"'+(k===0?' disabled':'')+'>↑</button><button type="button" class="btn ghost sm" data-dn="'+k+'"'+(k===5?' disabled':'')+'>↓</button></li>'; }).join('')+'</ol>';
+          Array.prototype.forEach.call(el.querySelectorAll('[data-u],[data-dn]'),function(b){ b.onclick=function(){ var k=+(b.getAttribute('data-u')||b.getAttribute('data-dn')),j=b.hasAttribute('data-u')?k-1:k+1,o=c.d.ord,t=o[k]; o[k]=o[j]; o[j]=t; c.save(); draw(); }; }); }
+        draw(); },
+      check:function(c){ var n=0; c.d.ord.forEach(function(v,k){ if(v===k) n++; }); return [n===6?2:0,n<6?['На своєму місці: '+n+' з 6.']:[]]; }}
+  ];
+
+
+  /* ---------- storage: one profile per student name ---------- */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0,x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function fresh(){ return {name:'',pts:{},data:{},task:1,view:'work',act:0,last:0}; }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.name){ var id=nnorm(st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  }
+  function tick(){ if(!st.name) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
+
+  function isBonus(n){ return !!TASKS[n-1].bonus; }
+  function total(){ var s=0; for(var n=1;n<=TASKS.length;n++) s+=st.pts[n]||0; return Math.min(12,s); }
+  function lastCore(){ var k=0; TASKS.forEach(function(t,i){ if(!t.bonus) k=i+1; }); return k; }
+  /* continue code */
+  var INV=17679;
+  function encode(pts,nm){ var idx=0,mul=1; TASKS.forEach(function(t,i){ idx+=Math.min(pts[i+1]||0,t.max)*mul; mul*=t.max+1; }); var N=idx,X=(N*7919+40427)%100000,C=(N*61+29+nhash(nm))%97,d=('0000'+X).slice(-5)+('0'+C).slice(-2); return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5),C=+c.slice(5),N=((X-40427+100000)%100000)*INV%100000; if((N*61+29+nhash(nm))%97!==C) return null; var pts={},idx=N; for(var i=0;i<TASKS.length;i++){ var r=TASKS[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } return idx?null:pts; }
+
+  function ctx(n){ if(!st.data[n]) st.data[n]={}; var sd=0,nm=nnorm(st.name||''); for(var i=0;i<nm.length;i++) sd=(sd*31+nm.charCodeAt(i))%100003; return {d:st.data[n],save:save,H:H,rerender:renderTask,seed:sd+n*101+1}; }
+  function renderTabs(){
+    $('tabs').innerHTML=TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<span class="tabsep">★ бонус</span>':'')+'<button type="button" role="tab" class="tab'+(p>=t.max?' full':'')+(t.bonus?' bonus':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(t.t)+' <span class="pt">'+(t.bonus?'+'+p+'★':p+'/'+t.max)+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">Результат <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; save(); renderAll(); window.scrollTo(0,0); } }); });
+  }
+  function renderTask(){
+    var n=st.task,t=TASKS[n-1],h='';
+    h+='<h2>Завдання '+n+' · '+esc(t.t)+' <span class="note">('+(t.bonus?'★ бонус, +'+t.max:t.max+' '+(t.max===1?'бал':t.max<5?'бали':'балів'))+')</span></h2>';
+    if(t.remind) h+='<details class="remind"'+(t.remindOpen?' open':'')+'><summary>Нагадування</summary><div>'+t.remind+'</div></details>';
+    h+='<ol class="steps">'+t.steps.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ol><div class="area" id="area"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">Перевірити завдання</button>'+(n<TASKS.length?'<button class="btn ghost" type="button" id="nxt">Наступне завдання →</button>':'')+(n>=lastCore()?'<button class="btn ghost" type="button" id="fin">Завершити й показати результат</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    t.render($('area'),ctx(n));
+    $('chk').addEventListener('click',function(){
+      var r=t.check(ctx(n)),raw=r[0]; if(!st.fails) st.fails={}; var f=st.fails[n]||0, cap=Math.floor(t.max/2), pen=t.nopen?0:Math.min(cap,Math.max(0,f-1)), p=Math.max(0,raw-pen);
+      if(raw<t.max&&!t.nopen) st.fails[n]=f+1;
+      if(p>(st.pts[n]||0)) st.pts[n]=p; save(); renderTabs(); renderWho();
+      var fb=$('fb'), f2=st.fails[n]||0, pen2=Math.min(cap,Math.max(0,f2-1)), penTxt=(!t.nopen&&cap>0&&raw<t.max)?'<p class="pen">Невдалих перевірок: '+f2+'. '+(pen2===0?'Перша помилка — без штрафу. Кожна наступна невдала перевірка знімає 1 бал (разом не більше '+cap+').':pen2>=cap?'Штраф уже максимальний: −'+cap+'.':'Тепер за це завдання максимум '+(t.max-pen2)+' з '+t.max+'.')+'</p>':'';
+      if(raw>=t.max&&p>=t.max){ fb.className='feedback ok'; fb.textContent='Готово! Повний бал.'+(r[2]?' '+r[2]:''); }
+      else if(raw>=t.max){ fb.className='feedback part'; fb.innerHTML='Правильно, але через невдалі перевірки: '+p+'/'+t.max+'.'; }
+      else { fb.className='feedback part'; fb.innerHTML=(raw>0?'Поки правильно не все: '+raw+'/'+t.max+(pen?' (зі штрафом '+p+')':''):'Поки 0 балів.')+(r[1]&&r[1].length?'<ul>'+r[1].map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>':'')+penTxt; }
+    });
+    if($('nxt')) $('nxt').addEventListener('click',function(){ st.task=n+1; save(); renderAll(); window.scrollTo(0,0); });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){ st.view='result'; save(); renderAll(); window.scrollTo(0,0); }
+  function renderResult(){
+    var mins=Math.max(1,Math.round((st.act||0)/60000)),h='';
+    h+='<h2 style="margin:0 0 4px">Результат практичної роботы</h2>'.replace('роботы','роботи');
+    h+='<p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+GRADE+' клас</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">з 12</span></div>';
+    h+='<table class="res">'+TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<tr><td colspan="2"><b>★ Бонус — основні дають до 10, 11 і 12 — тільки з бонусом</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(t.t)+'</td><td>'+(t.bonus?'+'+p+' / '+t.max+' ★':p+' / '+t.max)+'</td></tr>'; }).join('')+'<tr><td>Час роботи (без перерв)</td><td>'+mins+' хв</td></tr><tr><td>Код продовження</td><td style="font-family:monospace;font-size:18px">'+encode(st.pts,st.name)+'</td></tr></table>';
+    h+='<p class="note">Покажи цей екран учителю.</p><button class="btn ghost" type="button" id="back">Повернутися до завдань</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; save(); renderAll(); });
+  }
+  function renderWho(){ var on=!!st.name; $('who').hidden=!on; if(on) $('who').innerHTML=esc(st.name)+' · '+GRADE+' клас<br><b>'+total()+'</b> / 12<small>код продовження: '+encode(st.pts,st.name)+'</small>'; }
+  function renderAll(){
+    var on=!!st.name;
+    $('startBox').hidden=on; $('work').hidden=!on||st.view==='result'; $('resultBox').hidden=!on||st.view!=='result';
+    $('other').hidden=!on; $('restart').hidden=!on; $('ask').hidden=true;
+    renderWho(); if(!on) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask();
+  }
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<3||n.indexOf(' ')<0&&n.length<5){ $('startErr').textContent='Напиши ім\'я та прізвище.'; return; }
+    var id=nnorm(n);
+    if(DB.p[id]){ st=DB.p[id]; st.view='work'; } else { st=fresh(); st.name=n; }
+    if(c){ var d=decode(c,n); if(!d){ $('startErr').textContent='Код не підходить. Перевір цифри й ім\'я — пиши так само, як першого разу.'; return; } Object.keys(d).forEach(function(k){ if(d[k]>(st.pts[k]||0)) st.pts[k]=d[k]; }); }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+  }
+  $('startGo').addEventListener('click',go);
+  $('nameIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('nameIn').value=''; $('codeIn').value=''; renderAll(); window.scrollTo(0,0); });
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('nameIn').value=''; renderAll(); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  renderAll();
+  window.__p={st:function(){ return st; },TASKS:TASKS};
+})();
+</script>
+</body>
+</html>

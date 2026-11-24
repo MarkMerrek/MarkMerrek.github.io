@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Растровий редактор · 6 клас</title>
+<style>
+:root{
+  --bg:#F3F6FA; --surface:#FFFFFF; --surface-2:#E9EEF5; --ink:#141922; --ink-2:#3D4656; --muted:#667085;
+  --line:#D5DCE6; --line-strong:#BBC5D3; --accent:#2D58B8; --accent-soft:#E2EAF8;
+  --ok:#14804F; --ok-soft:#DDF3E8; --bad:#B23A3A; --bad-soft:#F8E1E1; --warm:#8A570F; --warm-soft:#F6EAD6;
+  --shadow:0 1px 2px rgba(20,25,34,.05),0 8px 24px -16px rgba(20,25,34,.35); color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+    --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+    --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10141B; --surface:#1A202B; --surface-2:#252D3A; --ink:#EEF2F8; --ink-2:#C3CBD8; --muted:#8C96A9;
+  --line:#2E3747; --line-strong:#3E4859; --accent:#8DB0F2; --accent-soft:#1E2A40;
+  --ok:#5FD3A2; --ok-soft:#173327; --bad:#F09090; --bad-soft:#3A1E1E; --warm:#E3B06A; --warm-soft:#2E2417;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.9); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:17px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;padding:22px 0 10px}
+.kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.1;margin:4px 0 0;letter-spacing:-.01em}
+.who{text-align:right;font-size:15px;color:var(--ink-2)}
+.who b{font-size:24px;color:var(--ink)}
+.who small{display:block;font-size:12.5px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow)}
+.start{max-width:600px;margin:28px auto;display:grid;gap:14px}
+.start h2{margin:0;font-size:22px}
+.start label{display:grid;gap:6px;font-weight:600}
+input[type=text],select{background:var(--surface);border:2px solid var(--line-strong);border-radius:10px;padding:10px 12px;font-size:17px}
+input[type=text]:focus,select:focus{outline:3px solid var(--accent-soft);border-color:var(--accent)}
+.btn{appearance:none;border:2px solid var(--accent);background:var(--accent);color:var(--surface);border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-size:16px}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:default}
+.pen{color:var(--warm);font-weight:600;margin:8px 0 0;font-size:15px}
+.err{color:var(--bad);font-weight:600;min-height:1.3em}
+.note{color:var(--muted);font-size:15px}
+.intro{background:var(--accent-soft);border-radius:12px;padding:14px 16px}
+.intro h3{margin:0 0 6px;font-size:16px}
+.intro p{margin:0 0 6px}.intro p:last-child{margin:0}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.tab{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:700;font-size:15px;display:flex;gap:6px;align-items:center}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.tab .pt{font-size:13px;color:var(--muted);font-weight:600}
+.tab.full .pt{color:var(--ok)}
+.tab.bonus{border-style:dashed}
+.tabsep{align-self:center;font-size:13px;font-weight:700;color:var(--muted);padding:0 4px 0 10px;border-left:2px solid var(--line-strong);margin-left:4px}
+.task h2{margin:0 0 6px;font-size:21px}
+.task h2 .note{font-size:14px;font-weight:600}
+.task ol.steps{margin:6px 0 12px;padding-left:22px}
+.task ol.steps li{margin:3px 0}
+details.remind{margin:0 0 12px;background:var(--warm-soft);border-radius:10px;padding:8px 12px}
+details.remind summary{cursor:pointer;font-weight:700;color:var(--warm)}
+details.remind div{margin-top:6px}
+.area{margin:10px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:12px;border-radius:10px;padding:10px 14px;font-weight:600}
+.feedback:empty{display:none}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.part{background:var(--warm-soft);color:var(--ink)}
+.feedback ul{margin:6px 0 0;padding-left:20px;font-weight:500}
+/* common widgets */
+.q{background:var(--surface-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.q > p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:7px 12px;cursor:pointer;font-weight:600;font-size:15.5px}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt.right{border-color:var(--ok);background:var(--ok-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.res{width:100%;border-collapse:collapse;margin:10px 0}
+.res td{padding:7px 6px;border-bottom:1px solid var(--line)}
+.res td:last-child{text-align:right;font-weight:700;white-space:nowrap}
+.res td[colspan]{white-space:normal;text-align:left}
+.big{font-size:64px;font-weight:800;line-height:1}
+.bottom{margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.confirm{display:inline-flex;gap:8px;align-items:center}
+.ed{display:grid;gap:8px;min-width:0}
+.tools{display:flex;flex-wrap:wrap;gap:6px}
+.tl{appearance:none;border:2px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:6px 10px;font-weight:700;font-size:15px;cursor:pointer}
+.tl[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.pal{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pc{appearance:none;width:34px;height:34px;border-radius:8px;border:2px solid var(--line-strong);cursor:pointer}
+.pc.on{outline:3px solid var(--accent);outline-offset:2px}
+.cur{margin-left:6px;font-size:15px;color:var(--muted)}
+.cur b{color:var(--ink);border-bottom:4px solid;padding-bottom:1px}
+.selbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--accent-soft);padding:6px 8px;border-radius:10px;font-size:15px}
+.cpl{display:flex;gap:6px;align-items:center;font-weight:600}
+.cvw{width:100%;overflow:auto}
+.ecv{display:block;touch-action:none;cursor:crosshair;border:2px solid var(--line-strong);border-radius:4px;image-rendering:pixelated}
+.einfo{color:var(--muted);font-size:14px;align-self:center}
+.edrow{margin-top:0}
+.epane{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start}
+.ref .thumb{border:2px solid var(--line-strong);border-radius:4px;display:block;max-width:100%}
+.epane .ref[hidden]+.ework{grid-column:1/-1}
+@media (max-width:700px){.epane{grid-template-columns:1fr}}
+.qa{margin-top:12px;display:grid;gap:8px}
+.qa label{font-weight:600}
+.qa input{width:100px;margin-left:8px}
+
+@media print{.tabs,.bottom{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="kicker">Інформатика · 6 клас · практична робота</div><h1>Растровий редактор</h1></div>
+    <div class="who" id="who" hidden></div>
+  </header>
+
+  <section class="card start" id="startBox" hidden>
+    <h2>Початок</h2>
+    <div class="intro"><h3>Растровий редактор просто на сторінці</h3><p>Перемальовуй, заливай, виділяй, віддзеркалюй, обрізай. Основні 5 завдань дають до 10 балів, 11 і 12 — тільки з бонусними ★.</p><p><b>Перевіряй уважно:</b> перша помилкова перевірка завдання безкоштовна, кожна наступна знімає бал.</p></div>
+    <label>Твоє ім'я та прізвище<input type="text" id="nameIn" maxlength="40" autocomplete="off"></label>
+    <details style="font-size:15px"><summary class="note" style="cursor:pointer">Пересів за інший комп'ютер? Код продовження</summary>
+      <label style="margin-top:8px">Код продовження (з іншого комп'ютера)<input type="text" id="codeIn" maxlength="12" inputmode="numeric" autocomplete="off" style="max-width:180px"></label></details>
+    <div class="err" id="startErr"></div>
+    <div><button class="btn" type="button" id="startGo">Почати</button></div>
+    <p class="note" style="margin:0">Робота зберігається на цьому комп'ютері. Урок перервали? Наступного разу введи те саме ім'я — продовжиш з того ж місця.</p>
+  </section>
+
+  <div id="work" hidden>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <section class="card task" id="task" aria-live="polite"></section>
+  </div>
+
+  <section class="card" id="resultBox" hidden></section>
+
+  <div class="bottom">
+    <button class="btn ghost sm" type="button" id="other" hidden>Інший учень</button>
+    <button class="btn ghost sm" type="button" id="restart" hidden>Почати заново</button>
+    <span class="confirm" id="ask" hidden><span>Усі бали цього учня зітруться. Точно?</span>
+      <button class="btn sm" type="button" id="askYes" style="background:var(--bad);border-color:var(--bad)">Так</button>
+      <button class="btn ghost sm" type="button" id="askNo">Ні</button></span>
+    <button class="btn ghost sm" type="button" id="theme" style="margin-left:auto">Світла / темна</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY='inf6-rastr-v1', GRADE='6';
+  var $=function(id){ return document.getElementById(id); };
+  function esc(x){ return String(x).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function shuffle(a,seed){ var r=seed||1; a=a.slice(); for(var i=a.length-1;i>0;i--){ r=(r*9301+49297)%233280; var j=Math.floor(r/233280*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+  /* choose-one rows: rows=[{id,text,opts:[..]}]; answer saved in d[id] */
+  function choiceRows(el,d,rows,save){
+    el.innerHTML=rows.map(function(r){ var ord=r.order||r.opts.map(function(_,i){ return i; }); return '<div class="q"><p>'+r.text+'</p><div class="opts">'+ord.map(function(i){ var o=r.opts[i]; return '<button type="button" class="opt" data-r="'+r.id+'" data-i="'+i+'" aria-pressed="'+(d[r.id]===i)+'">'+o+'</button>'; }).join('')+'</div></div>'; }).join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.opt'),function(b){ b.addEventListener('click',function(){ var r=b.getAttribute('data-r'); d[r]=+b.getAttribute('data-i'); save(); Array.prototype.forEach.call(el.querySelectorAll('.opt[data-r="'+r+'"]'),function(x){ x.setAttribute('aria-pressed',x===b?'true':'false'); }); }); });
+  }
+  function countRight(d,rows,key){ var n=0; rows.forEach(function(r){ if(d[r.id]===key[r.id]) n++; }); return n; }
+  var H={esc:esc,shuffle:shuffle,choiceRows:choiceRows,countRight:countRight};
+
+  /* ===== 6 клас: растровий редактор ===== */
+  var PAL={'.':'#FFFFFF','1':'#1E2430','2':'#E0403A','3':'#F28A1E','4':'#F7D531','5':'#3FA34D','6':'#9AD3F5','7':'#2D58B8','8':'#8B5A2B','9':'#F29AC0','a':'#9AA3AF','b':'#F1D7A6'};
+  var PKEYS=['1','2','3','4','5','6','7','8','9','a','b','.'];
+  var PNAME={'.':'білий','1':'чорний','2':'червоний','3':'помаранчевий','4':'жовтий','5':'зелений','6':'блакитний','7':'синій','8':'коричневий','9':'рожевий','a':'сірий','b':'бежевий'};
+  function rows2(r){ return {w:r[0].length,h:r.length,g:r.join('')}; }
+  function blank(w,h){ return {w:w,h:h,g:new Array(w*h+1).join('.')}; }
+  function flood(o,x,y,col){ var w=o.w,h=o.h,a=o.g.split(''),from=a[y*w+x]; if(from===col) return o.g; var st=[[x,y]]; while(st.length){ var p=st.pop(),px=p[0],py=p[1]; if(px<0||py<0||px>=w||py>=h||a[py*w+px]!==from) continue; a[py*w+px]=col; st.push([px+1,py],[px-1,py],[px,py+1],[px,py-1]); } return a.join(''); }
+  function diff(d,t){ if(d.w!==t.w||d.h!==t.h) return -1; var n=0; for(var i=0;i<t.g.length;i++) if(d.g[i]!==t.g[i]) n++; return n; }
+  function thumb(t,cell){ var cv=document.createElement('canvas'); cv.width=t.w*cell; cv.height=t.h*cell; cv.className='thumb'; var x=cv.getContext('2d'); for(var i=0;i<t.g.length;i++){ x.fillStyle=PAL[t.g[i]]; x.fillRect((i%t.w)*cell,Math.floor(i/t.w)*cell,cell,cell); } x.strokeStyle='rgba(0,0,0,.08)'; for(var k=0;k<=t.w;k++){ x.beginPath(); x.moveTo(k*cell+.5,0); x.lineTo(k*cell+.5,t.h*cell); x.stroke(); } for(k=0;k<=t.h;k++){ x.beginPath(); x.moveTo(0,k*cell+.5); x.lineTo(t.w*cell,k*cell+.5); x.stroke(); } return cv; }
+
+  /* editor: cfg {init:{w,h,g}, scale:bool, count:bool} ; state in c.d.e */
+  function editor(el,c,cfg){
+    var d=c.d; if(!d.e) d.e={w:cfg.init.w,h:cfg.init.h,g:cfg.init.g,n:0};
+    var E=d.e, tool=d.tool||'pen', col=d.col||'1', sel=null, undo=[], drag=null, copyMode=!!d.cp;
+    var TOOLS=[['pen','✏️ Олівець'],['era','🧽 Гумка'],['fill','🪣 Заливка'],['pick','💧 Піпетка'],['frame','▭ Рамка'],['rect','■ Прямокутник'],['sel','⬚ Виділення']];
+    el.innerHTML='<div class="ed"><div class="tools">'+TOOLS.map(function(t){ return '<button type="button" class="tl" data-t="'+t[0]+'">'+t[1]+'</button>'; }).join('')+'</div>'+
+      '<div class="pal">'+PKEYS.map(function(k){ return '<button type="button" class="pc" data-c="'+k+'" title="'+PNAME[k]+'" style="background:'+PAL[k]+'"></button>'; }).join('')+'<span class="cur">Колір: <b></b></span></div>'+
+      '<div class="selbar" hidden><span>Виділення:</span><button type="button" class="btn sm ghost" data-o="fh">↔ Віддзеркалити</button><button type="button" class="btn sm ghost" data-o="fv">↕ Віддзеркалити</button><button type="button" class="btn sm ghost" data-o="rot">⟳ 90°</button><button type="button" class="btn sm ghost" data-o="clr">🗑 Очистити</button><button type="button" class="btn sm ghost" data-o="crop">✂ Обрізати полотно</button><label class="cpl"><input type="checkbox" data-o="cp"> перетягувати копію</label></div>'+
+      '<div class="cvw"><canvas class="ecv"></canvas></div>'+
+      '<div class="row edrow"><button type="button" class="btn sm ghost" data-o="undo">↶ Скасувати</button>'+(cfg.scale?'<button type="button" class="btn sm ghost" data-o="x2">×2 Збільшити зображення</button>':'')+'<button type="button" class="btn sm ghost" data-o="reset">↺ Почати заново</button><span class="einfo"></span></div></div>';
+    var cv=el.querySelector('.ecv'), sb=el.querySelector('.selbar'), info=el.querySelector('.einfo'), cell=20;
+    function pushU(){ undo.push({w:E.w,h:E.h,g:E.g,sel:sel&&{x:sel.x,y:sel.y,w:sel.w,h:sel.h}}); if(undo.length>60) undo.shift(); }
+    function act(){ E.n=(E.n||0)+1; c.save(); }
+    function setTool(t){ tool=t; d.tool=t; if(t!=='sel'){ sel=null; } c.save(); ui(); draw(); }
+    function ui(){
+      Array.prototype.forEach.call(el.querySelectorAll('.tl'),function(b){ b.setAttribute('aria-pressed',b.getAttribute('data-t')===tool?'true':'false'); });
+      Array.prototype.forEach.call(el.querySelectorAll('.pc'),function(b){ b.classList.toggle('on',b.getAttribute('data-c')===col); });
+      el.querySelector('.cur b').textContent=PNAME[col]; el.querySelector('.cur b').style.borderColor=PAL[col];
+      sb.hidden=!sel; el.querySelector('[data-o="cp"]').checked=copyMode;
+      info.textContent='Полотно '+E.w+'×'+E.h+(cfg.count?' · дій: '+(E.n||0):'');
+    }
+    function size(){ var avail=Math.max(200,(el.querySelector('.cvw').clientWidth||400)-4); cell=Math.max(8,Math.min(30,Math.floor(avail/E.w))); cv.width=E.w*cell; cv.height=E.h*cell; cv.style.width=E.w*cell+'px'; cv.style.height=E.h*cell+'px'; }
+    function draw(prev){
+      size(); var x=cv.getContext('2d'), G=prev||E.g;
+      for(var i=0;i<G.length;i++){ x.fillStyle=PAL[G[i]]||'#fff'; x.fillRect((i%E.w)*cell,Math.floor(i/E.w)*cell,cell,cell); }
+      x.strokeStyle='rgba(0,0,0,.10)'; x.lineWidth=1;
+      for(var k=0;k<=E.w;k++){ x.beginPath(); x.moveTo(k*cell+.5,0); x.lineTo(k*cell+.5,E.h*cell); x.stroke(); }
+      for(k=0;k<=E.h;k++){ x.beginPath(); x.moveTo(0,k*cell+.5); x.lineTo(E.w*cell,k*cell+.5); x.stroke(); }
+      var s=drag&&drag.mode==='newsel'?norm(drag.x0,drag.y0,drag.x1,drag.y1):drag&&drag.mode==='move'?{x:sel.x+drag.dx,y:sel.y+drag.dy,w:sel.w,h:sel.h}:sel;
+      if(s){ x.setLineDash([6,4]); x.lineWidth=2; x.strokeStyle='#2D58B8'; x.strokeRect(s.x*cell+1,s.y*cell+1,s.w*cell-2,s.h*cell-2); x.setLineDash([]); }
+    }
+    function norm(a,b,c2,d2){ var x0=Math.max(0,Math.min(a,c2)),y0=Math.max(0,Math.min(b,d2)),x1=Math.min(E.w-1,Math.max(a,c2)),y1=Math.min(E.h-1,Math.max(b,d2)); return {x:x0,y:y0,w:x1-x0+1,h:y1-y0+1}; }
+    function at(e){ var r=cv.getBoundingClientRect(); return [Math.floor((e.clientX-r.left)/r.width*E.w),Math.floor((e.clientY-r.top)/r.height*E.h)]; }
+    function put(a,x,y,v){ if(x>=0&&y>=0&&x<E.w&&y<E.h) a[y*E.w+x]=v; }
+    function line(a,x0,y0,x1,y1,v){ var dx=Math.abs(x1-x0),dy=-Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,er=dx+dy; for(;;){ put(a,x0,y0,v); if(x0===x1&&y0===y1) break; var e2=2*er; if(e2>=dy){ er+=dy; x0+=sx; } if(e2<=dx){ er+=dx; y0+=sy; } } }
+    function rectG(g,s,v,fillIt){ var a=g.split(''); for(var y=s.y;y<s.y+s.h;y++) for(var x=s.x;x<s.x+s.w;x++){ if(fillIt||y===s.y||y===s.y+s.h-1||x===s.x||x===s.x+s.w-1) a[y*E.w+x]=v; } return a.join(''); }
+    function lifted(){ var b=[]; for(var y=0;y<sel.h;y++) for(var x=0;x<sel.w;x++) b.push(E.g[(sel.y+y)*E.w+sel.x+x]); return b; }
+    function moved(dx,dy){ var a=E.g.split(''),b=lifted(); if(!copyMode) for(var y=0;y<sel.h;y++) for(var x=0;x<sel.w;x++) a[(sel.y+y)*E.w+sel.x+x]='.'; for(y=0;y<sel.h;y++) for(x=0;x<sel.w;x++) put(a,sel.x+x+dx,sel.y+y+dy,b[y*sel.w+x]); return a.join(''); }
+    function inSel(p){ return sel&&p[0]>=sel.x&&p[0]<sel.x+sel.w&&p[1]>=sel.y&&p[1]<sel.y+sel.h; }
+    cv.addEventListener('pointerdown',function(e){
+      e.preventDefault(); var p=at(e); if(p[0]<0||p[1]<0||p[0]>=E.w||p[1]>=E.h) return; try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+      if(tool==='pen'||tool==='era'){ pushU(); var a=E.g.split(''); put(a,p[0],p[1],tool==='era'?'.':col); E.g=a.join(''); drag={mode:'paint',lx:p[0],ly:p[1],g0:undo[undo.length-1].g}; draw(); }
+      else if(tool==='fill'){ var ng=flood(E,p[0],p[1],col); if(ng!==E.g){ pushU(); E.g=ng; act(); } draw(); ui(); }
+      else if(tool==='pick'){ col=E.g[p[1]*E.w+p[0]]; d.col=col; c.save(); ui(); }
+      else if(tool==='frame'||tool==='rect'){ drag={mode:'shape',x0:p[0],y0:p[1],x1:p[0],y1:p[1]}; draw(rectG(E.g,norm(p[0],p[1],p[0],p[1]),col,tool==='rect')); }
+      else if(tool==='sel'){ if(inSel(p)) drag={mode:'move',sx:p[0],sy:p[1],dx:0,dy:0}; else { sel=null; drag={mode:'newsel',x0:p[0],y0:p[1],x1:p[0],y1:p[1]}; } draw(); ui(); }
+    });
+    cv.addEventListener('pointermove',function(e){ if(!drag) return; var p=at(e);
+      if(drag.mode==='paint'){ var a=E.g.split(''); line(a,drag.lx,drag.ly,Math.max(0,Math.min(E.w-1,p[0])),Math.max(0,Math.min(E.h-1,p[1])),tool==='era'?'.':col); drag.lx=Math.max(0,Math.min(E.w-1,p[0])); drag.ly=Math.max(0,Math.min(E.h-1,p[1])); E.g=a.join(''); draw(); }
+      else if(drag.mode==='shape'){ drag.x1=p[0]; drag.y1=p[1]; draw(rectG(E.g,norm(drag.x0,drag.y0,p[0],p[1]),col,tool==='rect')); }
+      else if(drag.mode==='newsel'){ drag.x1=p[0]; drag.y1=p[1]; draw(); }
+      else if(drag.mode==='move'){ drag.dx=p[0]-drag.sx; drag.dy=p[1]-drag.sy; draw(moved(drag.dx,drag.dy)); }
+    });
+    function up(){ if(!drag) return; var dr=drag; drag=null;
+      if(dr.mode==='paint'){ if(E.g!==dr.g0) act(); else undo.pop(); }
+      else if(dr.mode==='shape'){ pushU(); E.g=rectG(E.g,norm(dr.x0,dr.y0,dr.x1,dr.y1),col,tool==='rect'); act(); }
+      else if(dr.mode==='newsel'){ sel=norm(dr.x0,dr.y0,dr.x1,dr.y1); }
+      else if(dr.mode==='move'&&(dr.dx||dr.dy)){ pushU(); E.g=moved(dr.dx,dr.dy); var nx=Math.max(0,sel.x+dr.dx),ny=Math.max(0,sel.y+dr.dy),ex=Math.min(E.w,sel.x+dr.dx+sel.w),ey=Math.min(E.h,sel.y+dr.dy+sel.h); sel=ex>nx&&ey>ny?{x:nx,y:ny,w:ex-nx,h:ey-ny}:null; act(); }
+      c.save(); draw(); ui(); }
+    cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+    Array.prototype.forEach.call(el.querySelectorAll('.tl'),function(b){ b.onclick=function(){ setTool(b.getAttribute('data-t')); }; });
+    Array.prototype.forEach.call(el.querySelectorAll('.pc'),function(b){ b.onclick=function(){ col=b.getAttribute('data-c'); d.col=col; if(tool==='era'||tool==='pick'||tool==='sel') setTool('pen'); else { c.save(); ui(); } }; });
+    function op(o){
+      if(o==='undo'){ var u=undo.pop(); if(u){ E.w=u.w; E.h=u.h; E.g=u.g; sel=u.sel; c.save(); } }
+      else if(o==='reset'){ E.w=cfg.init.w; E.h=cfg.init.h; E.g=cfg.init.g; E.n=0; sel=null; undo=[]; c.save(); }
+      else if(o==='x2'){ if(E.w*2>32||E.h*2>32){ info.textContent='Завелике: не більше 32×32.'; return; } pushU(); var a=[]; for(var y=0;y<E.h*2;y++) for(var x=0;x<E.w*2;x++) a.push(E.g[Math.floor(y/2)*E.w+Math.floor(x/2)]); E.w*=2; E.h*=2; E.g=a.join(''); sel=null; act(); }
+      else if(o==='cp'){ copyMode=el.querySelector('[data-o="cp"]').checked; d.cp=copyMode; c.save(); }
+      else if(sel){
+        var b=lifted(),a2=E.g.split(''),s=sel; pushU();
+        if(o==='fh'||o==='fv'){ for(var yy=0;yy<s.h;yy++) for(var xx=0;xx<s.w;xx++){ var sx=o==='fh'?s.w-1-xx:xx, sy=o==='fv'?s.h-1-yy:yy; a2[(s.y+yy)*E.w+s.x+xx]=b[sy*s.w+sx]; } E.g=a2.join(''); }
+        else if(o==='rot'){ if(s.w!==s.h){ undo.pop(); info.textContent='Повертати можна лише квадратне виділення.'; return; } for(yy=0;yy<s.h;yy++) for(xx=0;xx<s.w;xx++) a2[(s.y+yy)*E.w+s.x+xx]=b[(s.w-1-xx)*s.w+yy]; E.g=a2.join(''); }
+        else if(o==='clr'){ for(yy=0;yy<s.h;yy++) for(xx=0;xx<s.w;xx++) a2[(s.y+yy)*E.w+s.x+xx]='.'; E.g=a2.join(''); }
+        else if(o==='crop'){ E.w=s.w; E.h=s.h; E.g=b.join(''); sel=null; }
+        act();
+      }
+      draw(); ui();
+    }
+    Array.prototype.forEach.call(el.querySelectorAll('[data-o]'),function(b){ if(b.tagName==='INPUT') b.onchange=function(){ op('cp'); }; else b.onclick=function(){ op(b.getAttribute('data-o')); }; });
+    ui(); draw(); window.addEventListener('resize',function(){ if(document.body.contains(cv)&&!drag) draw(); });
+    return E;
+  }
+  function pane(el,c,cfg,left){ el.innerHTML='<div class="epane"><div class="ref"><p class="note" style="margin:0 0 6px">'+left+'</p></div><div class="ework"></div></div>'+(cfg.after||''); if(cfg.ref) el.querySelector('.ref').appendChild(thumb(cfg.ref,cfg.refCell||14)); else el.querySelector('.ref').hidden=true; return editor(el.querySelector('.ework'),c,cfg); }
+
+  /* pictures */
+  var MUSH=rows2(["............","....2222....","..222..222..",".2222..2222.",".2..2222..2.",".2..2222..2.","222222222222","...bbbbbb...","...b1bb1b...","...bbbbbb...","...bbbbbb...","555555555555"]);
+  var HOUSE=rows2(["................",".......11.......","......1..1......",".....1....1.....","....1......1....","...1111111111...","...1........1...","...1..1111..1...","......1..1..1...","...1..1..1..1...","...1..1111..1...","...1........1...","1111111111111111","................"]);
+  var HOUSE_T=(function(){ var o={w:HOUSE.w,h:HOUSE.h,g:HOUSE.g}; var a=o.g.split(''); a[8*16+3]='1'; o.g=a.join(''); [[5,7,'4'],[7,3,'2'],[7,8,'7'],[0,0,'6'],[0,13,'5']].forEach(function(s){ o.g=flood(o,s[0],s[1],s[2]); }); return o; })();
+  var BL=[".....1..",".222..1.","24422221","24774421","24774421",".2244221","..9999.1",".99339.1",".93339.1","..9999.1",".......1","........"];
+  var BUTT0=rows2(BL.map(function(r){ return r+'........'; }));
+  var BUTT_T=rows2(BL.map(function(r){ return r+r.split('').reverse().join(''); }));
+  var HEART=[".22.22.","2222222","2222222",".22222.","..222..","...2..."];
+  var CROP0=(function(){ var a=[]; for(var y=0;y<16;y++){ var r=''; for(var x=0;x<16;x++){ var hy=y-3,hx=x-8; r+=(hy>=0&&hy<6&&hx>=0&&hx<7)?HEART[hy][hx]:'.'; } a.push(r); } return rows2(a); })();
+  var CROP_T=(function(){ var a=[]; for(var y=0;y<12;y++){ var r=''; for(var x=0;x<14;x++) r+=HEART[y>>1][x>>1]; a.push(r); } return rows2(a); })();
+  var LAND=(function(){ var a=[]; for(var y=0;y<12;y++){ var r=''; for(var x=0;x<16;x++){ var ch=y>=7?'5':'6'; if(y>=1&&y<=3&&x>=12&&x<=14) ch='4'; [1,5,9].forEach(function(t){ if((y===4||y===5)&&x>=t&&x<=t+2) ch='5'; if(y===6&&x===t+1) ch='8'; }); r+=ch; } a.push(r); } return rows2(a); })();
+  var CAT=rows2(["3..........3","33........33","333333333333","331133331133","331533335133","333333333333","333339933333","333313313333","333331133333",".3333333333.","..33333333..","...333333..."]);
+  var CAT_B=(function(){ var a=CAT.g.split(''); [[0,11,'.'],[3,3,'3'],[4,8,'7'],[6,6,'2'],[9,0,'3'],[11,5,'.']].forEach(function(p){ a[p[0]*12+p[1]]=p[2]; }); return {w:12,h:12,g:a.join('')}; })();
+
+  function q(id,text,opts){ return {id:id,text:text,opts:opts}; }
+  var QZ=[q('a','Заливка розфарбувала весь малюнок, а не лише стіну будинку. Чому?',['У контурі стіни є щілина — він не замкнений','Обрано не той колір','Малюнок векторний','На малюнку забагато пікселів']),
+    q('b','Що робить «Піпетка»?',['Бере колір з малюнка й робить його поточним','Стирає пікселі','Збільшує малюнок','Заливає замкнену область']),
+    q('c','Растровий малюнок 10×10 збільшили в 4 рази. Що сталося?',['Кожен піксель став квадратиком 4×4, нових деталей не з’явилося','З’явилися нові дрібні деталі','Малюнок став векторним','Кольорів стало більше']),
+    q('d','Кадрування — це…',['обрізання країв, щоб лишилася потрібна частина','додавання рамки довкола малюнка','зміна кольорів','поворот на 90°']),
+    q('e','Як скасувати останню дію майже в будь-якому редакторі?',['Ctrl + Z','Ctrl + C','Ctrl + V','Ctrl + S']),
+    q('f','На якій відстані від очей має бути екран?',['50–70 см, приблизно на витягнуту руку','10–20 см','20–30 см','понад 2 метри']),
+    q('g','З комп’ютера пахне горілим. Що робиш?',['Нічого не чіпаю й одразу кажу вчителю','Відкриваю корпус і шукаю, що горить','Висмикую кабель із розетки','Працюю далі, поки не задимить']),
+    q('h','Фото з телефона зберігають у форматі, що стискає з невеликою втратою якості. Це…',['JPG','PNG','BMP','TXT'])];
+
+  var TASKS=[
+    {t:'Інструктаж і інструменти',max:2,remindOpen:1,remind:'<p><b>Безпека:</b> екран — на відстані витягнутої руки, спина спирається на стілець. Не торкайся дротів і розеток, не їж і не пий біля комп’ютера. Запах горілого, іскри, дим — нічого не чіпай, одразу скажи вчителю. Кожні 15–20 хвилин — гімнастика для очей.</p><p><b>Растровий редактор</b> (Paint, GIMP, Photopea) працює з пікселями: олівець фарбує по одному, <b>заливка</b> фарбує замкнену область одного кольору, <b>піпетка</b> бере колір з малюнка, <b>виділення</b> дає змогу перемістити, скопіювати, віддзеркалити чи обрізати частину.</p>',
+      steps:['Дай відповіді на 8 запитань.','Усі 8 правильно — 2 бали, 6–7 — 1 бал.'],
+      render:function(el,c){ H.choiceRows(el,c.d,QZ.map(function(r,k){ return {id:r.id,text:r.text,opts:r.opts,order:H.shuffle([0,1,2,3],c.seed*7+k*31+3)}; }),c.save); },
+      check:function(c){ var n=0; QZ.forEach(function(r){ if(c.d[r.id]===0) n++; }); return [n===8?2:n>=6?1:0,n<8?['Правильних відповідей: '+n+' з 8.']:[]]; }},
+    {t:'Перемалюй за зразком',max:2,
+      steps:['Намалюй праворуч точно такий самий гриб, як на зразку, піксель у піксель.','Великі однобарвні частини швидше робити прямокутником і заливкою, ніж олівцем.','Ні одного неправильного пікселя — 2 бали, до 3 помилок — 1.'],
+      render:function(el,c){ pane(el,c,{init:blank(12,12),ref:MUSH,refCell:14},'Зразок 12×12'); },
+      check:function(c){ var m=diff(c.d.e||blank(12,12),MUSH); return [m===0?2:m>=0&&m<=3?1:0,m!==0?[m<0?'Розмір полотна має бути 12×12.':'Не збігається пікселів: '+m+'.']:[]]; }},
+    {t:'Розфарбуй заливкою',max:2,
+      steps:['Розфарбуй будинок: <b>стіни — жовті</b>, <b>дах — червоний</b>, <b>вікно — синє</b>, <b>небо — блакитне</b>, <b>трава внизу — зелена</b>. Чорний контур лишається чорним.','Щось піде не так — натисни «↶ Скасувати» і подумай, чому.','Усе точно — 2 бали, до 3 помилкових пікселів — 1.'],
+      render:function(el,c){ pane(el,c,{init:HOUSE},''); },
+      check:function(c){ var m=diff(c.d.e||HOUSE,HOUSE_T); return [m===0?2:m>=0&&m<=3?1:0,m!==0?['Не так, як треба, пікселів: '+m+'.']:[]]; }},
+    {t:'Метелик',max:2,remind:'<p>Виділи частину малюнка інструментом «⬚ Виділення». Перетягни виділене мишкою — воно переміститься. Якщо поставити позначку «перетягувати копію», на старому місці лишиться оригінал. Кнопки «↔» і «↕» віддзеркалюють виділене.</p>',
+      steps:['Ліва половина метелика вже є. Домалюй праву так, щоб метелик став дзеркально симетричним: права половина — дзеркальне відображення лівої.','Ліву половину не змінюй. Полотно 16×12.','Точно — 2 бали, до 4 помилкових пікселів — 1. Підказка: олівцем довго, виділенням — 3 дії.'],
+      render:function(el,c){ pane(el,c,{init:BUTT0},''); },
+      check:function(c){ var m=diff(c.d.e||BUTT0,BUTT_T); return [m===0?2:m>=0&&m<=4?1:0,m!==0?[m<0?'Розмір полотна має бути 16×12.':'Не збігається пікселів: '+m+'.']:[]]; }},
+    {t:'Обрізати й збільшити',max:2,
+      steps:['На полотні 16×16 маленьке серце. Обріж полотно так, щоб лишилося тільки серце, без жодного білого рядка чи стовпчика довкола.','Потім збільш зображення в 2 рази кнопкою «×2».','Дай відповіді нижче. Правильне зображення — 1 бал, обидві відповіді — 1 бал.'],
+      render:function(el,c){ pane(el,c,{init:CROP0,scale:true,after:'<div class="qa"><label>Скільки пікселів у зображенні після збільшення? <input type="text" inputmode="numeric" data-k="px" maxlength="5"></label><div class="qz"></div></div>'},''); var i=el.querySelector('[data-k="px"]'); i.value=c.d.px||''; i.oninput=function(){ c.d.px=i.value.replace(/\D/g,''); c.save(); };
+        H.choiceRows(el.querySelector('.qz'),c.d,[{id:'why',text:'Чому збільшене серце має «сходинки», а не плавні краї?',opts:['Кожен піксель став квадратиком 2×2, нових деталей не додалося','Редактор зіпсував малюнок','Під час збільшення змінилися кольори','Бо малюнок векторний'],order:H.shuffle([0,1,2,3],c.seed+77)}],c.save); },
+      check:function(c){ var m=diff(c.d.e||CROP0,CROP_T), p=0, msg=[]; if(m===0) p++; else msg.push(c.d.e&&c.d.e.w===14&&c.d.e.h===12?'Розмір правильний, але не збігається пікселів: '+m+'.':'Зображення поки не таке, як треба (зараз '+(c.d.e?c.d.e.w+'×'+c.d.e.h:'16×16')+').'); if(c.d.px==='168'&&c.d.why===0) p++; else msg.push('Відповіді на запитання поки неправильні.'); return [p,msg]; }},
+    {t:'Ощадливий художник',max:2,bonus:1,
+      steps:['Намалюй пейзаж за зразком, піксель у піксель, <b>не більше ніж за 8 дій</b>. Кожен мазок олівцем, заливка, прямокутник, перетягування й кнопка — одна дія. Виділення й вибір кольору — не дії.','Точно і ≤ 8 дій — +2. Точно, але дій більше — +1. «↺ Почати заново» обнуляє лічильник.'],
+      render:function(el,c){ pane(el,c,{init:blank(16,12),ref:LAND,refCell:12,count:true},'Зразок 16×12'); },
+      check:function(c){ var e=c.d.e||blank(16,12),m=diff(e,LAND); return m===0?[(e.n||0)<=8?2:1,(e.n||0)>8?['Точно, але дій '+e.n+'. Можна за 8 і менше.']:[]]:[0,['Не збігається пікселів: '+(m<0?'розмір не той':m)+'.']]; }},
+    {t:'Знайди відмінності',max:2,bonus:1,
+      steps:['Праворуч — копія кота, але в ній кілька відмінностей від зразка. Знайди й виправ їх.','Точна копія — +2, лишилося 1–2 відмінності — +1.'],
+      render:function(el,c){ pane(el,c,{init:CAT_B,ref:CAT,refCell:14},'Зразок'); },
+      check:function(c){ var m=diff(c.d.e||CAT_B,CAT); return [m===0?2:m>=1&&m<=2?1:0,m!==0?['Ще є відмінності.']:[]]; }}
+  ];
+
+
+  /* ---------- storage: one profile per student name ---------- */
+  var DB={cur:null,p:{}};
+  try{ var rd=JSON.parse(localStorage.getItem(KEY)||'null'); if(rd&&rd.p) DB=rd; }catch(e){}
+  function nnorm(n){ return String(n).toLowerCase().replace(/[’'ʼ`]/g,'').trim().split(/\s+/).sort().join(' '); }
+  function nhash(n){ var h=0,x=nnorm(n); for(var i=0;i<x.length;i++) h=(h*31+x.charCodeAt(i))%9973; return h%97; }
+  function fresh(){ return {name:'',pts:{},data:{},task:1,view:'work',act:0,last:0}; }
+  var st=(DB.cur&&DB.p[DB.cur])||fresh();
+  function save(){
+    if(st.name){ var id=nnorm(st.name); st.upd=Date.now(); DB.p[id]=st; DB.cur=id; } else DB.cur=null;
+    var ids=Object.keys(DB.p); if(ids.length>80){ ids.sort(function(a,b){ return (DB.p[a].upd||0)-(DB.p[b].upd||0); }); ids.slice(0,ids.length-80).forEach(function(k){ delete DB.p[k]; }); }
+    try{ localStorage.setItem(KEY,JSON.stringify(DB)); }catch(e){}
+  }
+  function tick(){ if(!st.name) return; var now=Date.now(), g=now-(st.last||now); if(g>0&&g<180000) st.act=(st.act||0)+g; st.last=now; }
+  ['click','input','keydown'].forEach(function(ev){ document.addEventListener(ev,tick,true); });
+
+  function isBonus(n){ return !!TASKS[n-1].bonus; }
+  function total(){ var s=0; for(var n=1;n<=TASKS.length;n++) s+=st.pts[n]||0; return Math.min(12,s); }
+  function lastCore(){ var k=0; TASKS.forEach(function(t,i){ if(!t.bonus) k=i+1; }); return k; }
+  /* continue code */
+  var INV=17679;
+  function encode(pts,nm){ var idx=0,mul=1; TASKS.forEach(function(t,i){ idx+=Math.min(pts[i+1]||0,t.max)*mul; mul*=t.max+1; }); var N=idx,X=(N*7919+40427)%100000,C=(N*61+29+nhash(nm))%97,d=('0000'+X).slice(-5)+('0'+C).slice(-2); return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5); }
+  function decode(c,nm){ if(!/^\d{7}$/.test(c)) return null; var X=+c.slice(0,5),C=+c.slice(5),N=((X-40427+100000)%100000)*INV%100000; if((N*61+29+nhash(nm))%97!==C) return null; var pts={},idx=N; for(var i=0;i<TASKS.length;i++){ var r=TASKS[i].max+1; pts[i+1]=idx%r; idx=Math.floor(idx/r); } return idx?null:pts; }
+
+  function ctx(n){ if(!st.data[n]) st.data[n]={}; var sd=0,nm=nnorm(st.name||''); for(var i=0;i<nm.length;i++) sd=(sd*31+nm.charCodeAt(i))%100003; return {d:st.data[n],save:save,H:H,rerender:renderTask,seed:sd+n*101+1}; }
+  function renderTabs(){
+    $('tabs').innerHTML=TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<span class="tabsep">★ бонус</span>':'')+'<button type="button" role="tab" class="tab'+(p>=t.max?' full':'')+(t.bonus?' bonus':'')+'" data-n="'+n+'" aria-selected="'+(st.task===n)+'">'+n+'. '+esc(t.t)+' <span class="pt">'+(t.bonus?'+'+p+'★':p+'/'+t.max)+'</span></button>'; }).join('')+'<button type="button" role="tab" class="tab" data-n="r">Результат <span class="pt">'+total()+'/12</span></button>';
+    Array.prototype.forEach.call($('tabs').querySelectorAll('.tab'),function(b){ b.addEventListener('click',function(){ var n=b.getAttribute('data-n'); if(n==='r') showResult(); else { st.task=+n; st.view='work'; save(); renderAll(); window.scrollTo(0,0); } }); });
+  }
+  function renderTask(){
+    var n=st.task,t=TASKS[n-1],h='';
+    h+='<h2>Завдання '+n+' · '+esc(t.t)+' <span class="note">('+(t.bonus?'★ бонус, +'+t.max:t.max+' '+(t.max===1?'бал':t.max<5?'бали':'балів'))+')</span></h2>';
+    if(t.remind) h+='<details class="remind"'+(t.remindOpen?' open':'')+'><summary>Нагадування</summary><div>'+t.remind+'</div></details>';
+    h+='<ol class="steps">'+t.steps.map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ol><div class="area" id="area"></div>';
+    h+='<div class="row"><button class="btn" type="button" id="chk">Перевірити завдання</button>'+(n<TASKS.length?'<button class="btn ghost" type="button" id="nxt">Наступне завдання →</button>':'')+(n>=lastCore()?'<button class="btn ghost" type="button" id="fin">Завершити й показати результат</button>':'')+'</div><div class="feedback" id="fb"></div>';
+    $('task').innerHTML=h;
+    t.render($('area'),ctx(n));
+    $('chk').addEventListener('click',function(){
+      var r=t.check(ctx(n)),raw=r[0]; if(!st.fails) st.fails={}; var f=st.fails[n]||0, cap=Math.floor(t.max/2), pen=t.nopen?0:Math.min(cap,Math.max(0,f-1)), p=Math.max(0,raw-pen);
+      if(raw<t.max&&!t.nopen) st.fails[n]=f+1;
+      if(p>(st.pts[n]||0)) st.pts[n]=p; save(); renderTabs(); renderWho();
+      var fb=$('fb'), f2=st.fails[n]||0, pen2=Math.min(cap,Math.max(0,f2-1)), penTxt=(!t.nopen&&cap>0&&raw<t.max)?'<p class="pen">Невдалих перевірок: '+f2+'. '+(pen2===0?'Перша помилка — без штрафу. Кожна наступна невдала перевірка знімає 1 бал (разом не більше '+cap+').':pen2>=cap?'Штраф уже максимальний: −'+cap+'.':'Тепер за це завдання максимум '+(t.max-pen2)+' з '+t.max+'.')+'</p>':'';
+      if(raw>=t.max&&p>=t.max){ fb.className='feedback ok'; fb.textContent='Готово! Повний бал.'+(r[2]?' '+r[2]:''); }
+      else if(raw>=t.max){ fb.className='feedback part'; fb.innerHTML='Правильно, але через невдалі перевірки: '+p+'/'+t.max+'.'; }
+      else { fb.className='feedback part'; fb.innerHTML=(raw>0?'Поки правильно не все: '+raw+'/'+t.max+(pen?' (зі штрафом '+p+')':''):'Поки 0 балів.')+(r[1]&&r[1].length?'<ul>'+r[1].map(function(x){ return '<li>'+x+'</li>'; }).join('')+'</ul>':'')+penTxt; }
+    });
+    if($('nxt')) $('nxt').addEventListener('click',function(){ st.task=n+1; save(); renderAll(); window.scrollTo(0,0); });
+    if($('fin')) $('fin').addEventListener('click',showResult);
+  }
+  function showResult(){ st.view='result'; save(); renderAll(); window.scrollTo(0,0); }
+  function renderResult(){
+    var mins=Math.max(1,Math.round((st.act||0)/60000)),h='';
+    h+='<h2 style="margin:0 0 4px">Результат практичної роботы</h2>'.replace('роботы','роботи');
+    h+='<p style="font-size:20px;margin:4px 0"><b>'+esc(st.name)+'</b> · '+GRADE+' клас</p><div class="big">'+total()+' <span style="font-size:28px;color:var(--muted)">з 12</span></div>';
+    h+='<table class="res">'+TASKS.map(function(t,i){ var n=i+1,p=st.pts[n]||0; return (t.bonus&&!(TASKS[i-1]&&TASKS[i-1].bonus)?'<tr><td colspan="2"><b>★ Бонус — основні дають до 10, 11 і 12 — тільки з бонусом</b></td></tr>':'')+'<tr><td>'+n+'. '+esc(t.t)+'</td><td>'+(t.bonus?'+'+p+' / '+t.max+' ★':p+' / '+t.max)+'</td></tr>'; }).join('')+'<tr><td>Час роботи (без перерв)</td><td>'+mins+' хв</td></tr><tr><td>Код продовження</td><td style="font-family:monospace;font-size:18px">'+encode(st.pts,st.name)+'</td></tr></table>';
+    h+='<p class="note">Покажи цей екран учителю.</p><button class="btn ghost" type="button" id="back">Повернутися до завдань</button>';
+    $('resultBox').innerHTML=h;
+    $('back').addEventListener('click',function(){ st.view='work'; save(); renderAll(); });
+  }
+  function renderWho(){ var on=!!st.name; $('who').hidden=!on; if(on) $('who').innerHTML=esc(st.name)+' · '+GRADE+' клас<br><b>'+total()+'</b> / 12<small>код продовження: '+encode(st.pts,st.name)+'</small>'; }
+  function renderAll(){
+    var on=!!st.name;
+    $('startBox').hidden=on; $('work').hidden=!on||st.view==='result'; $('resultBox').hidden=!on||st.view!=='result';
+    $('other').hidden=!on; $('restart').hidden=!on; $('ask').hidden=true;
+    renderWho(); if(!on) return;
+    if(st.view==='result'){ renderResult(); return; }
+    renderTabs(); renderTask();
+  }
+  function go(){
+    var n=$('nameIn').value.trim(), c=$('codeIn').value.replace(/\D/g,'');
+    if(n.length<3||n.indexOf(' ')<0&&n.length<5){ $('startErr').textContent='Напиши ім\'я та прізвище.'; return; }
+    var id=nnorm(n);
+    if(DB.p[id]){ st=DB.p[id]; st.view='work'; } else { st=fresh(); st.name=n; }
+    if(c){ var d=decode(c,n); if(!d){ $('startErr').textContent='Код не підходить. Перевір цифри й ім\'я — пиши так само, як першого разу.'; return; } Object.keys(d).forEach(function(k){ if(d[k]>(st.pts[k]||0)) st.pts[k]=d[k]; }); }
+    st.last=Date.now(); $('startErr').textContent=''; save(); renderAll();
+  }
+  $('startGo').addEventListener('click',go);
+  $('nameIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('codeIn').addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+  $('other').addEventListener('click',function(){ save(); st=fresh(); save(); $('nameIn').value=''; $('codeIn').value=''; renderAll(); window.scrollTo(0,0); });
+  $('restart').addEventListener('click',function(){ $('ask').hidden=false; });
+  $('askNo').addEventListener('click',function(){ $('ask').hidden=true; });
+  $('askYes').addEventListener('click',function(){ if(DB.cur) delete DB.p[DB.cur]; st=fresh(); save(); $('nameIn').value=''; renderAll(); });
+  $('theme').addEventListener('click',function(){ var d=document.documentElement, cur=d.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'); d.setAttribute('data-theme',cur==='dark'?'light':'dark'); });
+  renderAll();
+  window.__p={st:function(){ return st; },TASKS:TASKS};
+})();
+</script>
+</body>
+</html>
